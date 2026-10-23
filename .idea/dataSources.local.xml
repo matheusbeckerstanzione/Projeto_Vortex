@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="dataSourceStorageLocal" created-in="IU-262.10968.63">
-    <data-source name="neocore" uuid="af318879-13e3-421b-8aaa-91e6ef0a1c3f">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" />
-      <schema-mapping />
-    </data-source>
-  </component>
-</project>
