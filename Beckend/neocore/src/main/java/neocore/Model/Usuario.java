@@ -55,5 +55,14 @@ public class Usuario {
     private OffsetDateTime atualizadoEm;
 
 
+    @Column(name = "segredo_mfa_criptografado", columnDefinition = "TEXT")
+    private String segredoMfaCriptografado;
+
+    @Column(name = "bloqueado_ate")
+    private OffsetDateTime bloqueadoAte;
+
+    @Column(name = "versao_acesso", nullable = false)
+    private Integer versaoAcesso = 0;
+
 
 }

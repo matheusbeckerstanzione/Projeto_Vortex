@@ -21,7 +21,7 @@ public class ConviteAcesso {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "usuario_is", nullable = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
@@ -44,4 +44,4 @@ public class ConviteAcesso {
     @Column(name = "revogado_em")
     private OffsetDateTime revogadoEm;
     }
-}
+
