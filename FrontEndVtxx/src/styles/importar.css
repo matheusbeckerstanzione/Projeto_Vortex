@@ -1,0 +1,2135 @@
+/* =========================================================
+   NEOCORE — TELA DE IMPORTAÇÃO
+   Arquivo: importar.css
+   Objetivo: MVP visual, sem integração com backend
+   ========================================================= */
+
+
+/* =========================================================
+   01. VARIÁVEIS GLOBAIS
+   ========================================================= */
+
+:root {
+    --navy: #14233a;
+    --navy-light: #243b5b;
+
+    --blue: #0b4f80;
+    --blue-hover: #083b60;
+    --blue-light: #e8f3ff;
+    --blue-border: #93c5fd;
+
+    --muted: #64748b;
+    --muted-light: #8190a5;
+
+    --line: #e4e9ef;
+    --line-light: #edf0f4;
+
+    --background: #f2f4f7;
+    --surface: #ffffff;
+
+    --green: #20b86a;
+    --green-dark: #15803d;
+    --green-light: #dcfce7;
+
+    --yellow: #d99a25;
+    --yellow-dark: #a16207;
+    --yellow-light: #fef3c7;
+
+    --red: #d9534f;
+    --red-dark: #b91c1c;
+    --red-light: #fee2e2;
+
+    --radius-small: 6px;
+    --radius-medium: 10px;
+    --radius-large: 12px;
+    --radius-panel: 16px;
+
+    --shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.025);
+}
+
+
+/* =========================================================
+   01b. TOAST DE FEEDBACK
+   ========================================================= */
+
+.importar-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    padding: 12px 20px;
+
+    background: var(--blue);
+    color: #ffffff;
+
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+    font-size: 14px;
+    font-weight: 500;
+
+    z-index: 9999;
+}
+
+
+/* =========================================================
+   02. RESET E CONFIGURAÇÕES GERAIS
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Scoped styling for Importar page */
+.box-section,
+.importar-content {
+    font-family:
+        "Inter",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--navy);
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+}
+
+button,
+input,
+select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   03. ESTRUTURA PRINCIPAL DA PÁGINA
+   ========================================================= */
+
+.box-section {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+
+    width: 100%;
+    height: calc(100vh - 56px);
+    min-height: 0;
+
+    padding: 14px 20px 20px;
+
+    overflow: hidden;
+
+    background: var(--background);
+}
+
+
+/* =========================================================
+   04. MENU LATERAL — WORKSPACE
+   ========================================================= */
+
+.box-div {
+    display: flex;
+    flex: 0 0 210px;
+    flex-direction: column;
+
+    width: 210px;
+    height: 100%;
+    min-height: 0;
+
+    margin: 0;
+    padding: 20px 14px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    background: var(--surface);
+    border: 1px solid var(--line-light);
+    border-radius: var(--radius-panel);
+
+    box-shadow: var(--shadow-soft);
+}
+
+
+/* Título da área Workspace */
+
+.workspace-titulo>span,
+.box-div>span {
+    display: block;
+
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.workspace-titulo h2,
+.box-div h2 {
+    margin: 5px 0 0;
+
+    color: var(--navy);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   05. NAVEGAÇÃO LATERAL
+   ========================================================= */
+
+.menu-operacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    margin-top: 22px;
+}
+
+
+/* Botões do menu */
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    width: 100%;
+    min-height: 36px;
+
+    padding: 0 9px;
+
+    color: var(--muted);
+
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-small);
+
+    font-size: 12px;
+    font-weight: 450;
+    text-align: left;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+/* Efeito visual ao passar o mouse */
+
+.menu-item:hover {
+    color: var(--navy);
+    background: #f1f5f9;
+}
+
+
+/* Pequeno ponto ao lado de cada item */
+
+.menu-ponto {
+    flex: 0 0 5px;
+
+    width: 5px;
+    height: 5px;
+
+    background: #94a3b8;
+    border-radius: 50%;
+}
+
+
+/* Item atualmente selecionado */
+
+.menu-item.ativo {
+    color: var(--navy);
+    background: #dceeff;
+
+    font-weight: 700;
+}
+
+.menu-item.ativo .menu-ponto {
+    background: var(--blue);
+}
+
+
+/* =========================================================
+   06. CARTÃO DE ATUALIZAÇÃO DO MENU
+   ========================================================= */
+
+.box-div-atu {
+    margin-top: auto;
+    padding: 14px 11px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--line);
+    border-radius: 11px;
+}
+
+
+/* Texto auxiliar do cartão */
+
+.box-div-atu span {
+    display: block;
+
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+
+/* Mensagem principal do cartão */
+
+.box-div-atu h4 {
+    margin: 7px 0;
+
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   07. ÁREA PRINCIPAL DE IMPORTAÇÃO
+   ========================================================= */
+
+.importar-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding: 0 0 4px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+
+/* =========================================================
+   08. CABEÇALHO DA TELA
+   ========================================================= */
+
+.box-div-title {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+
+    min-width: 0;
+    padding: 2px 0;
+
+    color: var(--navy);
+}
+
+
+/* Título e descrição */
+
+.importar-cabecalho {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+
+    min-width: 150px;
+}
+
+.importar-cabecalho h1 {
+    margin: 0;
+
+    color: var(--navy);
+    font-size: 24px;
+    font-weight: 750;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+}
+
+.importar-cabecalho>span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   09. BUSCA E BOTÕES DO CABEÇALHO
+   ========================================================= */
+
+.importar-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* padding-right: 10px; */
+    gap: 9px;
+
+    margin: 0;
+}
+
+
+/* Campo de pesquisa */
+
+.importar-busca {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    width: 190px;
+    height: 36px;
+
+    padding: 0 11px;
+
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+}
+
+.busca-icone {
+    flex-shrink: 0;
+
+    color: var(--muted);
+    font-size: 19px;
+    line-height: 1;
+}
+
+.importar-busca input {
+    width: 100%;
+    min-width: 0;
+
+    padding: 0;
+
+    color: var(--navy);
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    font-size: 11px;
+}
+
+.importar-busca input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+
+/* Botão Baixar modelo */
+
+.importar-modelo {
+    padding: 9px 5px;
+
+    color: var(--navy);
+    background: transparent;
+    border: none;
+
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    transition: color 0.2s ease;
+}
+
+.importar-modelo:hover {
+    color: #2563eb;
+}
+
+
+/* Botão Iniciar importação */
+
+.importar-iniciar {
+    min-height: 36px;
+    padding: 9px 15px;
+
+    color: #ffffff;
+    background: var(--blue);
+
+    border: none;
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+
+    transition: background-color 0.2s ease;
+}
+
+.importar-iniciar:hover {
+    background: var(--blue-hover);
+}
+
+
+/* =========================================================
+   10. INDICADORES SUPERIORES
+   ========================================================= */
+
+
+/* ===== Indicadores na horizontal ===== */
+
+.importar-indicadores {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+
+    width: 100%;
+    align-items: stretch;
+}
+
+/* ===== Cartões dos indicadores ===== */
+
+.indicador-card {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 112px;
+
+    padding: 16px;
+
+    background: var(--surface);
+    border: 1px solid var(--line-light);
+    border-radius: var(--radius-large);
+
+    box-shadow: var(--shadow-soft);
+}
+
+
+
+/* Nome do indicador e ícone */
+
+.indicador-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+
+    min-width: 0;
+}
+
+
+.indicador-topo>span:first-child {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+
+
+/* Fundo azul-claro do ícone */
+.indicador-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+
+    background-color: #e5f3ff;
+    border-radius: 50%;
+}
+
+/* Ícone dentro do círculo */
+.indicador-logo img {
+    display: block;
+
+    width: 15px;
+    height: 15px;
+
+    object-fit: contain;
+}
+
+
+.indicador-logo-alert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+
+    background-color: #FFF3DC;
+    border-radius: 50%;
+}
+
+/* Ícone dentro do círculo */
+.indicador-logo-alert img {
+    display: block;
+
+    width: 15px;
+    height: 15px;
+
+    object-fit: contain;
+}
+
+
+.indicador-logo-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+
+    background-color: #2BBF6A;
+    border-radius: 50%;
+}
+
+/* Ícone dentro do círculo */
+.indicador-logo-check img {
+    display: block;
+
+    width: 15px;
+    height: 15px;
+
+    object-fit: contain;
+}
+
+
+
+
+
+
+
+/* Número em destaque */
+
+.indicador-card>strong {
+    color: var(--navy);
+    font-size: 25px;
+    font-weight: 750;
+    line-height: 1.1;
+}
+
+
+/* Informação complementar */
+
+.indicador-card>small {
+    color: var(--muted-light);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+
+/* Ícones dos indicadores */
+
+.indicador-icone {
+    display: grid;
+    flex: 0 0 22px;
+
+    width: 22px;
+    height: 22px;
+
+    place-items: center;
+
+    border-radius: 50%;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.indicador-icone.azul {
+    color: var(--blue);
+    background: var(--blue-light);
+}
+
+.indicador-icone.amarelo {
+    color: var(--yellow-dark);
+    background: var(--yellow-light);
+}
+
+.indicador-icone.verde {
+    color: #ffffff;
+    background: var(--green);
+}
+
+
+/* =========================================================
+   11. GRADE DAS COLUNAS PRINCIPAL E LATERAL
+   ========================================================= */
+
+.importar-layout {
+    display: grid;
+    flex: 0 0 auto;
+
+    grid-template-columns: minmax(0, 1fr) 245px;
+    align-items: start;
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+/* Coluna de conteúdo */
+
+.importar-coluna-principal {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+/* Coluna de resumo */
+
+.importar-coluna-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   12. ESTILO COMPARTILHADO DOS PAINÉIS
+   ========================================================= */
+
+.painel-card {
+    min-width: 0;
+    padding: 15px;
+
+    background: var(--surface);
+    border: 1px solid var(--line-light);
+    border-radius: var(--radius-large);
+
+    box-shadow: var(--shadow-soft);
+}
+
+
+/* Cabeçalho interno dos painéis */
+
+.painel-titulo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+
+    min-width: 0;
+}
+
+
+/* Títulos dos cartões */
+
+.painel-titulo h3,
+.painel-card>h3 {
+    margin: 0;
+
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.5;
+}
+
+
+/* Descrições dos cartões */
+
+.painel-titulo p,
+.painel-card>p {
+    margin: 4px 0 0;
+
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+
+/* Identificação da etapa atual */
+
+.etapa-badge {
+    flex-shrink: 0;
+
+    padding: 5px 8px;
+
+    color: var(--blue);
+    background: var(--blue-light);
+
+    border-radius: 5px;
+
+    font-size: 10px;
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   13. FLUXO DE ETAPAS
+   ========================================================= */
+
+.fluxo-etapas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+
+    margin: 18px 0;
+}
+
+
+/* Cada etapa */
+
+.fluxo-etapa {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    min-width: 0;
+
+    color: #94a3b8;
+}
+
+
+/* Número da etapa */
+
+.fluxo-etapa>span {
+    display: grid;
+    flex: 0 0 20px;
+
+    width: 20px;
+    height: 20px;
+
+    place-items: center;
+
+    color: #64748b;
+    background: #edf1f5;
+
+    border-radius: 50%;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+/* Nome da etapa */
+
+.fluxo-etapa small {
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+
+/* Etapas já concluídas e etapa atual */
+
+.fluxo-etapa.concluida,
+.fluxo-etapa.atual {
+    color: var(--navy);
+}
+
+.fluxo-etapa.concluida>span {
+    color: #ffffff;
+    background: var(--blue);
+}
+
+.fluxo-etapa.atual>span {
+    color: black;
+    background: #BFE2F5;
+}
+
+
+/* Linhas que conectam as etapas */
+
+.fluxo-linha {
+    flex: 1;
+
+    min-width: 8px;
+    height: 2px;
+
+    background: #e2e8f0;
+}
+
+.fluxo-linha.concluida {
+    background: #75a7d6;
+}
+
+
+/* =========================================================
+   14. SELEÇÃO DA ORIGEM DOS DADOS
+   ========================================================= */
+
+.origem-titulo {
+    margin-bottom: 10px;
+
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+
+/* Opções de origem */
+
+.origem-opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin-bottom: 13px;
+}
+
+
+/* Botões que representam as origens */
+
+.origem-botao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    min-height: 32px;
+    padding: 0 10px;
+
+    color: #475569;
+    background: #ffffff;
+
+    border: 1px solid var(--line);
+    border-radius: 999px;
+
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.origem-botao img {
+    width: 12px;
+}
+
+
+/* Origem destacada visualmente */
+
+.origem-botao.selecionada {
+    color: var(--blue);
+    background: #f0f7ff;
+    border-color: #9ac9f2;
+}
+
+
+/* =========================================================
+   15. ÁREA VISUAL DE UPLOAD
+   ========================================================= */
+
+.zona-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 155px;
+    padding: 20px 12px;
+
+    background: #f8fbff;
+
+    text-align: center;
+}
+
+
+
+/* Ícone de envio */
+
+
+.upload-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+
+    background-color: #e3f1ff;
+    border-radius: 50%;
+
+    font-weight: 600;
+}
+
+.upload-icone img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+
+
+/* Texto principal do upload */
+
+.zona-upload>strong {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+/* Instrução complementar */
+
+.zona-upload>span {
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* Botão ilustrativo de seleção */
+
+.upload-selecionar {
+    padding: 7px 12px;
+
+    color: var(--navy);
+    background: #ffffff;
+
+    border: 1px solid var(--line);
+    border-radius: 999px;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   16. ARQUIVO SELECIONADO — EXEMPLO VISUAL
+   ========================================================= */
+
+.arquivo-selecionado {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-width: 0;
+    margin-top: 10px;
+    padding: 10px;
+
+    background: #f8fafc;
+    border: 1px solid #e7edf3;
+    border-radius: 8px;
+}
+
+
+/* Ícone do arquivo */
+
+.arquivo-tipo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+
+    background-color: #e3f1ff;
+    border-radius: 30%;
+
+    font-weight: 600;
+}
+
+
+/* Nome e detalhes do arquivo */
+
+.arquivo-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.arquivo-info strong {
+    overflow: hidden;
+
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 650;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.arquivo-info small {
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* Status de arquivo pronto */
+
+.status-pronto {
+    flex-shrink: 0;
+
+    padding: 4px 7px;
+
+    color: var(--green-dark);
+    background: var(--green-light);
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+
+/* Símbolo decorativo para remover */
+
+.arquivo-remover {
+    color: var(--muted);
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   17. MAPEAMENTO DE COLUNAS
+   ========================================================= */
+
+.painel-mapeamento {
+    padding-bottom: 13px;
+}
+
+
+/* Ação de mapear automaticamente */
+
+.link-acao {
+    flex-shrink: 0;
+
+    padding: 3px 0;
+
+    color: var(--blue);
+    background: transparent;
+    border: none;
+
+    font-size: 10px;
+    font-weight: 650;
+    text-align: right;
+}
+
+.link-acao:hover {
+    color: #2563eb;
+}
+
+
+/* Estrutura da tabela */
+
+.tabela-mapeamento {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    margin-top: 15px;
+}
+
+
+/* Linha do mapeamento */
+
+.mapeamento-linha {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 0.95fr) minmax(0, 1.2fr) 88px;
+
+    align-items: center;
+    gap: 9px;
+
+    min-width: 0;
+    min-height: 35px;
+
+    padding: 5px 8px;
+
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+
+/* Nome original da coluna */
+
+.mapeamento-linha>strong {
+    overflow: hidden;
+
+    color: #334155;
+    font-size: 10px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* Cabeçalho da tabela */
+
+.mapeamento-cabecalho {
+    min-height: 20px;
+
+    padding-top: 0;
+    padding-bottom: 5px;
+
+    background: transparent;
+}
+
+.mapeamento-cabecalho>span {
+    color: var(--muted-light);
+    font-size: 9px;
+    font-weight: 650;
+    text-transform: uppercase;
+}
+
+
+/* Campos de destino */
+
+.mapeamento-linha select {
+    width: 100%;
+    min-width: 0;
+    height: 30px;
+
+    padding: 0 7px;
+
+    overflow: hidden;
+
+    color: #334155;
+    background: #ffffff;
+
+    border: 1px solid #e1e7ef;
+    border-radius: 5px;
+
+    font-size: 10px;
+    text-overflow: ellipsis;
+}
+
+
+/* Etiquetas de status */
+
+.mapeamento-status {
+    justify-self: start;
+
+    padding: 5px 6px;
+
+    border-radius: 5px;
+
+    font-size: 9px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.status-mapeado {
+    color: var(--green-dark);
+    background: var(--green-light);
+}
+
+.status-parcial {
+    color: var(--yellow-dark);
+    background: var(--yellow-light);
+}
+
+.status-erro {
+    color: var(--red-dark);
+    background: var(--red-light);
+}
+
+
+/* =========================================================
+   18. HISTÓRICO DE IMPORTAÇÕES
+   ========================================================= */
+
+.historico-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-top: 14px;
+}
+
+
+/* Linha de cada importação */
+
+.historico-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-width: 0;
+    padding: 10px;
+
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 8px;
+}
+
+
+/* Identificação visual da origem */
+
+.historico-avatar {
+    display: grid;
+    flex: 0 0 30px;
+
+    width: 30px;
+    height: 30px;
+
+    place-items: center;
+
+    color: #0875a7;
+    background: #d9f0fc;
+
+    border-radius: 50%;
+
+    font-size: 9px;
+    font-weight: 750;
+}
+
+
+/* Informações do arquivo */
+
+.historico-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.historico-info strong {
+    overflow: hidden;
+
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 650;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historico-info small {
+    overflow: hidden;
+
+    color: var(--muted);
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* Status dos arquivos */
+
+.historico-status {
+    flex-shrink: 0;
+
+    padding: 5px 7px;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.historico-ok {
+    color: var(--green-dark);
+    background: var(--green-light);
+}
+
+.historico-analise {
+    color: #0369a1;
+    background: #e0f2fe;
+}
+
+.historico-erro {
+    color: var(--red-dark);
+    background: var(--red-light);
+}
+
+
+/* =========================================================
+   19. RESUMO DA IMPORTAÇÃO — COLUNA LATERAL
+   ========================================================= */
+
+.painel-resumo>h3 {
+    margin-bottom: 3px;
+}
+
+
+/* Nome do arquivo no resumo */
+
+.resumo-arquivo {
+    margin: 0 0 15px !important;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* Linhas de valores */
+
+.resumo-linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    margin-top: 13px;
+}
+
+.resumo-linha>span {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.resumo-linha>strong {
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.resumo-linha .texto-verde {
+    color: #16a34a;
+}
+
+.resumo-linha .texto-amarelo {
+    color: #d97706;
+}
+
+
+/* Aviso de próxima etapa */
+
+.resumo-aviso {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    margin-top: 15px;
+    padding: 11px;
+
+    background: #f8fafc;
+    border: 1px solid var(--line-light);
+    border-radius: 8px;
+}
+
+.resumo-aviso strong {
+    color: var(--navy);
+    font-size: 10px;
+}
+
+.resumo-aviso span {
+    color: #475569;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+
+/* Botões do resumo */
+
+.botao-resumo-principal,
+.botao-resumo-secundario {
+    width: 100%;
+    min-height: 36px;
+
+    margin-top: 9px;
+    padding: 9px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.botao-resumo-principal {
+    color: #ffffff;
+    background: var(--blue);
+    border: 1px solid var(--blue);
+}
+
+.botao-resumo-secundario {
+    color: var(--navy);
+    background: #ffffff;
+    border: 1px solid var(--line);
+}
+
+
+/* =========================================================
+   20. REGRAS DE VALIDAÇÃO
+   ========================================================= */
+
+.painel-validacao>p,
+.painel-ajuda>p {
+    margin-bottom: 13px;
+}
+
+
+/* Linha de cada regra */
+
+.validacao-linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    margin-top: 14px;
+}
+
+.validacao-linha>span:first-child {
+    color: #475569;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+
+/* Interruptores decorativos — sem funcionalidade */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 28px;
+
+    width: 28px;
+    height: 16px;
+
+    background: #cbd5e1;
+    border-radius: 999px;
+}
+
+.switch::after {
+    position: absolute;
+
+    top: 3px;
+    left: 3px;
+
+    width: 10px;
+    height: 10px;
+
+    background: #ffffff;
+    border-radius: 50%;
+
+    content: "";
+}
+
+.switch.ligado {
+    background: var(--blue);
+}
+
+.switch.ligado::after {
+    left: 15px;
+}
+
+
+/* =========================================================
+   21. MODELOS E AJUDA
+   ========================================================= */
+
+.ajuda-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-width: 0;
+    margin-top: 10px;
+    padding: 10px;
+
+    background: #f8fafc;
+    border: 1px solid var(--line-light);
+    border-radius: 8px;
+}
+
+
+/* Ícone da ajuda */
+
+.ajuda-icone {
+    display: grid;
+    flex: 0 0 30px;
+
+    width: 30px;
+    height: 30px;
+
+    place-items: center;
+
+    color: var(--blue);
+    background: #dff0ff;
+
+    border-radius: 50%;
+
+    font-size: 14px;
+}
+
+
+/* Texto da ajuda */
+
+.ajuda-item>span:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.ajuda-item strong {
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.ajuda-item small {
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+
+
+
+/* Esconde as barras de rolagem da tela de importação */
+
+.importar-content,
+.box-section,
+.box-div {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.importar-content::-webkit-scrollbar,
+.box-section::-webkit-scrollbar,
+.box-div::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+
+
+/* =========================================================
+   22. RESPONSIVIDADE — NOTEBOOKS E TELAS MÉDIAS
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    /* Reduz o espaço ocupado pelo menu */
+
+    .box-section {
+        gap: 12px;
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .box-div {
+        flex-basis: 185px;
+        width: 185px;
+    }
+
+    /* Ajusta a coluna lateral */
+
+    .importar-layout {
+        grid-template-columns: minmax(0, 1fr) 220px;
+        gap: 10px;
+    }
+
+    .importar-coluna-principal,
+    .importar-coluna-lateral {
+        gap: 10px;
+    }
+
+    /* Reduz os espaços dos indicadores */
+
+    .importar-indicadores {
+        gap: 7px;
+    }
+
+    .indicador-card {
+        padding: 11px;
+    }
+
+    /* Permite que o cabeçalho se reorganize */
+
+    .box-div-title {
+        flex-wrap: wrap;
+    }
+
+    .importar-acoes {
+        gap: 7px;
+    }
+
+    .importar-busca {
+        width: 165px;
+    }
+}
+
+
+/* =========================================================
+   23. RESPONSIVIDADE — TABLETS
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    /* Espaçamento geral */
+
+    .box-section {
+        height: calc(100vh - 56px);
+        padding: 12px;
+    }
+
+    /* Menu lateral mais compacto */
+
+    .box-div {
+        flex-basis: 155px;
+        width: 155px;
+        padding: 16px 10px;
+    }
+
+    .menu-item {
+        font-size: 11px;
+    }
+
+    /* Cabeçalho */
+
+    .box-div-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .importar-cabecalho h1 {
+        font-size: 23px;
+    }
+
+    .importar-acoes {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    /* Indicadores em duas colunas */
+
+    .importar-indicadores {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Conteúdo principal ocupa a largura disponível */
+
+    .importar-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Cartões laterais lado a lado */
+
+    .importar-coluna-lateral {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .painel-ajuda {
+        grid-column: 1 / -1;
+    }
+
+    /* Mantém os textos legíveis */
+
+    .painel-titulo h3,
+    .painel-card>h3 {
+        font-size: 13px;
+    }
+
+    .painel-titulo p,
+    .painel-card>p {
+        font-size: 11px;
+    }
+}
+
+
+/* =========================================================
+   24. RESPONSIVIDADE — CELULARES
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    /* Estrutura da tela */
+
+    .box-section {
+        gap: 9px;
+        padding: 9px;
+    }
+
+    /* Menu lateral compacto */
+
+    .box-div {
+        flex-basis: 105px;
+        width: 105px;
+        padding: 12px 6px;
+        border-radius: 10px;
+    }
+
+    .workspace-titulo>span,
+    .box-div>span {
+        font-size: 10px;
+    }
+
+    .workspace-titulo h2,
+    .box-div h2 {
+        font-size: 12px;
+    }
+
+    .menu-operacoes {
+        gap: 4px;
+        margin-top: 16px;
+    }
+
+    .menu-item {
+        gap: 4px;
+        min-height: 34px;
+        padding: 0 4px;
+        font-size: 10px;
+    }
+
+    .box-div-atu {
+        padding: 9px 6px;
+    }
+
+    .box-div-atu h4 {
+        font-size: 10px;
+    }
+
+    .box-div-atu span {
+        font-size: 9px;
+    }
+
+    /* Cabeçalho */
+
+    .importar-cabecalho {
+        min-width: 0;
+    }
+
+    .importar-cabecalho h1 {
+        font-size: 22px;
+    }
+
+    .importar-cabecalho>span {
+        font-size: 11px;
+    }
+
+    .importar-acoes {
+        align-items: center;
+        gap: 7px;
+    }
+
+    .importar-busca {
+        flex: 1 1 100%;
+        width: 100%;
+        height: 36px;
+    }
+
+    .importar-modelo,
+    .importar-iniciar {
+        font-size: 11px;
+    }
+
+    /* Indicadores */
+
+    .importar-indicadores {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .indicador-card {
+        min-height: 100px;
+        padding: 10px;
+    }
+
+    .indicador-topo>span:first-child {
+        font-size: 10px;
+    }
+
+    .indicador-card>strong {
+        font-size: 22px;
+    }
+
+    .indicador-card>small {
+        font-size: 10px;
+    }
+
+    /* Painéis */
+
+    .painel-card {
+        padding: 11px;
+        border-radius: 10px;
+    }
+
+    .painel-titulo {
+        gap: 7px;
+    }
+
+    .painel-titulo h3,
+    .painel-card>h3 {
+        font-size: 12px;
+    }
+
+    .painel-titulo p,
+    .painel-card>p {
+        font-size: 10px;
+    }
+
+    /* Etapas */
+
+    .fluxo-etapas {
+        gap: 3px;
+        margin: 15px 0;
+    }
+
+    .fluxo-etapa {
+        gap: 3px;
+    }
+
+    .fluxo-etapa>span {
+        flex-basis: 17px;
+        width: 17px;
+        height: 17px;
+        font-size: 9px;
+    }
+
+    .fluxo-etapa small {
+        font-size: 9px;
+    }
+
+    .etapa-badge {
+        padding: 4px 5px;
+        font-size: 9px;
+    }
+
+    /* Origem dos dados */
+
+    .origem-opcoes {
+        gap: 5px;
+    }
+
+    .origem-botao {
+        min-height: 30px;
+        padding: 0 8px;
+        font-size: 10px;
+    }
+
+    /* Upload */
+
+    .zona-upload {
+        min-height: 145px;
+        padding: 16px 8px;
+    }
+
+    .zona-upload>strong {
+        font-size: 11px;
+    }
+
+    .zona-upload>span:nth-of-type(2) {
+        font-size: 9px;
+    }
+
+    .arquivo-selecionado {
+        gap: 6px;
+        padding: 8px 6px;
+    }
+
+    .arquivo-info strong {
+        font-size: 10px;
+    }
+
+    .arquivo-info small {
+        font-size: 8px;
+    }
+
+    .status-pronto {
+        padding: 4px 5px;
+        font-size: 9px;
+    }
+
+    /* Mapeamento */
+
+    .link-acao {
+        font-size: 9px;
+    }
+
+    .mapeamento-linha {
+        grid-template-columns:
+            minmax(0, 0.8fr) minmax(0, 1fr) 65px;
+
+        gap: 5px;
+        padding: 5px 4px;
+    }
+
+    .mapeamento-cabecalho>span {
+        font-size: 8px;
+    }
+
+    .mapeamento-linha>strong {
+        font-size: 9px;
+    }
+
+    .mapeamento-linha select {
+        height: 29px;
+        padding: 0 3px;
+        font-size: 9px;
+    }
+
+    .mapeamento-status {
+        padding: 4px;
+        font-size: 8px;
+    }
+
+    /* Histórico */
+
+    .historico-item {
+        gap: 6px;
+        padding: 8px 5px;
+    }
+
+    .historico-avatar {
+        flex-basis: 26px;
+        width: 26px;
+        height: 26px;
+        font-size: 8px;
+    }
+
+    .historico-info strong {
+        font-size: 10px;
+    }
+
+    .historico-info small {
+        font-size: 8px;
+    }
+
+    .historico-status {
+        padding: 4px;
+        font-size: 8px;
+    }
+
+    /* Cartões laterais empilhados */
+
+    .importar-coluna-lateral {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .painel-ajuda {
+        grid-column: auto;
+    }
+
+    /* Resumo */
+
+    .resumo-linha>span {
+        font-size: 10px;
+    }
+
+    .resumo-linha>strong {
+        font-size: 11px;
+    }
+
+    .resumo-aviso strong,
+    .resumo-aviso span {
+        font-size: 10px;
+    }
+
+    .botao-resumo-principal,
+    .botao-resumo-secundario {
+        min-height: 36px;
+        font-size: 10px;
+    }
+
+    /* Validação */
+
+    .validacao-linha>span:first-child {
+        font-size: 10px;
+    }
+
+    /* Ajuda */
+
+    .ajuda-item strong {
+        font-size: 10px;
+    }
+
+    .ajuda-item small {
+        font-size: 9px;
+    }
+}
+
+
+/* =========================================================
+   25. TELAS MUITO ESTREITAS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    /* Aproveita melhor a largura disponível */
+
+    .box-section {
+        gap: 7px;
+        padding: 7px;
+    }
+
+    .box-div {
+        flex-basis: 88px;
+        width: 88px;
+        padding: 10px 5px;
+    }
+
+    .menu-item {
+        gap: 3px;
+        padding: 0 3px;
+        font-size: 9px;
+    }
+
+    .workspace-titulo h2,
+    .box-div h2 {
+        font-size: 11px;
+    }
+
+    .importar-content {
+        gap: 10px;
+    }
+
+    .indicador-card {
+        padding: 8px;
+    }
+
+    .indicador-card>strong {
+        font-size: 20px;
+    }
+
+    .indicador-topo>span:first-child {
+        font-size: 9px;
+    }
+
+    .mapeamento-linha {
+        grid-template-columns:
+            minmax(0, 0.75fr) minmax(0, 1fr) 57px;
+
+        gap: 3px;
+    }
+
+    .mapeamento-linha>strong,
+    .mapeamento-linha select {
+        font-size: 8px;
+    }
+
+    .mapeamento-status {
+        font-size: 7px;
+    }
+
+    .historico-status {
+        font-size: 7px;
+    }
+}

@@ -1,0 +1,956 @@
+/* DashboardPerfilCompleto.css - Tela de Perfil Completo NeoCore */
+
+.perfil-completo-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 4px 30px 4px;
+}
+
+/* ==========================================================================
+   1. Header Principal
+   ========================================================================== */
+.perfil-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.perfil-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.perfil-page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.perfil-page-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.perfil-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.perfil-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.perfil-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.perfil-search-input {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  height: 38px;
+  padding: 0 16px 0 38px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  width: 230px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.perfil-search-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+  width: 260px;
+}
+
+.perfil-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.perfil-btn-secondary {
+  background-color: transparent;
+  color: #0f172a;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.perfil-btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.perfil-btn-primary {
+  background-color: #0b3b60;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.perfil-btn-primary:hover {
+  background-color: #072a45;
+  box-shadow: 0 2px 8px rgba(11, 59, 96, 0.25);
+}
+
+.perfil-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.perfil-btn-primary.full-width {
+  width: 100%;
+  padding: 10px;
+}
+
+.perfil-btn-outline {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.perfil-btn-outline:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.perfil-btn-outline.full-width {
+  width: 100%;
+  padding: 9px;
+}
+
+/* ==========================================================================
+   2. Card Banner do Perfil do Contato
+   ========================================================================== */
+.perfil-banner-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.perfil-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.perfil-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #38bdf8;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+}
+
+.perfil-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.perfil-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.perfil-role {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.perfil-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.perfil-status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.2px;
+}
+
+.perfil-status-pill.green {
+  background-color: #064e3b;
+  color: #34d399;
+}
+
+.perfil-status-pill.navy {
+  background-color: #0b3b60;
+  color: #ffffff;
+}
+
+.perfil-updated-text {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Circular Gauge da Nota de Confiança */
+.perfil-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-left: 1px solid #f1f5f9;
+  padding-left: 24px;
+}
+
+.perfil-gauge-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.perfil-gauge-svg {
+  transform: rotate(-90deg);
+}
+
+.gauge-bg {
+  fill: none;
+  stroke: #e2e8f0;
+}
+
+.gauge-progress {
+  fill: none;
+  stroke: #0b3b60;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.perfil-gauge-number {
+  position: absolute;
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.perfil-gauge-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gauge-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.gauge-grade {
+  font-size: 18px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+.gauge-subnote {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   3. Two-Column Layout
+   ========================================================================== */
+.perfil-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.perfil-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.perfil-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   4. Card Base Styles
+   ========================================================================== */
+.perfil-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perfil-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.perfil-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.perfil-card-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.perfil-edit-action-btn {
+  background: transparent;
+  border: none;
+  color: #0284c7;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.perfil-edit-action-btn:hover {
+  background-color: #f0f9ff;
+  color: #0369a1;
+}
+
+/* ==========================================================================
+   5. Card: Inteligência do Contato
+   ========================================================================== */
+.perfil-intelligence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intel-item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: all 0.15s ease;
+}
+
+.intel-item-card:hover {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.intel-item-card.intel-item-reviewed {
+  border-left: 3px solid #10b981;
+}
+
+.intel-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.intel-item-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.intel-item-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.text-confirmed {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.text-pending {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.text-rejected {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.intel-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.intel-link-btn {
+  background: transparent;
+  border: none;
+  color: #0284c7;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.intel-link-btn:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.intel-btn-confirm {
+  background: transparent;
+  border: none;
+  color: #0b3b60;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.intel-btn-confirm:hover {
+  text-decoration: underline;
+}
+
+.intel-btn-reject {
+  background: transparent;
+  border: none;
+  color: #b91c1c;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.intel-btn-reject:hover {
+  text-decoration: underline;
+}
+
+.intel-sep {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.intel-footer-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.intel-note-unavailable {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.intel-note-explanation {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   6. Card: Dados Cadastrais e Operacionais
+   ========================================================================== */
+.cadastral-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+}
+
+.cadastral-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.cadastral-table thead {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cadastral-table th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.cadastral-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.cadastral-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.cadastral-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.cadastral-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.cadastral-td-campo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.cadastral-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cadastral-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cadastral-value-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.cadastral-inline-input {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #0284c7;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+}
+
+.cadastral-origin-text {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.cadastral-pill {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.cadastral-pill.green {
+  background-color: #064e3b;
+  color: #34d399;
+}
+
+.cadastral-pill.amber {
+  background-color: #451a03;
+  color: #fbbf24;
+}
+
+/* ==========================================================================
+   7. Coluna Direita (Nota de confiança, Revisão, Ações rápidas)
+   ========================================================================== */
+
+/* Barra de 3 segmentos */
+.confidence-segment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.confidence-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  height: 6px;
+}
+
+.confidence-bar-segment {
+  border-radius: 4px;
+}
+
+.confidence-bar-segment.segment-low {
+  background-color: #f87171;
+}
+
+.confidence-bar-segment.segment-mid {
+  background-color: #fbbf24;
+}
+
+.confidence-bar-segment.segment-high {
+  background-color: #34d399;
+}
+
+.confidence-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #64748b;
+}
+
+/* Linhas de resumo de confiança */
+.confidence-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confidence-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.confidence-summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.confidence-label {
+  color: #64748b;
+}
+
+.confidence-value {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.confidence-value.text-green {
+  color: #16a34a;
+}
+
+.confidence-value.text-amber {
+  color: #b45309;
+}
+
+/* Card 2: Revisão de inteligência - Callout */
+.intel-review-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.intel-review-callout.success {
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
+}
+
+.callout-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.callout-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.callout-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0;
+}
+
+.intel-review-callout.success .callout-title {
+  color: #15803d;
+}
+
+.callout-desc {
+  font-size: 11.5px;
+  color: #92400e;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.intel-review-callout.success .callout-desc {
+  color: #166534;
+}
+
+/* Card 3: Ações Rápidas */
+.quick-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-action-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-action-item:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.quick-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quick-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quick-action-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.quick-action-desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   8. Modal de Consulta de Fonte / Auditoria
+   ========================================================================== */
+.source-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.source-modal-box {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.source-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.source-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.source-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.source-modal-close:hover {
+  color: #0f172a;
+}
+
+.source-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.source-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.source-modal-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.source-modal-val {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.source-modal-desc {
+  font-size: 13px;
+  color: #334155;
+  margin: 0;
+  background-color: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.source-modal-tag {
+  display: inline-block;
+  font-size: 11.5px;
+  color: #0369a1;
+  background-color: #e0f2fe;
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.source-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+/* ==========================================================================
+   9. Responsive Design
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .perfil-columns-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .perfil-banner-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .perfil-banner-right {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 16px;
+    width: 100%;
+  }
+  .perfil-header-actions {
+    width: 100%;
+  }
+  .perfil-search-input {
+    width: 100%;
+  }
+}

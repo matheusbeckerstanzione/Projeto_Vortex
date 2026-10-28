@@ -1,0 +1,736 @@
+
+/* =====================================================
+   RESET GLOBAL
+   ===================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Reset scoping for Acesso Negado */
+.acesso-pagina {
+    font-family: "Inter", Arial, sans-serif;
+}
+
+
+button,
+input {
+    font-family: inherit;
+}
+
+
+/* =====================================================
+   TELA PRINCIPAL
+   ===================================================== */
+
+.acesso-pagina {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    align-items: stretch;
+    gap: 0;
+
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+
+    overflow: hidden;
+
+    background: #f3f6fc;
+    color: #080b12;
+}
+
+
+/* =====================================================
+   ÁREA ESQUERDA
+   ===================================================== */
+
+.acesso-esquerda {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    min-width: 0;
+    min-height: 100vh;
+
+    padding: 62px 24px 55px clamp(40px, 6.5vw, 112px);
+
+    overflow: hidden;
+
+    background: transparent;
+}
+
+
+/* =====================================================
+   TÍTULO PRINCIPAL
+   ===================================================== */
+
+.acesso-mensagem {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    max-width: 560px;
+}
+
+.acesso-mensagem h1 {
+    margin: 0 0 14px;
+
+    color: #050505;
+
+    font-size: clamp(38px, 3.2vw, 52px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1.08;
+
+    text-align: left;
+}
+
+.acesso-mensagem p {
+    max-width: 440px;
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.7;
+
+    text-align: left;
+}
+
+
+/* =====================================================
+   ILUSTRAÇÃO DO CADEADO
+   ===================================================== */
+
+.acesso-ilustracao {
+    position: relative;
+
+    flex-shrink: 0;
+
+    width: min(100%, 380px);
+    height: 300px;
+
+    margin: 0 auto 55px;
+}
+
+
+/* Base */
+
+.acesso-base {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+
+    width: 82%;
+    height: 76px;
+
+    transform: translateX(-50%);
+
+    background: #3447b9;
+    border-radius: 50% / 35%;
+
+    box-shadow: 0 18px 0 #293681;
+}
+
+.acesso-base::after {
+    position: absolute;
+    inset: 0;
+
+    content: "";
+
+    border: 14px solid rgba(93, 143, 255, 0.65);
+    border-radius: 50%;
+}
+
+.acesso-base-topo {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 45px;
+
+    background: #4262df;
+    border-radius: 50%;
+}
+
+
+/* Arco */
+
+.acesso-cadeado {
+    position: absolute;
+    bottom: 65px;
+    left: 50%;
+
+    width: 118px;
+    height: 170px;
+
+    transform: translateX(-50%);
+}
+
+.acesso-arco {
+    position: absolute;
+    top: 0;
+    left: 16px;
+
+    width: 86px;
+    height: 105px;
+
+    border: 16px solid #91b3ff;
+    border-bottom: 0;
+    border-radius: 48px 48px 0 0;
+}
+
+
+/* Corpo */
+
+.acesso-corpo {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    height: 100px;
+
+    background: linear-gradient(
+        135deg,
+        #6492f4,
+        #3450c9
+    );
+
+    border-radius: 22px;
+
+    box-shadow: inset -12px 0 0 rgba(24, 47, 155, 0.2);
+}
+
+.acesso-corpo::before {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+
+    width: 42px;
+    height: 5px;
+
+    content: "";
+
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 10px;
+}
+
+
+/* Fechadura */
+
+.acesso-fechadura {
+    position: absolute;
+    top: 33px;
+    left: 50%;
+
+    width: 19px;
+    height: 19px;
+
+    transform: translateX(-50%);
+
+    background: #173b91;
+    border-radius: 50%;
+}
+
+.acesso-fechadura::after {
+    position: absolute;
+    top: 12px;
+    left: 6px;
+
+    width: 7px;
+    height: 19px;
+
+    content: "";
+
+    background: #173b91;
+    border-radius: 0 0 4px 4px;
+}
+
+
+/* Bolinhas */
+
+.acesso-bolinha {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+}
+
+.bolinha-azul {
+    top: 75px;
+    left: 12%;
+
+    width: 15px;
+    height: 15px;
+
+    background: #6d91e8;
+}
+
+.bolinha-roxa {
+    top: 145px;
+    left: 7%;
+
+    width: 31px;
+    height: 31px;
+
+    background: linear-gradient(135deg, #bc65e5, #8036c6);
+}
+
+.bolinha-verde {
+    top: 65px;
+    right: 10%;
+
+    width: 22px;
+    height: 22px;
+
+    background: linear-gradient(135deg, #61cdb9, #178d82);
+}
+
+
+/* Alerta */
+
+.acesso-alerta-ilustracao {
+    position: absolute;
+    top: 112px;
+    right: 20%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    background: linear-gradient(135deg, #ff9c51, #f4510b);
+    border-radius: 50%;
+
+    color: #ffffff;
+    font-size: 31px;
+    font-weight: 800;
+
+    box-shadow: 0 5px 12px rgba(244, 81, 11, 0.18);
+}
+
+
+/* =====================================================
+   ÁREA DIREITA
+   ===================================================== */
+
+.acesso-direita {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: 100vh;
+
+    padding: 38px 24px;
+
+    background: transparent;
+}
+
+
+/* =====================================================
+   CARTÃO BRANCO
+   ===================================================== */
+
+.acesso-cartao {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    max-width: 550px;
+
+    height: calc(100vh - 76px);
+    min-height: 670px;
+    max-height: 900px;
+
+    padding: 60px 30px 35px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5eaf1;
+    border-radius: 20px;
+
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.09);
+}
+
+
+/* =====================================================
+   LOGO NEOCORE
+   ===================================================== */
+
+.acesso-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin: 0 auto 26px;
+
+    text-align: center;
+}
+
+.acesso-logo img {
+    display: block;
+
+    width: 87px;
+    height: 87px;
+
+    margin-bottom: 14px;
+
+    object-fit: contain;
+}
+
+.acesso-logo h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 4px;
+}
+
+.acesso-logo > span {
+    margin-top: 8px;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+    letter-spacing: 1.2px;
+}
+
+
+/* =====================================================
+   CONTEÚDO DO CARTÃO
+   ===================================================== */
+
+.acesso-conteudo {
+    width: 100%;
+}
+
+.acesso-conteudo h3 {
+    margin: 0 0 12px;
+
+    color: #14233a;
+
+    font-size: 26px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+
+    text-align: center;
+}
+
+.acesso-descricao {
+    margin: 0 0 35px;
+
+    color: #64748b;
+
+    font-size: 14px;
+    line-height: 1.6;
+
+    text-align: center;
+}
+
+
+/* =====================================================
+   CAIXA DE ERRO
+   ===================================================== */
+
+.acesso-erro {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 57px;
+
+    margin-bottom: 55px;
+    padding: 15px 15px;
+
+    background: #f8fafc;
+
+    border: 1px solid #e5eaf1;
+    border-radius: 10px;
+}
+
+.acesso-erro img {
+    flex-shrink: 0;
+
+    width: 16px;
+    height: 16px;
+
+    object-fit: contain;
+}
+
+.acesso-erro div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.acesso-erro span {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.acesso-erro p {
+    margin: 0;
+
+    color: #14233a;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+/* =====================================================
+   BOTÕES
+   ===================================================== */
+
+.acesso-botoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    width: 100%;
+}
+
+.acesso-botoes button {
+    min-width: 0;
+    min-height: 40px;
+
+    padding: 10px 12px;
+
+    border-radius: 9px;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.acesso-voltar {
+    color: #14233a;
+
+    background: #e9edf5;
+    border: 1px solid #e9edf5;
+}
+
+.acesso-voltar:hover {
+    background: #dce3ed;
+}
+
+.acesso-trocar {
+    color: #ffffff;
+
+    background: #174c7a;
+    border: 1px solid #174c7a;
+}
+
+.acesso-trocar:hover {
+    background: #10395e;
+}
+
+
+/* =====================================================
+   LINK DE SOLICITAÇÃO
+   ===================================================== */
+
+.acesso-ajuda {
+    margin: 22px 0 0;
+
+    color: #64748b;
+
+    font-size: 11px;
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.acesso-ajuda a {
+    color: #174cbd;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.acesso-ajuda a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   TABLETS E TELAS MENORES
+   ===================================================== */
+
+@media (max-width: 1000px) {
+    .acesso-pagina {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .acesso-esquerda {
+        padding-left: 36px;
+    }
+
+    .acesso-mensagem h1 {
+        font-size: clamp(34px, 4vw, 44px);
+    }
+
+    .acesso-direita {
+        padding: 24px 18px;
+    }
+
+    .acesso-cartao {
+        height: calc(100vh - 48px);
+        min-height: 560px;
+
+        padding: 40px 22px 30px;
+    }
+}
+
+
+/* =====================================================
+   CELULARES
+   ===================================================== */
+
+@media (max-width: 700px) {
+    .acesso-pagina {
+        display: flex;
+        flex-direction: column;
+
+        min-height: 100vh;
+        overflow: auto;
+    }
+
+    .acesso-esquerda {
+        min-height: auto;
+
+        padding: 35px 24px 0;
+    }
+
+    .acesso-mensagem h1 {
+        font-size: clamp(32px, 8vw, 44px);
+        letter-spacing: -1.5px;
+    }
+
+    .acesso-mensagem p {
+        font-size: 12px;
+    }
+
+    .acesso-ilustracao {
+        width: min(100%, 320px);
+        height: 240px;
+
+        margin: 20px auto 0;
+
+        transform: scale(0.9);
+        transform-origin: center bottom;
+    }
+
+    .acesso-direita {
+        min-height: auto;
+
+        padding: 24px 18px 36px;
+    }
+
+    .acesso-cartao {
+        width: 100%;
+        max-width: 480px;
+
+        height: auto;
+        min-height: 500px;
+        max-height: none;
+
+        padding: 35px 22px;
+    }
+
+    .acesso-logo {
+        margin-bottom: 28px;
+    }
+
+    .acesso-logo img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .acesso-conteudo h3 {
+        font-size: 20px;
+    }
+}
+
+
+/* =====================================================
+   CELULARES PEQUENOS
+   ===================================================== */
+
+@media (max-width: 380px) {
+    .acesso-esquerda {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .acesso-mensagem h1 {
+        font-size: 30px;
+    }
+
+    .acesso-direita {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .acesso-cartao {
+        min-height: 480px;
+        padding: 28px 16px;
+    }
+
+    .acesso-botoes {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =====================================================
+   TELAS BAIXAS
+   ===================================================== */
+
+@media (max-height: 650px) and (min-width: 701px) {
+    .acesso-pagina {
+        min-height: 650px;
+        overflow: auto;
+    }
+
+    .acesso-esquerda,
+    .acesso-direita {
+        min-height: 650px;
+    }
+
+    .acesso-cartao {
+        height: 600px;
+    }
+
+    .acesso-esquerda {
+        padding-top: 36px;
+    }
+
+    .acesso-ilustracao {
+        margin-bottom: 25px;
+        transform: scale(0.85);
+        transform-origin: center bottom;
+    }
+}

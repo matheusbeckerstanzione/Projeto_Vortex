@@ -1,0 +1,652 @@
+/* ==========================================================================
+   dashboard.css — Layout e Estilos da Dashboard NEOCORE
+   ========================================================================== */
+
+/* Fundo padrão limpo e claro da Dashboard */
+body:has(.dash-container) {
+  background-color: #f1f4f9 !important;
+  color: #0f172a;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Container Geral da Dashboard */
+.dash-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f1f4f9;
+}
+
+/* ==========================================================================
+   1. Header Superior
+   ========================================================================== */
+.dash-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 60px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #eef2f6;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  position: relative;
+}
+
+/* Faixa azul vertical de destaque na extrema esquerda */
+.dash-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #0284c7;
+}
+
+.dash-header-left {
+  display: flex;
+  align-items: center;
+}
+
+/* Botão de Menu Hambúrguer */
+.dash-menu-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.dash-menu-btn:hover {
+  background-color: #f8fafc;
+}
+
+.dash-menu-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: #1e3a5f;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+/* Centro: Logo NEOCORE */
+.dash-header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  user-select: none;
+}
+
+.dash-brand-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.dash-brand-name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #0f172a;
+}
+
+/* Lado Direito: Usuário */
+.dash-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.dash-user-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.dash-user-wrapper:hover {
+  background-color: #f8fafc;
+}
+
+.dash-user-greeting {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.dash-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #dbeafe;
+  color: #0284c7;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(2, 132, 199, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dropdown do Usuário */
+.dash-user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  width: 190px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 10px;
+  z-index: 110;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dash-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px 8px;
+}
+
+.dash-dropdown-info strong {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.dash-dropdown-info span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.dash-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
+}
+
+.dash-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.dash-dropdown-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.dash-dropdown-item.logout {
+  color: #dc2626;
+}
+
+.dash-dropdown-item.logout:hover {
+  background: #fef2f2;
+}
+
+/* ==========================================================================
+   2. Corpo Principal (Sidebar + Main Content)
+   ========================================================================== */
+.dash-body {
+  display: flex;
+  flex: 1;
+  padding: 16px 20px 20px 16px;
+  gap: 20px;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+/* ==========================================================================
+   3. Sidebar Estilo Card Flutuante
+   ========================================================================== */
+.dash-sidebar {
+  width: 236px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+  border: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease, opacity 0.2s ease;
+}
+
+.dash-sidebar.closed {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.dash-sidebar-inner {
+  padding: 24px 16px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Cabeçalho Workspace */
+.dash-workspace-header {
+  margin-bottom: 22px;
+  padding-left: 6px;
+}
+
+.dash-workspace-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+.dash-workspace-title {
+  margin: 2px 0 0;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* Lista de Navegação */
+.dash-nav {
+  flex: 1;
+}
+
+.dash-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-nav-item {
+  width: 100%;
+}
+
+.dash-nav-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #475569;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  position: relative;
+}
+
+.dash-nav-btn:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Bolinha indicadora (Dot) */
+.dash-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.dash-nav-text {
+  flex: 1;
+}
+
+/* Chevron do dropdown */
+.dash-nav-chevron {
+  color: #0f172a;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: auto;
+}
+
+.dash-nav-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+/* Item Ativo (Pill azul claro pastel) */
+.dash-nav-btn.active {
+  background-color: #bde0fe;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.dash-nav-btn.active .dash-nav-dot {
+  background-color: #0f172a;
+  transform: scale(1.15);
+}
+
+/* Submenu de Contatos */
+.dash-submenu {
+  list-style: none;
+  padding: 4px 0 6px 0;
+  margin: 2px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-submenu-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 7px 12px 7px 22px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #475569;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 400;
+  text-align: left;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.dash-submenu-btn:hover {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Subitem Ativo com Barra Vertical de Destaque */
+.dash-submenu-btn.active.highlight-bar {
+  background-color: #e0f2fe;
+  color: #034f8a;
+  font-weight: 600;
+}
+
+.dash-sub-indicator {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 14px;
+  background-color: #034f8a;
+  border-radius: 2px;
+}
+
+.dash-submenu-btn.active.highlight-bar .dash-submenu-text {
+  padding-left: 4px;
+}
+
+.dash-submenu-btn.active:not(.highlight-bar) {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Card Inferior de Atualização */
+.dash-update-card {
+  margin-top: auto;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 14px;
+  box-sizing: border-box;
+}
+
+.dash-update-label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.dash-update-title {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.dash-update-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   4. Conteúdo Principal da Dashboard
+   ========================================================================== */
+.dash-main {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+  border: 1px solid #edf2f7;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dash-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dash-main-title h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.dash-main-title p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.dash-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-action-btn:hover {
+  background-color: #0369a1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+/* Cards de Métricas e Visão Geral */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.dash-stat-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.dash-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.dash-stat-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Tabela / Lista Prévia de Registros */
+.dash-table-card {
+  background: #ffffff;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 20px;
+  flex: 1;
+}
+
+.dash-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dash-table-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dash-search-input {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #0f172a;
+  background: #f8fafc;
+  outline: none;
+  width: 200px;
+}
+
+.dash-search-input:focus {
+  border-color: #0284c7;
+  background: #ffffff;
+}
+
+.dash-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.dash-empty-state svg {
+  margin-bottom: 12px;
+  color: #94a3b8;
+}
+
+.dash-empty-state h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.dash-empty-state p {
+  margin: 0;
+  font-size: 12.5px;
+  max-width: 360px;
+}
+
+/* Responsividade */
+@media (max-width: 900px) {
+  .dash-body {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .dash-sidebar {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .dash-main {
+    border-radius: 16px;
+    padding: 20px;
+  }
+}

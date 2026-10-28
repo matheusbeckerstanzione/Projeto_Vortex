@@ -1,0 +1,1013 @@
+/* DashboardEnriquecimento.css - Tela de Enriquecimento de Contatos NeoCore */
+
+.enrich-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 4px 30px 4px;
+}
+
+/* ==========================================================================
+   1. Page Header
+   ========================================================================== */
+.enrich-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.enrich-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.enrich-page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.enrich-page-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+}
+
+.enrich-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.enrich-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.enrich-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.enrich-search-input {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  height: 38px;
+  padding: 0 16px 0 38px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  width: 230px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.enrich-search-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+  width: 260px;
+}
+
+.enrich-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.enrich-link-btn {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.enrich-link-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.enrich-btn-primary {
+  background-color: #0b3b60;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.enrich-btn-primary:hover {
+  background-color: #072a45;
+  box-shadow: 0 2px 8px rgba(11, 59, 96, 0.25);
+}
+
+.enrich-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.enrich-btn-primary.full-width {
+  width: 100%;
+  padding: 11px;
+}
+
+.enrich-btn-secondary {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.enrich-btn-secondary:hover {
+  background-color: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.enrich-btn-secondary.full-width {
+  width: 100%;
+  padding: 10px;
+}
+
+/* ==========================================================================
+   2. KPI Cards Row
+   ========================================================================== */
+.enrich-kpis-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.enrich-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.enrich-kpi-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.enrich-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.enrich-kpi-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.enrich-kpi-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.enrich-kpi-icon-wrap.blue-icon {
+  background-color: #e0f2fe;
+}
+
+.enrich-kpi-icon-wrap.teal-icon {
+  background-color: #e0f2fe;
+}
+
+.enrich-kpi-icon-wrap.info-icon {
+  background-color: #e0f2fe;
+}
+
+.enrich-kpi-icon-wrap.green-icon {
+  background-color: #10b981;
+}
+
+.enrich-kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.enrich-kpi-footer {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   3. Two-Column Layout
+   ========================================================================== */
+.enrich-columns {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.enrich-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.enrich-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   4. Cards General Style
+   ========================================================================== */
+.enrich-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.enrich-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.enrich-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.enrich-card-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.enrich-select-all-btn,
+.enrich-manage-btn {
+  background: transparent;
+  border: none;
+  color: #0284c7;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.enrich-select-all-btn:hover,
+.enrich-manage-btn:hover {
+  background-color: #f0f9ff;
+  color: #0369a1;
+}
+
+/* ==========================================================================
+   5. O que descobrir (Attributes Grid)
+   ========================================================================== */
+.enrich-attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.enrich-attr-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.enrich-attr-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.enrich-attr-card.selected {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.2);
+}
+
+.enrich-attr-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enrich-attr-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.enrich-attr-icon.blue {
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+.enrich-attr-icon.teal {
+  background-color: #ccfbf1;
+  color: #0f766e;
+}
+
+.enrich-attr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.enrich-attr-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.enrich-attr-desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.enrich-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.enrich-checkbox.checked {
+  background-color: #0284c7;
+  border-color: #0284c7;
+}
+
+.enrich-demo-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  padding-top: 4px;
+}
+
+/* ==========================================================================
+   6. Fontes de Dados
+   ========================================================================== */
+.enrich-sources-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.enrich-source-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.enrich-source-row:last-child {
+  border-bottom: none;
+}
+
+.enrich-source-row:hover {
+  background: #f8fafc;
+}
+
+.enrich-source-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.enrich-source-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.enrich-source-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.enrich-source-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.enrich-source-desc {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.enrich-source-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.enrich-source-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.enrich-source-badge.connected {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.enrich-source-badge.connectable {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.enrich-source-badge.analysis {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+/* Custom Toggle Switch */
+.enrich-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.enrich-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.enrich-toggle-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 22px;
+}
+
+.enrich-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.enrich-toggle input:checked + .enrich-toggle-slider {
+  background-color: #0284c7;
+}
+
+.enrich-toggle input:checked + .enrich-toggle-slider:before {
+  transform: translateX(18px);
+}
+
+/* ==========================================================================
+   7. Prévia do Resultado (Table & Actions)
+   ========================================================================== */
+.enrich-preview-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+}
+
+.enrich-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.enrich-preview-table thead {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.enrich-preview-table th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.enrich-preview-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.enrich-preview-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.enrich-preview-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.enrich-preview-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+/* Coluna Contato */
+.preview-td-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.preview-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.preview-avatar.status-concluido {
+  background: linear-gradient(135deg, #0b3b60, #0284c7);
+}
+
+.preview-avatar.status-revisao {
+  background: linear-gradient(135deg, #0d9488, #14b8a6);
+}
+
+.preview-avatar.status-erro {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+.preview-avatar.status-processando {
+  background: linear-gradient(135deg, #64748b, #94a3b8);
+}
+
+.preview-avatar.status-selecionado {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.preview-contact-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Coluna Atributos */
+.preview-badges-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.preview-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.preview-badge.badge-navy {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.preview-badge.badge-teal {
+  background-color: #ccfbf1;
+  color: #0f766e;
+}
+
+.preview-badge.badge-red {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.preview-badge.badge-gray {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.preview-badge.badge-light {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+}
+
+/* Coluna Fonte / Confiança */
+.preview-td-source {
+  white-space: nowrap;
+}
+
+.preview-source-text {
+  display: block;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.preview-source-text.status-erro {
+  color: #dc2626;
+}
+
+.preview-confidence {
+  display: inline-block;
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Coluna Estado */
+.preview-status-badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.preview-status-badge.status-concluido {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.preview-status-badge.status-revisao {
+  background-color: #ccfbf1;
+  color: #0f766e;
+}
+
+.preview-status-badge.status-erro {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.preview-status-badge.status-processando {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.preview-status-badge.status-selecionado {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+/* Coluna Ação */
+.preview-action-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-btn {
+  border: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preview-btn.approve {
+  background-color: #0b3b60;
+  color: #ffffff;
+}
+
+.preview-btn.approve:hover {
+  background-color: #072a45;
+}
+
+.preview-btn.reject {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.preview-btn.reject:hover {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.preview-btn.select {
+  background-color: #f1f5f9;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.preview-btn.select:hover {
+  background-color: #e0f2fe;
+}
+
+.preview-action-done {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.preview-action-done.approved {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.preview-action-done.rejected {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.enrich-preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+}
+
+.enrich-preview-footer-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.enrich-save-results-btn {
+  background: linear-gradient(135deg, #0b3b60 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(11, 59, 96, 0.15);
+  width: 100%;
+  margin-top: 4px;
+}
+
+.enrich-save-results-btn:hover {
+  box-shadow: 0 4px 14px rgba(11, 59, 96, 0.25);
+  transform: translateY(-1px);
+}
+
+.enrich-save-results-btn:active {
+  transform: scale(0.99);
+}
+
+/* ==========================================================================
+   8. Right Column (Resumo, Regras, Privacidade)
+   ========================================================================== */
+.enrich-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.enrich-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.enrich-summary-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.enrich-summary-label {
+  color: #64748b;
+}
+
+.enrich-summary-value {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.enrich-summary-value.highlight {
+  color: #0284c7;
+  font-size: 15px;
+}
+
+.enrich-summary-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.4;
+}
+
+.enrich-summary-warning svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Regras da busca */
+.enrich-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.enrich-rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.enrich-rule-label {
+  font-size: 13px;
+  color: #334155;
+  font-weight: 500;
+}
+
+/* Privacidade e ajuda */
+.enrich-privacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.enrich-privacy-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.enrich-privacy-item:hover {
+  background-color: #f8fafc;
+}
+
+.enrich-privacy-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.enrich-privacy-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.enrich-privacy-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.enrich-privacy-desc {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   9. Responsive Design
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .enrich-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .enrich-kpis-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .enrich-attributes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .enrich-kpis-row {
+    grid-template-columns: 1fr;
+  }
+  .enrich-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .enrich-search-input {
+    width: 100%;
+  }
+}

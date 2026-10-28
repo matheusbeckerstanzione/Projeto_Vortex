@@ -1,0 +1,227 @@
+@import './orbColor.css';
+
+html.auth-no-scroll,
+body.auth-no-scroll {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ===== Layout Unificado de Autenticação (Full Width & Zero Scroll) ===== */
+.auth-page {
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+  padding: 0 clamp(40px, 5vw, 100px);
+  margin: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  background-color: #f8fafc;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+/* ===== Overlay branco cinematográfico que faz a transição para o dashboard ===== */
+.auth-white-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 999999;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+/* Estado de transição cinematográfica: desativa corte de overflow e eleva o globo para a tela toda */
+.auth-page.auth-transitioning {
+  overflow: visible !important;
+}
+
+.auth-page.auth-transitioning .auth-left-col {
+  overflow: visible !important;
+  z-index: 1000 !important;
+}
+
+.auth-page.auth-transitioning .auth-right-col {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.auth-page.auth-transitioning .auth-orb-slot {
+  z-index: 1001 !important;
+}
+
+/* Corner Logo alinhado com o início do conteúdo */
+.auth-corner-logo {
+  position: absolute;
+  top: clamp(20px, 3.5vh, 36px);
+  left: clamp(40px, 5vw, 100px);
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  z-index: 10;
+}
+
+/* Coluna esquerda: fixa, sem scroll, texto lá em cima e globo no centro */
+.auth-left-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  padding: clamp(32px, 5vh, 60px) 0 clamp(20px, 3vh, 36px);
+  box-sizing: border-box;
+  user-select: none;
+  position: relative;
+}
+
+.auth-hero-content {
+  width: 100%;
+  margin-top: clamp(6px, 1.5vh, 18px);
+  margin-bottom: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.auth-hero-title {
+  margin: 0 0 10px;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #000;
+}
+
+.auth-hero-desc {
+  margin: 0 auto;
+  max-width: 540px;
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.5;
+  color: var(--muted, #64748b);
+}
+
+/* Container do globo Three.js: maior e centralizado no meio do espaço */
+.auth-orb-slot {
+  position: relative;
+  width: 100%;
+  max-width: min(900px, 90vh);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  flex-shrink: 1;
+  will-change: transform;
+}
+
+.auth-orb-slot .orb {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  position: relative;
+}
+
+.auth-orb-slot .orb::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(closest-side, var(--orb-ambient-glow, rgba(66, 217, 255, 0.28)), transparent);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Coluna direita: card centralizado vertical e horizontalmente, ZERO SCROLL */
+.auth-right-col {
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-card-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 900px) {
+  .auth-page {
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+    padding: 24px 20px 48px;
+  }
+
+  .auth-left-col {
+    height: auto;
+    align-items: center;
+    text-align: center;
+    padding-top: 48px;
+    padding-bottom: 16px;
+  }
+
+  .auth-hero-title {
+    white-space: normal;
+  }
+
+  .auth-hero-desc {
+    max-width: 100%;
+  }
+
+  .auth-orb-slot {
+    max-width: 280px;
+    margin: 12px auto 0;
+  }
+
+  .auth-right-col {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* aqui é tamanho maximo da tela em ambas as direções tanto em horizontal quanto em vertical */
+@media (max-height: 699px) or (min-width: 901px) {
+  .auth-hero-title {
+    font-size: clamp(26px, 3.2vw, 40px);
+    margin-bottom: 8px;
+  }
+
+  .auth-hero-desc {
+    font-size: 12px;
+  }
+
+  .auth-orb-slot {
+    max-width: min(700px, 80vh);
+  }
+}
+
+/* Prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .auth-page {
+    transition: none !important;
+  }
+}

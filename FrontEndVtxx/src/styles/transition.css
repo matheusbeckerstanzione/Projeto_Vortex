@@ -1,0 +1,82 @@
+/* ==========================================================================
+   transition.css — Estilos para a transição cinematográfica do globo
+   ========================================================================== */
+
+/* Container global do globo — position fixed, sincroniza suavemente com o slot */
+.global-orb-wrapper {
+  position: fixed;
+  z-index: 25;
+  pointer-events: none;
+  will-change: transform, left, top, width, height;
+  transition: left 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              top 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.4s ease;
+}
+
+/* Durante a transição cinematográfica (rAF), desativa transition CSS para ter controle frame a frame */
+.global-orb-wrapper.transitioning {
+  z-index: 100;
+  pointer-events: none;
+  transition: none !important;
+}
+
+/* O orb dentro do wrapper global não precisa de margem/position próprios */
+.global-orb-wrapper .orb {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  aspect-ratio: auto !important;
+  position: relative;
+}
+
+/* Remove o glow ::before durante a transição para evitar artefatos */
+.global-orb-wrapper.transitioning .orb::before {
+  opacity: 0 !important;
+  transition: opacity 0.3s ease;
+}
+
+/* Overlay de cobertura de cor (fases 3→4) */
+.transition-color-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0;
+  /* Gradiente radial com as cores médias do globo */
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    #0a5a9e 0%,
+    #083d6e 40%,
+    #041e38 80%,
+    #020e1a 100%
+  );
+  will-change: opacity;
+}
+
+/* Bloqueio de cliques durante a transição */
+.transition-blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: auto;
+  background: transparent;
+  cursor: wait;
+}
+
+/* Wrapper da nova tela (dashboard) durante a revelação (fase 4) */
+.transition-reveal-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .global-orb-wrapper,
+  .transition-color-overlay {
+    transition: none !important;
+    animation: none !important;
+  }
+}

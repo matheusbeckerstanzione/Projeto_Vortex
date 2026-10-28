@@ -1,0 +1,73 @@
+/* ==========================================================================
+   orbColor.css — Cores do Planeta Terra 3D (OrbScene)
+   Você pode ajustar qualquer valor abaixo em Hex (#RRGGBB), rgb(...) ou hsl(...).
+   ========================================================================== */
+
+:root {
+  /* 1. Azul oceano profundo — cor principal dos oceanos e áreas de sombra */
+  --orb-ocean-deep: #1148af;
+
+  /* 2. Azul oceânico luminoso — reflexos e regiões iluminadas dos oceanos */
+  --orb-ocean-bright: #0878C9;
+
+  /* 3. Verde continental — vegetação e massas continentais (TERRA) */
+  --orb-continent: #48A860;
+
+  /* 4. Branco das nuvens — formações de nuvens e detalhes claros da superfície */
+  --orb-clouds: #D8E8D5;
+
+  /* 5. Ciano atmosférico — contorno luminoso / halo atmosférico ao redor da Terra */
+  --orb-atmosphere: #42D9FF;
+
+  /* 6. Brilho atmosférico no fundo atrás da Terra */
+  --orb-ambient-glow: rgba(66, 217, 255, 0.32);
+}
+
+/* ===== Tooltip dos Pegmen no Globo 3D ===== */
+.orb-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 60;
+  transform: translate(-50%, -100%) translateY(-12px);
+  padding: 6px 14px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55), 0 0 14px rgba(56, 189, 248, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-family: inherit;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orb-tooltip.show {
+  opacity: 1;
+  transform: translate(-50%, -100%) translateY(-8px);
+}
+
+.orb-tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.orb-tooltip-title svg {
+  flex-shrink: 0;
+}
+
+.orb-country-text {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #38bdf8;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+  padding-left: 17px;
+  text-transform: uppercase;
+}
