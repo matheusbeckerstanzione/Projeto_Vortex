@@ -118,6 +118,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(IntegracaoExternaException.class)
+    public ResponseEntity<ErroResponse> tratarIntegracaoExterna(
+            IntegracaoExternaException exception,
+            HttpServletRequest request) {
+
+        return responder(
+                exception.getStatus(),
+                exception.getMessage(),
+                request,
+                List.of()
+        );
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErroResponse> tratarRestricoesValidacao(
             ConstraintViolationException exception,
