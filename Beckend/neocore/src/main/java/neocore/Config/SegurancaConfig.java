@@ -234,6 +234,7 @@ public class SegurancaConfig {
                                 "/empresas",
                                 "/exportacoes/empresas",
                                 "/contatos",
+                                "/sinais/sugestoes",
                                 "/atributos-contato",
                                 "/atributos-empresa",
                                 "/pesquisas-enriquecimento",
