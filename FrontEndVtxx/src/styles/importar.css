@@ -2133,3 +2133,26 @@ img {
         font-size: 7px;
     }
 }
+
+/* Embedded Importar mode */
+.importar-content.embedded {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 16px 24px;
+}
+
+@media (max-width: 768px) {
+  .importar-content.embedded {
+    padding: 12px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .importar-content.embedded {
+    padding: 8px 6px !important;
+  }
+}

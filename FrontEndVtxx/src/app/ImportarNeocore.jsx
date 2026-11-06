@@ -45,7 +45,7 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
   };
 
   return (
-    <main className="importar-content" style={embedded ? { padding: '16px 24px', width: '100%' } : {}}>
+    <main className={`importar-content ${embedded ? 'embedded' : ''}`}>
       {toast && (
         <div className="importar-toast">
           {toast}

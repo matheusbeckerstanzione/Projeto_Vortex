@@ -22,7 +22,19 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
   const [segmentFilter, setSegmentFilter] = useState('ALL');
   const [activeTab, setActiveTab] = useState('gerais');
   const [activeMenu, setActiveMenu] = useState(initialMenu);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 992;
+    }
+    return true;
+  });
+  const [contactMobileTab, setContactMobileTab] = useState('list');
+  const handleMenuSelect = (menuKey) => {
+    setActiveMenu(menuKey);
+    if (typeof window !== 'undefined' && window.innerWidth <= 992) {
+      setIsSidebarOpen(false);
+    }
+  };
   const [isContactsOpen, setIsContactsOpen] = useState(
     ['todos-contatos', 'completar', 'enriquecimento', 'perfil-completo', 'ficha'].includes(initialMenu)
   );
@@ -302,19 +314,39 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
       {/* Main Workspace Layout */}
       <div className="vortex-main-layout">
+        {/* Mobile Sidebar Backdrop */}
+        {isSidebarOpen && (
+          <div
+            className="sidebar-mobile-backdrop"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
         {/* Left Sidebar */}
         <aside className={`vortex-sidebar ${!isSidebarOpen ? 'closed' : ''}`} aria-hidden={!isSidebarOpen}>
           <div className="sidebar-inner-container">
             <div className="workspace-header">
-            <span className="workspace-label">Workspace</span>
-            <h2 className="workspace-title">Operações</h2>
-          </div>
+              <div className="workspace-header-text">
+                <span className="workspace-label">Workspace</span>
+                <h2 className="workspace-title">Operações</h2>
+              </div>
+              <button
+                type="button"
+                className="sidebar-mobile-close-btn"
+                onClick={() => setIsSidebarOpen(false)}
+                aria-label="Fechar menu"
+                title="Fechar menu"
+              >
+                ✕
+              </button>
+            </div>
 
           <nav className="sidebar-nav">
             <div
               className={`nav-item ${activeMenu === 'inicio' ? 'active' : ''}`}
               onClick={() => {
-                setActiveMenu('inicio');
+                handleMenuSelect('inicio');
                 setStatusFilter('ALL');
                 setSourceFilter('ALL');
                 setSegmentFilter('ALL');
@@ -332,7 +364,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                   const willOpen = !isContactsOpen;
                   setIsContactsOpen(willOpen);
                   if (willOpen && activeMenu === 'inicio') {
-                    setActiveMenu('todos-contatos');
+                    handleMenuSelect('todos-contatos');
                     setStatusFilter('ALL');
                   }
                 }}
@@ -362,7 +394,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                 <div
                   className={`sub-item ${activeMenu === 'todos-contatos' ? 'active' : ''}`}
                   onClick={() => {
-                    setActiveMenu('todos-contatos');
+                    handleMenuSelect('todos-contatos');
                     setStatusFilter('ALL');
                     setIsContactsOpen(true);
                   }}
@@ -374,7 +406,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                 <div
                   className={`sub-item ${activeMenu === 'enriquecimento' || activeMenu === 'completar' ? 'active' : ''}`}
                   onClick={() => {
-                    setActiveMenu('enriquecimento');
+                    handleMenuSelect('enriquecimento');
                     setStatusFilter('review');
                     setIsContactsOpen(true);
                   }}
@@ -387,7 +419,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                 <div
                   className={`sub-item ${activeMenu === 'perfil-completo' ? 'active' : ''}`}
                   onClick={() => {
-                    setActiveMenu('perfil-completo');
+                    handleMenuSelect('perfil-completo');
                     setStatusFilter('unified');
                     setIsContactsOpen(true);
                   }}
@@ -400,7 +432,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                 <div
                   className={`sub-item ${activeMenu === 'ficha' ? 'active' : ''}`}
                   onClick={() => {
-                    setActiveMenu('ficha');
+                    handleMenuSelect('ficha');
                     setIsContactsOpen(true);
                   }}
                   title="Consultar fichas de origem brutas"
@@ -414,7 +446,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
             <div
               className={`nav-item ${activeMenu === 'importar' ? 'active' : ''}`}
-              onClick={() => setActiveMenu('importar')}
+              onClick={() => handleMenuSelect('importar')}
             >
               <span className="nav-bullet"></span>
               <span className="nav-text">Importar</span>
@@ -422,7 +454,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
             <div
               className={`nav-item ${activeMenu === 'segmentos' ? 'active' : ''}`}
-              onClick={() => setActiveMenu('segmentos')}
+              onClick={() => handleMenuSelect('segmentos')}
             >
               <span className="nav-bullet"></span>
               <span className="nav-text">Segmentos</span>
@@ -430,7 +462,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
             <div
               className={`nav-item ${activeMenu === 'governanca' ? 'active' : ''}`}
-              onClick={() => setActiveMenu('governanca')}
+              onClick={() => handleMenuSelect('governanca')}
             >
               <span className="nav-bullet"></span>
               <span className="nav-text">Governança</span>
@@ -439,7 +471,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
             <div
               className={`nav-item ${activeMenu === 'logs' ? 'active' : ''}`}
               onClick={() => {
-                setActiveMenu('logs');
+                handleMenuSelect('logs');
                 setActiveTab('historico');
               }}
             >
@@ -453,7 +485,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
             className="sidebar-update-card"
             onClick={() => {
               setIsContactsOpen(true);
-              setActiveMenu('enriquecimento');
+              handleMenuSelect('enriquecimento');
             }}
             style={{ cursor: 'pointer' }}
             title="Clique para abrir enriquecimento de contatos"
@@ -549,9 +581,41 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
             onShowToast={showToast}
           />
         ) : (
-          <>
-            {/* Center Content: Contatos Table */}
-            <main className="vortex-center-content">
+          <div className="vortex-contacts-wrapper">
+            {/* Mobile View Tabs (Lista vs Perfil) */}
+            <div className="mobile-view-tabs">
+              <button
+                type="button"
+                className={`mobile-view-tab ${contactMobileTab === 'list' ? 'active' : ''}`}
+                onClick={() => setContactMobileTab('list')}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Contatos ({filteredContacts.length})</span>
+              </button>
+              <button
+                type="button"
+                className={`mobile-view-tab ${contactMobileTab === 'details' ? 'active' : ''}`}
+                onClick={() => setContactMobileTab('details')}
+                disabled={!selectedContact}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Perfil {selectedContact ? `(${selectedContact.initials})` : ''}</span>
+              </button>
+            </div>
+
+            <div className="vortex-contacts-content-split">
+              {/* Center Content: Contatos Table */}
+              <main className={`vortex-center-content ${contactMobileTab === 'details' ? 'mobile-hidden' : ''}`}>
               <div className="content-page-header">
                 <div>
                   <h1 className="page-title">Contatos</h1>
@@ -698,7 +762,12 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                             <tr
                               key={contact.id}
                               className={`contact-row ${isSelected ? 'row-selected' : ''}`}
-                              onClick={() => setSelectedContactId(contact.id)}
+                              onClick={() => {
+                                setSelectedContactId(contact.id);
+                                if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                                  setContactMobileTab('details');
+                                }
+                              }}
                             >
                               <td className="td-contact">
                                 <div className="contact-cell-content">
@@ -709,6 +778,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                                     <span className="contact-name">{contact.name}</span>
                                     <span className="contact-company">{contact.company}</span>
                                     <span className="contact-email">{contact.email}</span>
+                                    <span className="contact-sources-mobile">{contact.sourcesCount} {contact.sourcesLabel}</span>
                                   </div>
                                 </div>
                               </td>
@@ -771,7 +841,19 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
             {/* Right Sidebar: Perfil Unificado */}
             {selectedContact && (
-              <aside className="vortex-right-panel">
+              <aside className={`vortex-right-panel ${contactMobileTab === 'list' ? 'mobile-hidden' : ''}`}>
+                <div className="mobile-panel-back-bar">
+                  <button
+                    type="button"
+                    className="mobile-back-to-list-btn"
+                    onClick={() => setContactMobileTab('list')}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>Voltar para lista de contatos</span>
+                  </button>
+                </div>
                 <div className="panel-header">
                   <h3 className="panel-title">Perfil unificado</h3>
                   <button className="btn-edit" onClick={handleOpenEdit} title="Editar dados consolidados">
@@ -1000,7 +1082,8 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                 )}
               </aside>
             )}
-          </>
+            </div>
+          </div>
         )}
       </div>
 
