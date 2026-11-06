@@ -643,3 +643,57 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* inicio-mobile-responsive-patch */
+@media (max-width: 768px) {
+  .inicio-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 0 20px 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .inicio-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .inicio-page-title {
+    font-size: 22px !important;
+  }
+
+  .inicio-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .inicio-search-form {
+    width: 100% !important;
+  }
+
+  .inicio-search-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .inicio-btn-export,
+  .inicio-btn-enrich {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .inicio-card {
+    border-radius: 12px !important;
+    padding: 16px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}

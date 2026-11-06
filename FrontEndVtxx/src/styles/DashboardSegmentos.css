@@ -1777,27 +1777,476 @@
   margin: 0;
 }
 
+/* Base styles for responsive elements */
+.segmentos-mobile-tabs {
+  display: none;
+}
+
+.segmentos-mobile-back-bar {
+  display: none;
+}
+
+.segment-mobile-date {
+  display: none;
+}
+
 /* ==========================================================================
    9. Responsive Design
    ========================================================================== */
-@media (max-width: 1100px) {
+
+/* Tablets and small screens (<= 1024px) */
+@media (max-width: 1024px) {
   .segmentos-columns-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .segmentos-mobile-tabs {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 6px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .segmentos-mobile-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    outline: none;
+  }
+
+  .segmentos-mobile-tab.active {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 700;
+  }
+
+  .segmentos-mobile-tab:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .segmentos-col-left.mobile-hidden {
+    display: none !important;
+  }
+
+  .segmentos-col-right.mobile-hidden {
+    display: none !important;
+  }
+
+  .segmentos-mobile-back-bar {
+    display: flex;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .segmentos-back-to-list-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    border: none;
+    color: #0369a1;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .segmentos-back-to-list-btn:hover {
+    background: #e0f2fe;
   }
 }
 
+/* Intermediate screens (<= 768px) */
 @media (max-width: 768px) {
+  .segmentos-container {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    padding: 0 0 20px 0;
+    gap: 16px;
+  }
+
+  .segmentos-columns-grid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .segmentos-card {
+    padding: 14px 12px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
   .segmentos-kpis-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
-  .segmentos-filters-row {
-    grid-template-columns: 1fr;
+
+  .segmentos-chips-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
   }
+
+  .segmentos-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
   .modal-destinations-grid {
     grid-template-columns: 1fr;
   }
+
   .modal-stat-cards-grid.three-cols,
   .modal-stat-cards-grid.four-cols {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Responsive list format for segment table */
+  .segmentos-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  .segmentos-table thead {
+    display: none;
+  }
+
+  .segmentos-table,
+  .segmentos-table tbody {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .segment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 8px;
+  }
+
+  .segment-row td {
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .td-segment-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .segment-row-title {
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .segment-row-criteria {
+    font-size: 11.5px;
+    color: #64748b;
+    line-height: 1.35;
+    margin-top: 2px;
+  }
+
+  .segment-meta-mobile {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  .segment-mobile-contacts {
+    font-weight: 600;
+    color: #0284c7;
+  }
+
+  .segment-mobile-dot {
+    color: #cbd5e1;
+  }
+
+  .segment-mobile-date {
+    display: inline-block;
+    color: #94a3b8;
+  }
+
+  .td-segment-contacts {
+    display: none !important;
+  }
+
+  .td-segment-date {
+    display: none !important;
+  }
+
+  .td-segment-status {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .seg-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+}
+
+/* Mobile smartphones (<= 640px) */
+@media (max-width: 640px) {
+  .segmentos-container {
+    padding: 0 0 20px 0;
+    gap: 14px;
+  }
+
+  .segmentos-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .segmentos-page-title {
+    font-size: 22px;
+  }
+
+  .segmentos-page-subtitle {
+    font-size: 12.5px;
+  }
+
+  .segmentos-header-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+
+  .segmentos-btn-secondary,
+  .segmentos-btn-primary {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    justify-content: center;
+    padding: 10px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .segmentos-kpis-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .segmentos-kpi-card {
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  .segmentos-kpi-value {
+    font-size: 24px;
+  }
+
+  .segmentos-kpi-value-text {
+    font-size: 16px;
+  }
+
+  .segmentos-card {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+
+  .segmentos-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .segmentos-card-title {
+    font-size: 15px;
+  }
+
+  .segmentos-filters-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .segmentos-select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px;
+  }
+
+  .segmentos-table-footer {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Segment Details Card on mobile */
+  .selected-seg-name {
+    font-size: 17px;
+  }
+
+  .selected-seg-desc {
+    font-size: 12px;
+  }
+
+  .criteria-rules-list {
+    gap: 6px;
+  }
+
+  .criteria-rule-box {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .criteria-channel-box {
+    padding: 8px 10px;
+  }
+
+  .seg-sources-list {
+    gap: 6px;
+  }
+
+  .seg-source-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 8px 10px;
+  }
+
+  .seg-source-desc {
+    font-size: 11px;
+  }
+
+  .seg-preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .seg-preview-item {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .seg-contact-name {
+    font-size: 12px;
+  }
+
+  .seg-contact-detail {
+    font-size: 10.5px;
+  }
+
+  .seg-footer-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .seg-footer-actions .seg-action-link {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+  }
+
+  /* AI Creation Modal on mobile */
+  .seg-modal-overlay {
+    padding: 10px;
+  }
+
+  .seg-modal-container {
+    padding: 16px 14px;
+    max-height: 94vh;
+    border-radius: 12px;
+    width: calc(100% - 20px);
+    margin: auto;
+  }
+
+  .modal-title {
+    font-size: 16px;
+  }
+
+  .modal-subtitle {
+    font-size: 12px;
+  }
+
+  .modal-stepper {
+    gap: 4px;
+    padding: 6px 0;
+  }
+
+  .step-item {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .step-number {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .modal-stat-cards-grid.three-cols,
+  .modal-stat-cards-grid.four-cols {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .modal-footer-row {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-footer-row button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 10px 14px;
   }
 }

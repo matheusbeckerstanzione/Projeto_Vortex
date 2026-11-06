@@ -131,7 +131,7 @@ export default function VortexGovernanca({ embedded = false, onNavigate, onShowT
   );
 
   const renderMain = () => (
-    <main className="gov-main" style={embedded ? { width: '100%', maxWidth: '100%', padding: '24px 32px' } : {}}>
+    <main className={`gov-main ${embedded ? 'embedded' : ''}`}>
           {/* Header row */}
           <div className="gov-main-header">
             <div>

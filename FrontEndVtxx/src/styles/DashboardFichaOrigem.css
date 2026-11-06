@@ -712,3 +712,159 @@
     justify-content: space-between;
   }
 }
+
+/* ficha-origem-responsive-patch */
+
+/* Responsive Patch for Mobile & Tablets */
+@media (max-width: 768px) {
+  .ficha-origem-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0 0 20px 0 !important;
+    overflow-x: hidden !important;
+    gap: 14px !important;
+  }
+
+  .ficha-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .ficha-page-title {
+    font-size: 22px !important;
+  }
+
+  .ficha-header-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .ficha-btn-secondary,
+  .ficha-btn-primary {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    padding: 10px 14px !important;
+  }
+
+  .ficha-top-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 16px 14px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .ficha-sources-selector {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    padding-bottom: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .source-chip {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .source-card {
+    border-radius: 12px !important;
+    padding: 16px 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .source-footer-btns {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .source-footer-btns button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+
+/* Ficha de Origem: Full Fluidity on Mobile */
+.ficha-origem-container,
+.ficha-middle-grid,
+.ficha-card,
+.ficha-contact-banner {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  .ficha-origem-container {
+    overflow-x: hidden !important;
+  }
+
+  .ficha-middle-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .ficha-card {
+    padding: 16px 12px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .ficha-contact-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 12px !important;
+    gap: 12px !important;
+  }
+
+  .source-item-card {
+    padding: 12px 10px !important;
+  }
+
+  .source-fields-table {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .source-field-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 3px !important;
+    padding: 8px 0 !important;
+  }
+
+  .source-field-val {
+    word-break: break-all !important;
+  }
+
+  .source-evaluation-cards {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .ficha-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .ficha-table {
+    min-width: 480px !important;
+    width: 100% !important;
+  }
+}

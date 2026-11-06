@@ -163,6 +163,7 @@ const INITIAL_SEGMENTS = [
 export default function DashboardSegmentos({ onShowToast, onNavigateToContact }) {
   const [segments, setSegments] = useState(INITIAL_SEGMENTS);
   const [selectedSegmentId, setSelectedSegmentId] = useState(1);
+  const [segmentMobileTab, setSegmentMobileTab] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -345,9 +346,41 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
       </div>
 
       {/* ===== Grid em Duas Colunas ===== */}
+      {/* Mobile Tab Switcher */}
+      <div className="segmentos-mobile-tabs">
+        <button
+          type="button"
+          className={`segmentos-mobile-tab ${segmentMobileTab === 'list' ? 'active' : ''}`}
+          onClick={() => setSegmentMobileTab('list')}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span>Segmentos ({filteredSegments.length})</span>
+        </button>
+        <button
+          type="button"
+          className={`segmentos-mobile-tab ${segmentMobileTab === 'details' ? 'active' : ''}`}
+          onClick={() => setSegmentMobileTab('details')}
+          disabled={!selectedSegment}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Detalhes {selectedSegment ? `(${selectedSegment.name.slice(0, 14)}...)` : ''}</span>
+        </button>
+      </div>
+
       <div className="segmentos-columns-grid">
         {/* ===== Coluna Esquerda: Todos os Segmentos ===== */}
-        <div className="segmentos-col-left">
+        <div className={`segmentos-col-left ${segmentMobileTab === 'details' ? 'mobile-hidden' : ''}`}>
           <section className="segmentos-card">
             <div className="segmentos-card-header">
               <h3 className="segmentos-card-title">Todos os segmentos</h3>
@@ -430,7 +463,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     <th>SEGMENTO / CRITÉRIOS</th>
                     <th>CONTATOS</th>
                     <th>ESTADO</th>
-                    <th>ATUALIZAÇÃO</th>
+                    <th className="th-hide-mobile">ATUALIZAÇÃO</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -438,11 +471,21 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     <tr
                       key={seg.id}
                       className={`segment-row ${selectedSegmentId === seg.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedSegmentId(seg.id)}
+                      onClick={() => {
+                        setSelectedSegmentId(seg.id);
+                        if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                          setSegmentMobileTab('details');
+                        }
+                      }}
                     >
                       <td className="td-segment-info">
                         <h4 className="segment-row-title">{seg.name}</h4>
                         <p className="segment-row-criteria">{seg.criteria}</p>
+                        <div className="segment-meta-mobile">
+                          <span className="segment-mobile-contacts">{seg.contactsCount !== null ? `${seg.contactsCount} contatos` : '0 contatos'}</span>
+                          <span className="segment-mobile-dot">·</span>
+                          <span className="segment-mobile-date">{seg.updatedAt}</span>
+                        </div>
                       </td>
                       <td className="td-segment-contacts">
                         {seg.contactsCount !== null ? seg.contactsCount : '—'}
@@ -460,7 +503,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                           <span className="seg-pill gray">Rascunho</span>
                         )}
                       </td>
-                      <td className="td-segment-date">{seg.updatedAt}</td>
+                      <td className="td-segment-date td-hide-mobile">{seg.updatedAt}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -489,7 +532,19 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
         </div>
 
         {/* ===== Coluna Direita: Detalhes do Segmento Selecionado ===== */}
-        <div className="segmentos-col-right">
+        <div className={`segmentos-col-right ${segmentMobileTab === 'list' ? 'mobile-hidden' : ''}`}>
+          <div className="segmentos-mobile-back-bar">
+            <button
+              type="button"
+              className="segmentos-back-to-list-btn"
+              onClick={() => setSegmentMobileTab('list')}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Voltar para lista de segmentos</span>
+            </button>
+          </div>
           <section className="segmentos-card">
             <div className="segmentos-card-header">
               <h3 className="segmentos-card-title">Detalhes do segmento</h3>
