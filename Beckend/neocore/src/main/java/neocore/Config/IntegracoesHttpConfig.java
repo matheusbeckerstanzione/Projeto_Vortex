@@ -33,6 +33,14 @@ public class IntegracoesHttpConfig {
     }
 
 
+
+    @Bean("youTubeRestClient")
+    @Lazy
+    public RestClient youTubeRestClient() {
+        return criar("https://www.googleapis.com");
+    }
+
+
     private RestClient criar(String baseUrl) {
         var http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))

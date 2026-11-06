@@ -203,6 +203,7 @@ public class SegurancaConfig {
                                 "/empresas",
                                 "/empresas/{id}",
                                 "/localidades/ufs/{uf}/municipios",
+                                "/sinais/youtube",
                                 "/empresas/{id}/enriquecimento",
                                 "/contatos",
                                 "/contatos/{id}",
