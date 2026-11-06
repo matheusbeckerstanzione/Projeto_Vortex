@@ -26,6 +26,13 @@ public class IntegracoesHttpConfig {
         return criar("https://viacep.com.br");
     }
 
+    @Bean("ibgeRestClient")
+    @Lazy
+    public RestClient ibgeRestClient() {
+        return criar("https://servicodados.ibge.gov.br");
+    }
+
+
     private RestClient criar(String baseUrl) {
         var http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))

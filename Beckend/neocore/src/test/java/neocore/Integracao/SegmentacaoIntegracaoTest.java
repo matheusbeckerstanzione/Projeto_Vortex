@@ -31,6 +31,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
+import neocore.Service.SegmentacaoEmpresasService;
+import neocore.Service.ExportacaoService;
+import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -48,6 +52,12 @@ public class SegmentacaoIntegracaoTest {
 
     @Autowired
     private SegmentoService service;
+
+    @Autowired
+    private ExportacaoService exportacaoService;
+
+    @Autowired
+    private SegmentacaoEmpresasService segmentacaoEmpresasService;
 
     @Autowired
     private SegmentoContatoRepository membros;
@@ -406,6 +416,130 @@ public class SegmentacaoIntegracaoTest {
                 () -> service.associar(request)
         );
     }
+
+    @Test
+    void previaEmpresarialCombinaUfMunicipioCnaeEPorte() {
+        String cnae = "6201501";
+        String porte = "PORTE-TESTE-" + UUID.randomUUID();
+
+        Empresa saoPaulo = empresa(setorAlvo, "São Paulo", "SP");
+        saoPaulo.setMunicipioIbge("3550308");
+        saoPaulo.setCnaePrincipal(cnae);
+        saoPaulo.setPorte(porte);
+
+        Empresa campinas = empresa(setorAlvo, "Campinas", "SP");
+        campinas.setMunicipioIbge("3509502");
+        campinas.setCnaePrincipal(cnae);
+        campinas.setPorte(porte);
+
+        em.flush();
+
+        Map<String, Object> criterios = Map.of(
+                "modo", "AND",
+                "uf", "SP",
+                "municipioIbge", "3550308",
+                "cnaePrincipal", cnae,
+                "porte", porte
+        );
+
+        var resultado = segmentacaoEmpresasService.previa(
+                new SegmentacaoEmpresasRequest(finalidade.getId(), criterios),
+                0,
+                20
+        );
+
+        assertEquals(1L, resultado.getTotalElements());
+        assertEquals(saoPaulo.getId(), resultado.getContent().get(0).id());
+
+        Map<String, Object> filtrosDivergentes = Map.of(
+                "municipioIbge", "3525904",
+                "uf", "RJ",
+                "cnaePrincipal", "6422100",
+                "porte", "OUTRO-" + porte
+        );
+
+        for (var filtro : filtrosDivergentes.entrySet()) {
+            var criteriosAlterados = new HashMap<>(criterios);
+            criteriosAlterados.put(filtro.getKey(), filtro.getValue());
+
+            var semResultados = segmentacaoEmpresasService.previa(
+                    new SegmentacaoEmpresasRequest(
+                            finalidade.getId(),
+                            criteriosAlterados
+                    ),
+                    0,
+                    20
+            );
+
+            assertEquals(
+                    0L,
+                    semResultados.getTotalElements(),
+                    "Deveria retornar zero ao alterar o filtro " + filtro.getKey()
+            );
+        }
+    }
+
+
+
+    @Test
+    void csvEmpresarialExportaSomenteORecorteEProtegeContraFormulas() {
+        String cnae = "6201501";
+        String porte = "PORTE-CSV-" + UUID.randomUUID();
+
+        Empresa saoPaulo = empresa(setorAlvo, "São Paulo", "SP");
+        saoPaulo.setNome("=Empresa \"Teste\"");
+        saoPaulo.setMunicipioIbge("3550308");
+        saoPaulo.setCnaePrincipal(cnae);
+        saoPaulo.setPorte(porte);
+
+        Empresa campinas = empresa(setorAlvo, "Campinas", "SP");
+        campinas.setMunicipioIbge("3509502");
+        campinas.setCnaePrincipal(cnae);
+        campinas.setPorte(porte);
+
+        em.flush();
+
+        var request = new SegmentacaoEmpresasRequest(
+                finalidade.getId(),
+                Map.of(
+                        "modo", "AND",
+                        "uf", "SP",
+                        "municipioIbge", "3550308",
+                        "cnaePrincipal", cnae,
+                        "porte", porte
+                )
+        );
+
+        byte[] arquivo = exportacaoService.exportarEmpresas(request);
+        var linhas = new String(arquivo, StandardCharsets.UTF_8)
+                .lines()
+                .toList();
+
+        assertEquals(2, linhas.size());
+        assertEquals(
+                "razao_social;cnpj;cnae_principal;setor;porte;municipio;uf;municipio_ibge",
+                linhas.get(0)
+        );
+
+        String linhaEsperada = String.join(
+                ";",
+                "\"'=Empresa \"\"Teste\"\"\"",
+                "\"" + saoPaulo.getCnpj() + "\"",
+                "\"6201501\"",
+                "\"" + setorAlvo + "\"",
+                "\"" + porte + "\"",
+                "\"São Paulo\"",
+                "\"SP\"",
+                "\"3550308\""
+        );
+
+        assertEquals(linhaEsperada, linhas.get(1));
+    }
+
+
+
+
+
 
     private Map<String, Object> filtros(String modo) {
         return Map.of(

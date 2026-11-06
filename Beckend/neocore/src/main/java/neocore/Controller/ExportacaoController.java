@@ -6,6 +6,8 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import jakarta.validation.Valid;
+import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
 
 @RestController
 @RequestMapping("/exportacoes")
@@ -29,6 +31,25 @@ public class ExportacaoController {
                         HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.attachment()
                                 .filename("segmento-" + id + ".csv")
+                                .build()
+                                .toString()
+                )
+                .body(csv);
+    }
+
+    @PostMapping("/empresas")
+    public ResponseEntity<byte[]> exportarEmpresas(
+            @Valid @RequestBody SegmentacaoEmpresasRequest request
+    ) {
+        byte[] csv = service.exportarEmpresas(request);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+                .cacheControl(CacheControl.noStore())
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename("empresas.csv")
                                 .build()
                                 .toString()
                 )
