@@ -5,21 +5,45 @@ const API_URL = import.meta.env?.VITE_API_URL ?? '';
 
 export async function fazerLogin(email, senha, mfa) {
   try {
-    if (API_URL) {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha, mfa }),
-      });
-      if (!res.ok) return { success: false, message: 'Credenciais inválidas.' };
-      return res.json();
+    if (!API_URL) {
+      return {
+        success: false,
+        message: 'A API não está configurada.'
+      };
     }
-  } catch {
-    // fallback para simulação
-  }
 
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return { success: true };
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        senha,
+        mfa
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data.message || 'E-mail, senha ou código MFA inválido.'
+      };
+    }
+
+    return {
+      ...data,
+      success: data.success !== false
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Não foi possível conectar ao servidor.'
+    };
+  }
 }
 
 export async function cadastrarUsuario(payload) {

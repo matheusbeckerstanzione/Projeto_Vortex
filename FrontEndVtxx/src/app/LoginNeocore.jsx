@@ -69,24 +69,54 @@ export default function LoginNeocore() {
   };
 
   /* ---------- Submit → Transição Suave para Dashboard (Modo MVP direto) ---------- */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (logging) return;
+
+    setError('')
 
     // Acesso negado só funciona se o CÓDIGO MFA for 000000
     const mfaCode = mfa.join('');
-    if (mfaCode === '000000') {
-      sessionStorage.setItem('mfa_denied', 'true');
-      navigate('/acesso-negado', { state: { fromMfaDenied: true } });
-      return;
+
+    if (!email.trim()) {
+      setError('Informe seu e-mail.')
+      return
+    }
+
+    if (!password) {
+      setError('Informe sua senha.')
+      return
+    }
+
+    if (mfaCode.length !== 6) {
+      setError("O código MFA deve ter 6 números")
     }
 
     setLogging(true);
 
-    if (startLoginTransition) {
-      startLoginTransition();
-    } else {
-      navigate('/dashboard');
+    try {
+      const resultado = await fazerLogin(
+        email.trim(),
+        password,
+        mfaCode
+      )
+
+      if (!resultado.success) {
+        setError(resultado.message || "E-mail, senha ou código MFA inválido.")
+        return
+      }
+
+
+      if (startLoginTransition) {
+        startLoginTransition()
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      setError("Não foi possível conectar ao servidor. Tente Novamente.")
+    } finally {
+      setLogging(false)
     }
   };
 
@@ -127,7 +157,11 @@ export default function LoginNeocore() {
         <p>Faça login para continuar</p>
       </div>
 
-      {error && <div className="login-error">{error}</div>}
+      {error && (
+        <div className="login-error">
+          {error}
+        </div>
+      )}
 
       {/* Campo E-mail */}
       <label className="l" htmlFor="email">
