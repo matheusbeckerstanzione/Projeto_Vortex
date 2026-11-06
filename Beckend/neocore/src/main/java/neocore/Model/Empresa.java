@@ -11,6 +11,7 @@ import java.util.Map;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -63,6 +64,18 @@ public class Empresa {
 
     @Column(length = 80)
     private String porte;
+
+    @Column(name = "nome_fantasia", length = 160)
+    private String nomeFantasia;
+
+    @Column(name = "natureza_juridica", length = 160)
+    private String naturezaJuridica;
+
+    @Column(name = "situacao_cadastral")
+    private Integer situacaoCadastral;
+
+    @Column(name = "data_abertura")
+    private LocalDate dataAbertura;
 
     @Column(length = 8)
     private String cep;

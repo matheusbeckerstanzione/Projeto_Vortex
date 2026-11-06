@@ -12,5 +12,9 @@ public enum CampoEnriquecimentoEmpresa {
     LOGRADOURO,
     NUMERO,
     COMPLEMENTO,
-    BAIRRO
+    BAIRRO,
+    NOME_FANTASIA,
+    NATUREZA_JURIDICA,
+    SITUACAO_CADASTRAL,
+    DATA_ABERTURA
 }

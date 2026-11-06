@@ -1,7 +1,13 @@
 package neocore.Config;
 
 import neocore.Repository.UsuarioRepository;
-import neocore.Security.*;
+import neocore.Security.FiltroLimiteRequisicoes;
+import neocore.Security.FiltroToken;
+import neocore.Security.LimitadorRequisicoes;
+import neocore.Security.RespostaSeguranca;
+import neocore.Security.SenhaSeguraEncoder;
+import neocore.Security.TokenStore;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,16 +38,16 @@ public class SegurancaConfig {
             String arquivo,
 
             @Value("${neocore.seguranca.exigir-lista-senhas:true}")
-            boolean exigirLista) {
-
+            boolean exigirLista
+    ) {
         return new SenhaSeguraEncoder(arquivo, exigirLista);
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
             @Value("${neocore.seguranca.cors-origins:}")
-            String origens) {
-
+            String origens
+    ) {
         var configuracao = new CorsConfiguration();
 
         List<String> permitidas = Arrays.stream(origens.split(","))
@@ -50,49 +56,24 @@ public class SegurancaConfig {
                 .toList();
 
         if (permitidas.stream().anyMatch(origem -> origem.contains("*"))) {
-            throw new IllegalStateException(
-                    "Configure origens CORS explícitas."
-            );
+            throw new IllegalStateException("Configure origens CORS explícitas.");
         }
 
         configuracao.setAllowedOrigins(permitidas);
-
         configuracao.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
-
         configuracao.setAllowedHeaders(
-                List.of(
-                        "Authorization",
-                        "Content-Type",
-                        "Accept"
-                )
+                List.of("Authorization", "Content-Type", "Accept")
         );
-
         configuracao.setExposedHeaders(
-                List.of(
-                        "Content-Disposition",
-                        "Retry-After"
-                )
+                List.of("Content-Disposition", "Retry-After")
         );
-
         configuracao.setAllowCredentials(false);
         configuracao.setMaxAge(3600L);
 
         var source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration(
-                "/**",
-                configuracao
-        );
-
+        source.registerCorsConfiguration("/**", configuracao);
         return source;
     }
 
@@ -107,8 +88,8 @@ public class SegurancaConfig {
             CorsConfigurationSource cors,
 
             @Value("${neocore.seguranca.exigir-https:true}")
-            boolean exigirHttps) throws Exception {
-
+            boolean exigirHttps
+    ) throws Exception {
         if (exigirHttps) {
             http.redirectToHttps(Customizer.withDefaults());
         }
@@ -116,16 +97,12 @@ public class SegurancaConfig {
         http
                 .cors(config -> config.configurationSource(cors))
 
-                // Exclusivamente Bearer no header.
-                // Não reutilizar esta dispensa com autenticação por cookie.
+                // Esta configuração usa autenticação Bearer no cabeçalho.
                 .csrf(config -> config.disable())
 
-                .sessionManagement(config ->
-                        config.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
-
+                .sessionManagement(config -> config.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS
+                ))
                 .formLogin(config -> config.disable())
                 .httpBasic(config -> config.disable())
                 .logout(config -> config.disable())
@@ -133,57 +110,39 @@ public class SegurancaConfig {
 
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
-
-                        .contentSecurityPolicy(csp ->
-                                csp.policyDirectives(
-                                        "default-src 'none'; "
-                                                + "frame-ancestors 'none'; "
-                                                + "base-uri 'none'; "
-                                                + "form-action 'none'"
-                                )
-                        )
-
-                        .referrerPolicy(referrer ->
-                                referrer.policy(
-                                        ReferrerPolicyHeaderWriter
-                                                .ReferrerPolicy.NO_REFERRER
-                                )
-                        )
-
-                        .permissionsPolicyHeader(policy ->
-                                policy.policy(
-                                        "camera=(), microphone=(), geolocation=()"
-                                )
-                        )
-
-                        .httpStrictTransportSecurity(hsts ->
-                                hsts.maxAgeInSeconds(31536000)
-                                        .includeSubDomains(false)
-                                        .preload(false)
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; "
+                                        + "frame-ancestors 'none'; "
+                                        + "base-uri 'none'; "
+                                        + "form-action 'none'"
+                        ))
+                        .referrerPolicy(referrer -> referrer.policy(
+                                ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER
+                        ))
+                        .permissionsPolicyHeader(policy -> policy.policy(
+                                "camera=(), microphone=(), geolocation=()"
+                        ))
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .maxAgeInSeconds(31536000)
+                                .includeSubDomains(false)
+                                .preload(false)
                         )
                 )
 
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint(
                                 (request, response, exception) ->
-                                        RespostaSeguranca.enviar(
-                                                response,
-                                                401
-                                        )
+                                        RespostaSeguranca.enviar(response, 401)
                         )
-
                         .accessDeniedHandler(
                                 (request, response, exception) ->
-                                        RespostaSeguranca.enviar(
-                                                response,
-                                                403
-                                        )
+                                        RespostaSeguranca.enviar(response, 403)
                         )
                 )
 
                 .authorizeHttpRequests(rotas -> rotas
 
-                        // Rotas públicas: somente estes POSTs.
+                        // Rotas públicas.
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/autenticacao/login",
@@ -193,14 +152,12 @@ public class SegurancaConfig {
                                 "/solicitacoes-acesso"
                         ).permitAll()
 
-                        // O service confere se é o próprio usuário ou admin.
+                        // O serviço confere se a consulta é do próprio usuário
+                        // ou de um administrador.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/usuarios/{id}"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
                         // Operações administrativas.
                         .requestMatchers(
@@ -245,6 +202,7 @@ public class SegurancaConfig {
                                 HttpMethod.GET,
                                 "/empresas",
                                 "/empresas/{id}",
+                                "/empresas/{id}/enriquecimento",
                                 "/contatos",
                                 "/contatos/{id}",
                                 "/fontes-dados",
@@ -265,11 +223,9 @@ public class SegurancaConfig {
                                 "/resultados-campanha",
                                 "/restricoes-uso",
                                 "/exportacoes/segmentos/{id}"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
+                        // Cadastros, logout, enriquecimento e segmentação.
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/autenticacao/logout",
@@ -284,11 +240,14 @@ public class SegurancaConfig {
                                 "/campanhas",
                                 "/interacoes-contato",
                                 "/resultados-campanha",
-                                "/restricoes-uso"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                                "/restricoes-uso",
+                                "/empresas/consulta-cnpj",
+                                "/empresas/enriquecimento/previa-cnpj",
+                                "/empresas/enriquecimento/confirmacao-cnpj",
+                                "/empresas/segmentacao/previa",
+                                "/empresas/{id}/enriquecimento/previa",
+                                "/empresas/{id}/enriquecimento/confirmacao"
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
                         .requestMatchers(
                                 HttpMethod.PUT,
@@ -296,60 +255,27 @@ public class SegurancaConfig {
                                 "/contatos/{id}",
                                 "/segmentos/{id}",
                                 "/campanhas/{id}"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/pesquisas-enriquecimento/{id}/cancelamento",
                                 "/segmentos/{id}/status",
                                 "/campanhas/{id}/status"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
                         .requestMatchers(
                                 HttpMethod.DELETE,
                                 "/segmento-contatos/{segmentoId}/{contatoId}"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
-
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/empresas/{id}/enriquecimento"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/empresas/{id}/enriquecimento/previa",
-                                "/empresas/{id}/enriquecimento/confirmacao"
-                        ).hasAnyRole(
-                                "ADMINISTRADOR",
-                                "ANALISTA"
-                        )
+                        ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
                         .anyRequest().denyAll()
-
-
                 )
 
                 .addFilterBefore(
-                        new FiltroToken(
-                                tokens,
-                                usuarios,
-                                limitador
-                        ),
+                        new FiltroToken(tokens, usuarios, limitador),
                         UsernamePasswordAuthenticationFilter.class
                 )
-
                 .addFilterBefore(
                         new FiltroLimiteRequisicoes(limitador),
                         FiltroToken.class

@@ -1,6 +1,9 @@
 package neocore.Service;
 
-import neocore.DTO.enriquecimento.*;
+import neocore.DTO.enriquecimento.CampoEnriquecimentoEmpresa;
+import neocore.DTO.enriquecimento.CampoEnriquecimentoResponse;
+import neocore.DTO.enriquecimento.EnriquecimentoPreviaRequest;
+import neocore.DTO.enriquecimento.EnriquecimentoPreviaResponse;
 import neocore.Exception.ConflitoException;
 import neocore.Exception.RecursoNaoEncontradoException;
 
@@ -8,15 +11,18 @@ import org.springframework.stereotype.Component;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Component
 public class PreviasEmpresaStore {
 
     private final Clock relogio;
-
-    private final Map<UUID, Entrada> entradas =
-            new HashMap<>();
+    private final Map<UUID, Entrada> entradas = new HashMap<>();
 
     public PreviasEmpresaStore() {
         this(Clock.systemUTC());
@@ -45,8 +51,7 @@ public class PreviasEmpresaStore {
             Map<CampoEnriquecimentoEmpresa, String> valoresConsultados
     ) {
         public Dados {
-            valoresConsultados =
-                    Map.copyOf(valoresConsultados);
+            valoresConsultados = Map.copyOf(valoresConsultados);
         }
     }
 
@@ -69,23 +74,17 @@ public class PreviasEmpresaStore {
 
         entradas.values().removeIf(entrada ->
                 !entrada.reservada
-                        && !entrada.dados.resposta()
-                        .expiraEm().isAfter(agora)
+                        && !entrada.dados.resposta().expiraEm().isAfter(agora)
         );
 
-        long quantidade = entradas.values()
-                .stream()
-                .filter(entrada ->
-                        entrada.dados.contexto()
-                                .usuarioId()
-                                .equals(contexto.usuarioId())
-                )
+        long quantidade = entradas.values().stream()
+                .filter(entrada -> entrada.dados.contexto()
+                        .usuarioId().equals(contexto.usuarioId()))
                 .count();
 
         if (quantidade >= 5 || entradas.size() >= 1000) {
             throw new ConflitoException(
-                    "Limite de prévias; confirme uma "
-                            + "ou aguarde cinco minutos."
+                    "Limite de prévias; confirme uma ou aguarde cinco minutos."
             );
         }
 
@@ -97,19 +96,11 @@ public class PreviasEmpresaStore {
                 );
 
         campos.forEach(campo ->
-                valoresConsultados.put(
-                        campo.campo(),
-                        campo.sugerido()
-                )
+                valoresConsultados.put(campo.campo(), campo.sugerido())
         );
 
         var alterados = campos.stream()
-                .filter(campo ->
-                        !Objects.equals(
-                                campo.atual(),
-                                campo.sugerido()
-                        )
-                )
+                .filter(campo -> !Objects.equals(campo.atual(), campo.sugerido()))
                 .toList();
 
         var resposta = new EnriquecimentoPreviaResponse(
@@ -123,13 +114,7 @@ public class PreviasEmpresaStore {
 
         entradas.put(
                 id,
-                new Entrada(
-                        new Dados(
-                                contexto,
-                                resposta,
-                                valoresConsultados
-                        )
-                )
+                new Entrada(new Dados(contexto, resposta, valoresConsultados))
         );
 
         return resposta;
@@ -143,37 +128,38 @@ public class PreviasEmpresaStore {
         Entrada entrada = entradas.get(id);
 
         if (entrada == null
-                || !entrada.dados.contexto()
-                .usuarioId().equals(usuarioId)
-                || !entrada.dados.contexto()
-                .empresaId().equals(empresaId)) {
-
-            throw new RecursoNaoEncontradoException(
-                    "Prévia não encontrada."
-            );
+                || !entrada.dados.contexto().usuarioId().equals(usuarioId)
+                || !Objects.equals(
+                entrada.dados.contexto().empresaId(),
+                empresaId
+        )) {
+            throw new RecursoNaoEncontradoException("Prévia não encontrada.");
         }
 
-        if (!entrada.dados.resposta()
-                .expiraEm().isAfter(relogio.instant())) {
-
+        if (!entrada.dados.resposta().expiraEm().isAfter(relogio.instant())) {
             if (!entrada.reservada) {
                 entradas.remove(id);
             }
 
-            throw new ConflitoException(
-                    "Prévia expirada. Consulte novamente."
-            );
+            throw new ConflitoException("Prévia expirada. Consulte novamente.");
         }
 
         if (entrada.reservada) {
-            throw new ConflitoException(
-                    "Prévia já está sendo confirmada."
-            );
+            throw new ConflitoException("Prévia já está sendo confirmada.");
         }
 
         entrada.reservada = true;
-
         return entrada.dados;
+    }
+
+    public synchronized Dados reservar(UUID id, UUID usuarioId) {
+        Entrada entrada = entradas.get(id);
+
+        if (entrada == null) {
+            throw new RecursoNaoEncontradoException("Prévia não encontrada.");
+        }
+
+        return reservar(id, usuarioId, entrada.dados.contexto().empresaId());
     }
 
     public synchronized void concluir(UUID id) {

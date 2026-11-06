@@ -25,7 +25,11 @@ public class CriteriosSegmento {
             "setor",
             "cidade",
             "uf",
-            "empresaId"
+            "empresaId",
+            "cnaePrincipal",
+            "porte",
+            "municipioIbge",
+            "situacaoCadastral"
     );
 
     public Map<String, Object> validar(
@@ -36,13 +40,13 @@ public class CriteriosSegmento {
                 "Informe ao menos um filtro."
         );
 
-        Map<String, Object> normalizado = new LinkedHashMap<>();
+        Map<String, Object> mapa = new LinkedHashMap<>();
 
         for (var entrada : criterios.entrySet()) {
             String campo = entrada.getKey();
 
             ServiceSupport.exigir(
-                    CAMPOS.contains(campo),
+                    campo != null && CAMPOS.contains(campo),
                     "Filtro desconhecido: " + campo
             );
 
@@ -51,67 +55,98 @@ public class CriteriosSegmento {
                     "Filtro deve conter texto: " + campo
             );
 
-            String valor = ((String) entrada.getValue()).strip();
+            String valor =
+                    ((String) entrada.getValue()).strip();
 
             ServiceSupport.exigir(
                     !valor.isEmpty(),
                     "Filtro vazio: " + campo
             );
 
-            int maximo = campo.equals("cidade") ? 100 : 80;
-
             ServiceSupport.exigir(
-                    valor.length() <= maximo,
+                    valor.length()
+                            <= (campo.equals("cidade") ? 100 : 80),
                     "Filtro excede tamanho permitido."
             );
 
-            if (campo.equals("modo")) {
-                valor = valor.toUpperCase(Locale.ROOT);
+            switch (campo) {
+                case "modo" -> {
+                    valor = valor.toUpperCase(Locale.ROOT);
 
-                ServiceSupport.exigir(
-                        valor.equals("AND") || valor.equals("OR"),
-                        "Modo deve ser AND ou OR."
-                );
-            } else if (campo.equals("uf")) {
-                ServiceSupport.exigir(
-                        valor.matches("[A-Za-z]{2}"),
-                        "UF inválida."
-                );
-
-                valor = valor.toUpperCase(Locale.ROOT);
-            } else if (campo.equals("empresaId")) {
-                try {
-                    valor = UUID.fromString(valor).toString();
-                } catch (IllegalArgumentException exception) {
-                    throw new RegraNegocioException(
-                            "empresaId inválido."
+                    ServiceSupport.exigir(
+                            valor.equals("AND")
+                                    || valor.equals("OR"),
+                            "Modo deve ser AND ou OR."
                     );
+                }
+
+                case "uf" -> {
+                    ServiceSupport.exigir(
+                            valor.matches("[A-Za-z]{2}"),
+                            "UF inválida."
+                    );
+
+                    valor = valor.toUpperCase(Locale.ROOT);
+                }
+
+                case "empresaId" -> {
+                    try {
+                        valor = UUID.fromString(valor)
+                                .toString();
+
+                    } catch (IllegalArgumentException exception) {
+                        throw new RegraNegocioException(
+                                "empresaId inválido."
+                        );
+                    }
+                }
+
+                case "cnaePrincipal", "municipioIbge" ->
+                        ServiceSupport.exigir(
+                                valor.matches("[0-9]{7}"),
+                                campo + " deve conter sete dígitos."
+                        );
+
+                case "situacaoCadastral" -> {
+                    ServiceSupport.exigir(
+                            valor.matches("[0-9]{1,2}"),
+                            "Situação cadastral inválida."
+                    );
+
+                    valor = Integer.toString(
+                            Integer.parseInt(valor)
+                    );
+                }
+
+                case "porte" ->
+                        valor = valor.toUpperCase(Locale.ROOT);
+
+                default -> {
                 }
             }
 
-            normalizado.put(campo, valor);
+            mapa.put(campo, valor);
         }
 
         ServiceSupport.exigir(
-                normalizado.keySet().stream()
-                        .anyMatch(chave -> !chave.equals("modo")),
+                mapa.keySet().stream()
+                        .anyMatch(campo ->
+                                !campo.equals("modo")
+                        ),
                 "Informe ao menos um filtro."
         );
 
-        normalizado.putIfAbsent("modo", "AND");
+        mapa.putIfAbsent("modo", "AND");
 
-        return normalizado;
+        return mapa;
     }
 
-    private Predicate filtro(
+    private Predicate filtroEmpresa(
             CriteriaBuilder cb,
-            CriteriaQuery<?> query,
-            Root<Contato> contato,
-            Map<String, Object> criterios,
-            UUID finalidadeId
+            From<?, Empresa> empresa,
+            Map<String, Object> criterios
     ) {
         var mapa = validar(criterios);
-        var empresa = contato.join("empresa");
 
         List<Predicate> filtros = new ArrayList<>();
 
@@ -130,36 +165,79 @@ public class CriteriosSegmento {
                                 UUID.fromString(valor)
                         )
                 );
+
+            } else if (campo.equals("situacaoCadastral")) {
+                filtros.add(
+                        cb.equal(
+                                empresa.get("situacaoCadastral"),
+                                Integer.valueOf(valor)
+                        )
+                );
+
             } else {
                 filtros.add(
                         cb.equal(
-                                cb.lower(empresa.get(campo)),
+                                cb.lower(
+                                        empresa.<String>get(campo)
+                                ),
                                 valor.toLowerCase(Locale.ROOT)
                         )
                 );
             }
         }
 
-        Predicate combinados = "OR".equals(mapa.get("modo"))
-                ? cb.or(filtros.toArray(Predicate[]::new))
-                : cb.and(filtros.toArray(Predicate[]::new));
+        return "OR".equals(mapa.get("modo"))
+                ? cb.or(
+                filtros.toArray(Predicate[]::new)
+        )
+                : cb.and(
+                filtros.toArray(Predicate[]::new)
+        );
+    }
 
-        Subquery<Integer> bloqueio = query.subquery(Integer.class);
-        var restricao = bloqueio.from(RestricaoUso.class);
+    private Predicate filtro(
+            CriteriaBuilder cb,
+            CriteriaQuery<?> query,
+            Root<Contato> contato,
+            Map<String, Object> criterios,
+            UUID finalidadeId
+    ) {
+        Join<Contato, Empresa> empresa =
+                contato.join("empresa");
+
+        Predicate combinados = filtroEmpresa(
+                cb,
+                empresa,
+                criterios
+        );
+
+        Subquery<Integer> bloqueio =
+                query.subquery(Integer.class);
+
+        var restricao = bloqueio.from(
+                RestricaoUso.class
+        );
 
         bloqueio.select(cb.literal(1)).where(
                 cb.equal(
                         restricao.get("contato").get("id"),
                         contato.get("id")
                 ),
-                cb.isTrue(restricao.get("ativa")),
+
+                cb.isTrue(
+                        restricao.get("ativa")
+                ),
+
                 cb.or(
-                        cb.isNull(restricao.get("finalidade")),
+                        cb.isNull(
+                                restricao.get("finalidade")
+                        ),
                         cb.equal(
                                 restricao.get("finalidade").get("id"),
                                 finalidadeId
                         )
                 ),
+
                 cb.or(
                         cb.equal(
                                 restricao.get("escopo"),
@@ -174,15 +252,20 @@ public class CriteriosSegmento {
 
         return cb.and(
                 combinados,
+
                 cb.equal(
                         contato.get("statusIdentidade"),
                         StatusIdentidade.VERIFICADA
                 ),
+
                 cb.greaterThan(
                         contato.get("revisarAte"),
                         OffsetDateTime.now()
                 ),
-                cb.not(cb.exists(bloqueio))
+
+                cb.not(
+                        cb.exists(bloqueio)
+                )
         );
     }
 
@@ -193,6 +276,7 @@ public class CriteriosSegmento {
             int limite
     ) {
         var cb = em.getCriteriaBuilder();
+
         var query = cb.createQuery(Contato.class);
         var contato = query.from(Contato.class);
 
@@ -206,7 +290,9 @@ public class CriteriosSegmento {
                                 finalidadeId
                         )
                 )
-                .orderBy(cb.asc(contato.get("id")));
+                .orderBy(
+                        cb.asc(contato.get("id"))
+                );
 
         return em.createQuery(query)
                 .setFirstResult(offset)
@@ -219,6 +305,7 @@ public class CriteriosSegmento {
             UUID finalidadeId
     ) {
         var cb = em.getCriteriaBuilder();
+
         var query = cb.createQuery(Long.class);
         var contato = query.from(Contato.class);
 
@@ -233,7 +320,8 @@ public class CriteriosSegmento {
                         )
                 );
 
-        return em.createQuery(query).getSingleResult();
+        return em.createQuery(query)
+                .getSingleResult();
     }
 
     public boolean corresponde(
@@ -241,11 +329,15 @@ public class CriteriosSegmento {
             Segmento segmento
     ) {
         var cb = em.getCriteriaBuilder();
+
         var query = cb.createQuery(Long.class);
         var root = query.from(Contato.class);
 
         query.select(cb.count(root)).where(
-                cb.equal(root.get("id"), contato.getId()),
+                cb.equal(
+                        root.get("id"),
+                        contato.getId()
+                ),
                 filtro(
                         cb,
                         query,
@@ -255,6 +347,61 @@ public class CriteriosSegmento {
                 )
         );
 
-        return em.createQuery(query).getSingleResult() > 0;
+        return em.createQuery(query)
+                .getSingleResult() > 0;
+    }
+
+    public List<Empresa> buscarEmpresas(
+            Map<String, Object> criterios,
+            int offset,
+            int limite
+    ) {
+        ServiceSupport.exigir(
+                offset >= 0 && limite >= 1 && limite <= 100,
+                "Paginação inválida."
+        );
+
+        var cb = em.getCriteriaBuilder();
+
+        var query = cb.createQuery(Empresa.class);
+        var empresa = query.from(Empresa.class);
+
+        query.select(empresa)
+                .where(
+                        filtroEmpresa(
+                                cb,
+                                empresa,
+                                criterios
+                        )
+                )
+                .orderBy(
+                        cb.asc(empresa.get("id"))
+                );
+
+        return em.createQuery(query)
+                .setFirstResult(offset)
+                .setMaxResults(limite)
+                .getResultList();
+    }
+
+    public long contarEmpresas(
+            Map<String, Object> criterios
+    ) {
+        var cb = em.getCriteriaBuilder();
+
+        var query = cb.createQuery(Long.class);
+        var empresa = query.from(Empresa.class);
+
+        query.select(cb.count(empresa))
+                .where(
+                        filtroEmpresa(
+                                cb,
+                                empresa,
+                                criterios
+                        )
+                );
+
+        return em.createQuery(query)
+                .getSingleResult();
     }
 }
