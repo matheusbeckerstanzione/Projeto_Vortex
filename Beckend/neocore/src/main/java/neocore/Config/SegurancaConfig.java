@@ -274,7 +274,39 @@ public class SegurancaConfig {
                                 "/segmento-contatos/{segmentoId}/{contatoId}"
                         ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/empresas/{empresaId}/github"
+                        )
+                        .hasAnyRole(
+                                "ADMINISTRADOR",
+                                "ANALISTA"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/empresas/{empresaId}/github/vinculo"
+                        )
+                        .hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/empresas/{empresaId}/github/vinculo"
+                        )
+                        .hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/empresas/{empresaId}/github/coleta"
+                        )
+                        .hasAnyRole(
+                                "ADMINISTRADOR",
+                                "ANALISTA"
+                        )
+
                         .anyRequest().denyAll()
+
                 )
 
                 .addFilterBefore(
