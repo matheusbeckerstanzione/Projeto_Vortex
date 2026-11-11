@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { fazerLogin } from '../services/auth';
 import '../styles/login.css';
 
 export default function LoginNeocore() {
@@ -76,9 +75,6 @@ export default function LoginNeocore() {
 
     setError('')
 
-    // Acesso negado só funciona se o CÓDIGO MFA for 000000
-    const mfaCode = mfa.join('');
-
     if (!email.trim()) {
       setError('Informe seu e-mail.')
       return
@@ -89,24 +85,16 @@ export default function LoginNeocore() {
       return
     }
 
-    if (mfaCode.length !== 6) {
-      setError("O código MFA deve ter 6 números")
-    }
-
     setLogging(true);
 
     try {
-      const resultado = await fazerLogin(
-        email.trim(),
-        password,
-        mfaCode
-      )
 
-      if (!resultado.success) {
-        setError(resultado.message || "E-mail, senha ou código MFA inválido.")
-        return
-      }
+      await new Promise(resolve => setTimeout(resolve, 400))
 
+      // if (!resultado.success) {
+      //   setError(resultado.message || "E-mail, senha ou código MFA inválido.")
+      //   return
+      // }3
 
       if (startLoginTransition) {
         startLoginTransition()

@@ -1,8 +1,9 @@
+
 /* ==========================================================================
    dashboard.css — Layout e Estilos da Dashboard NEOCORE
    ========================================================================== */
 
-/* Fundo padrão limpo e claro da Dashboard */
+/* Fundo padrão */
 body:has(.dash-container) {
   background-color: #f1f4f9 !important;
   color: #0f172a;
@@ -12,7 +13,7 @@ body:has(.dash-container) {
   overflow-x: hidden;
 }
 
-/* Container Geral da Dashboard */
+/* Container Geral */
 .dash-container {
   min-height: 100vh;
   display: flex;
@@ -23,11 +24,14 @@ body:has(.dash-container) {
 /* ==========================================================================
    1. Header Superior
    ========================================================================== */
+
 .dash-header {
   position: sticky;
   top: 0;
   z-index: 100;
   height: 60px;
+  min-height: 60px;
+  box-sizing: border-box;
   background-color: #ffffff;
   display: flex;
   align-items: center;
@@ -35,10 +39,8 @@ body:has(.dash-container) {
   padding: 0 24px;
   border-bottom: 1px solid #eef2f6;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  position: relative;
 }
 
-/* Faixa azul vertical de destaque na extrema esquerda */
 .dash-header::before {
   content: '';
   position: absolute;
@@ -54,7 +56,6 @@ body:has(.dash-container) {
   align-items: center;
 }
 
-/* Botão de Menu Hambúrguer */
 .dash-menu-btn {
   background: transparent;
   border: none;
@@ -82,7 +83,7 @@ body:has(.dash-container) {
   transition: all 0.25s ease;
 }
 
-/* Centro: Logo NEOCORE */
+/* Logo */
 .dash-header-center {
   position: absolute;
   left: 50%;
@@ -111,7 +112,7 @@ body:has(.dash-container) {
   color: #0f172a;
 }
 
-/* Lado Direito: Usuário */
+/* Usuário */
 .dash-header-right {
   display: flex;
   align-items: center;
@@ -153,7 +154,7 @@ body:has(.dash-container) {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Dropdown do Usuário */
+/* Dropdown */
 .dash-user-dropdown {
   position: absolute;
   top: 100%;
@@ -170,8 +171,15 @@ body:has(.dash-container) {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dash-dropdown-info {
@@ -227,52 +235,81 @@ body:has(.dash-container) {
 }
 
 /* ==========================================================================
-   2. Corpo Principal (Sidebar + Main Content)
+   2. Corpo Principal
    ========================================================================== */
+
 .dash-body {
   display: flex;
   flex: 1;
-  padding: 16px 20px 20px 16px;
+  min-height: calc(100vh - 60px);
+  padding: 16px 20px 20px 282px;
   gap: 20px;
   box-sizing: border-box;
   align-items: stretch;
+  transition: padding-left 0.25s ease;
+}
+
+/* Quando a Sidebar estiver fechada */
+.dash-container:has(.dash-sidebar.closed) .dash-body {
+  padding-left: 20px;
 }
 
 /* ==========================================================================
-   3. Sidebar Estilo Card Flutuante
+   3. Sidebar — Altura completa da tela
    ========================================================================== */
+
 .dash-sidebar {
-  width: 236px;
-  flex-shrink: 0;
+  position: fixed;
+  top: 60px;
+  left: 16px;
+  bottom: 16px;
+
+  width: 246px;
+  height: auto;
+
   background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
   border: 1px solid #edf2f7;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease, opacity 0.2s ease;
+  border-radius: 20px;
+
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+
+  box-sizing: border-box;
+  z-index: 90;
+
+  opacity: 1;
+  overflow: hidden;
+
+  transition:
+    width 0.25s ease,
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
 .dash-sidebar.closed {
   width: 0;
   opacity: 0;
-  overflow: hidden;
+  transform: translateX(-15px);
   padding: 0;
-  margin: 0;
   border: none;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .dash-sidebar-inner {
-  padding: 24px 16px 20px 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
-  flex: 1;
-  height: 100%;
+
+  padding: 24px 16px 16px;
   box-sizing: border-box;
 }
 
 /* Cabeçalho Workspace */
 .dash-workspace-header {
+  flex-shrink: 0;
   margin-bottom: 22px;
   padding-left: 6px;
 }
@@ -293,9 +330,27 @@ body:has(.dash-container) {
   letter-spacing: -0.01em;
 }
 
-/* Lista de Navegação */
+/* Navegação */
 .dash-nav {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dash-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.dash-nav::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.dash-nav::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .dash-nav-list {
@@ -311,6 +366,7 @@ body:has(.dash-container) {
   width: 100%;
 }
 
+/* Botões principais */
 .dash-nav-btn {
   width: 100%;
   display: flex;
@@ -334,7 +390,7 @@ body:has(.dash-container) {
   color: #0f172a;
 }
 
-/* Bolinha indicadora (Dot) */
+/* Indicador */
 .dash-nav-dot {
   width: 6px;
   height: 6px;
@@ -349,7 +405,7 @@ body:has(.dash-container) {
   flex: 1;
 }
 
-/* Chevron do dropdown */
+/* Chevron */
 .dash-nav-chevron {
   color: #0f172a;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -360,7 +416,7 @@ body:has(.dash-container) {
   transform: rotate(180deg);
 }
 
-/* Item Ativo (Pill azul claro pastel) */
+/* Item ativo */
 .dash-nav-btn.active {
   background-color: #bde0fe;
   color: #0f172a;
@@ -372,11 +428,11 @@ body:has(.dash-container) {
   transform: scale(1.15);
 }
 
-/* Submenu de Contatos */
+/* Submenu */
 .dash-submenu {
   list-style: none;
-  padding: 4px 0 6px 0;
-  margin: 2px 0 0 0;
+  padding: 4px 0 6px;
+  margin: 2px 0 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -405,7 +461,7 @@ body:has(.dash-container) {
   color: #0f172a;
 }
 
-/* Subitem Ativo com Barra Vertical de Destaque */
+/* Subitem ativo */
 .dash-submenu-btn.active.highlight-bar {
   background-color: #e0f2fe;
   color: #034f8a;
@@ -433,14 +489,14 @@ body:has(.dash-container) {
   font-weight: 600;
 }
 
-/* Card Inferior de Atualização */
+/* Card inferior */
 .dash-update-card {
-  margin-top: auto;
+  flex-shrink: 0;
+  margin-top: 16px;
+  padding: 14px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 14px 14px;
-  box-sizing: border-box;
+  border-radius: 14px;
 }
 
 .dash-update-label {
@@ -467,8 +523,9 @@ body:has(.dash-container) {
 }
 
 /* ==========================================================================
-   4. Conteúdo Principal da Dashboard
+   4. Conteúdo Principal
    ========================================================================== */
+
 .dash-main {
   flex: 1;
   background: #ffffff;
@@ -525,7 +582,7 @@ body:has(.dash-container) {
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
 }
 
-/* Cards de Métricas e Visão Geral */
+/* Cards de métricas */
 .dash-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -566,7 +623,7 @@ body:has(.dash-container) {
   gap: 4px;
 }
 
-/* Tabela / Lista Prévia de Registros */
+/* Tabela */
 .dash-table-card {
   background: #ffffff;
   border: 1px solid #eef2f6;
@@ -605,6 +662,7 @@ body:has(.dash-container) {
   background: #ffffff;
 }
 
+/* Estado vazio */
 .dash-empty-state {
   display: flex;
   flex-direction: column;
@@ -633,16 +691,28 @@ body:has(.dash-container) {
   max-width: 360px;
 }
 
-/* Responsividade */
+/* ==========================================================================
+   5. Responsividade
+   ========================================================================== */
+
 @media (max-width: 900px) {
+  .dash-sidebar {
+    top: 60px;
+    left: 12px;
+    bottom: 12px;
+    width: 250px;
+    max-width: calc(100vw - 24px);
+    border-radius: 16px;
+  }
+
   .dash-body {
     flex-direction: column;
+    min-height: calc(100vh - 60px);
     padding: 12px;
   }
 
-  .dash-sidebar {
-    width: 100%;
-    border-radius: 16px;
+  .dash-container:has(.dash-sidebar.closed) .dash-body {
+    padding: 12px;
   }
 
   .dash-main {
@@ -650,3 +720,37 @@ body:has(.dash-container) {
     padding: 20px;
   }
 }
+
+@media (max-width: 600px) {
+  .dash-header {
+    padding: 0 14px;
+  }
+
+  .dash-brand-name {
+    font-size: 13px;
+  }
+
+  .dash-user-greeting {
+    display: none;
+  }
+
+  .dash-main {
+    padding: 16px;
+  }
+
+  .dash-main-header {
+    align-items: flex-start;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-search-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+  
