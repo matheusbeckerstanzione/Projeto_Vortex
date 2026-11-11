@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Component
 public class GitHubClient {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(GitHubClient.class);
 
     private final RestClient client;
 
@@ -140,11 +144,32 @@ public class GitHubClient {
             return resposta;
 
         } catch (ResourceAccessException exception) {
-            Throwable causa = exception.getMostSpecificCause();
+            boolean timeout = false;
+            StringBuilder tipos = new StringBuilder();
 
-            boolean timeout =
-                    causa instanceof SocketTimeoutException
-                            || causa instanceof HttpTimeoutException;
+            for (
+                    Throwable causa = exception;
+                    causa != null;
+                    causa = causa.getCause()
+            ) {
+                if (tipos.length() > 0) {
+                    tipos.append(" -> ");
+                }
+
+                tipos.append(
+                        causa.getClass().getSimpleName()
+                );
+
+                if (causa instanceof SocketTimeoutException
+                        || causa instanceof HttpTimeoutException) {
+                    timeout = true;
+                }
+            }
+
+            LOG.warn(
+                    "Falha de transporte ao acessar api.github.com; causas={}",
+                    tipos
+            );
 
             throw new IntegracaoExternaException(
                     timeout

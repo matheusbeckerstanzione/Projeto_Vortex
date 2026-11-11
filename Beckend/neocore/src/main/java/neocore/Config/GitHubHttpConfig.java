@@ -20,13 +20,13 @@ public class GitHubHttpConfig {
             @Value("${GITHUB_API_TOKEN:}") String token
     ) {
         var http = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(3))
+                .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .build();
 
         var factory = new JdkClientHttpRequestFactory(http);
 
-        factory.setReadTimeout(Duration.ofSeconds(10));
+        factory.setReadTimeout(Duration.ofSeconds(20));
 
         var builder = RestClient.builder()
                 .baseUrl("https://api.github.com")
