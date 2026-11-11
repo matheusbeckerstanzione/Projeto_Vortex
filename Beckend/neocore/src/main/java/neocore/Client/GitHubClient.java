@@ -114,6 +114,14 @@ public class GitHubClient {
                                 int status =
                                         response.getStatusCode().value();
 
+                                LOG.warn(
+                                        "Resposta GitHub: status={}, restantes={}, reset={}, retryAfter={}",
+                                        status,
+                                        response.getHeaders().getFirst("X-RateLimit-Remaining"),
+                                        response.getHeaders().getFirst("X-RateLimit-Reset"),
+                                        response.getHeaders().getFirst("Retry-After")
+                                );
+
                                 if (status == 404) {
                                     throw new RecursoNaoEncontradoException(
                                             "Organização pública não encontrada no GitHub."
