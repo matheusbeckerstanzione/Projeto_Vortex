@@ -224,6 +224,7 @@ public class SegurancaConfig {
                                 "/interacoes-contato",
                                 "/resultados-campanha",
                                 "/restricoes-uso",
+                                "/sinais/github/organizacoes/{organizacao}",
                                 "/exportacoes/segmentos/{id}"
                         ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 

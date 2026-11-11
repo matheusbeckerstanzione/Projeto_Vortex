@@ -67,17 +67,21 @@ public class IntegracoesHttpConfig {
     @Lazy
     public RestClient geminiRestClient() {
         var http = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(3))
+                .connectTimeout(Duration.ofSeconds(5))
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .build();
 
         var factory = new JdkClientHttpRequestFactory(http);
-        factory.setReadTimeout(Duration.ofSeconds(25));
+        factory.setReadTimeout(Duration.ofSeconds(60));
 
         return RestClient.builder()
                 .baseUrl("https://generativelanguage.googleapis.com")
                 .requestFactory(factory)
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(
+                        HttpHeaders.ACCEPT,
+                        MediaType.APPLICATION_JSON_VALUE
+                )
                 .build();
     }
+
 }
