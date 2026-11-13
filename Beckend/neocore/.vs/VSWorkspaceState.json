@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\main",
+    "\\src\\main\\java",
+    "\\src\\main\\java\\neocore",
+    "\\src\\main\\java\\neocore\\Controller",
+    "\\src\\main\\resources",
+    "\\src\\test",
+    "\\src\\test\\java",
+    "\\src\\test\\java\\neocore"
+  ],
+  "SelectedNode": "\\Dockerfile",
+  "PreviewInSolutionExplorer": false
+}

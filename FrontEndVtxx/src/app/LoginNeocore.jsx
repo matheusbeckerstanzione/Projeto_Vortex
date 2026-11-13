@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import { fazerLogin } from '../services/auth';
 import '../styles/login.css';
 
 export default function LoginNeocore() {
@@ -69,24 +68,43 @@ export default function LoginNeocore() {
   };
 
   /* ---------- Submit → Transição Suave para Dashboard (Modo MVP direto) ---------- */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (logging) return;
 
-    // Acesso negado só funciona se o CÓDIGO MFA for 000000
-    const mfaCode = mfa.join('');
-    if (mfaCode === '000000') {
-      sessionStorage.setItem('mfa_denied', 'true');
-      navigate('/acesso-negado', { state: { fromMfaDenied: true } });
-      return;
+    setError('')
+
+    if (!email.trim()) {
+      setError('Informe seu e-mail.')
+      return
+    }
+
+    if (!password) {
+      setError('Informe sua senha.')
+      return
     }
 
     setLogging(true);
 
-    if (startLoginTransition) {
-      startLoginTransition();
-    } else {
-      navigate('/dashboard');
+    try {
+
+      await new Promise(resolve => setTimeout(resolve, 400))
+
+      // if (!resultado.success) {
+      //   setError(resultado.message || "E-mail, senha ou código MFA inválido.")
+      //   return
+      // }3
+
+      if (startLoginTransition) {
+        startLoginTransition()
+      } else {
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      setError("Não foi possível conectar ao servidor. Tente Novamente.")
+    } finally {
+      setLogging(false)
     }
   };
 
@@ -127,7 +145,11 @@ export default function LoginNeocore() {
         <p>Faça login para continuar</p>
       </div>
 
-      {error && <div className="login-error">{error}</div>}
+      {error && (
+        <div className="login-error">
+          {error}
+        </div>
+      )}
 
       {/* Campo E-mail */}
       <label className="l" htmlFor="email">

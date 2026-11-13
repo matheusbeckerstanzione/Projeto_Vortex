@@ -318,6 +318,7 @@ body {
 /* Left Sidebar */
 .vortex-sidebar {
   width: 220px;
+  min-height: calc(100vh - 108px);
   background: #ffffff;
   border-radius: 14px;
   padding: 20px 16px;
@@ -326,18 +327,21 @@ body {
   border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   flex-shrink: 0;
+
   position: sticky;
   top: 80px;
-  max-height: calc(100vh - 100px);
+
+  align-self: stretch;
   overflow-y: auto;
-  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.2s ease;
+
+  transition:
+    width 0.28s ease,
+    padding 0.28s ease,
+    opacity 0.22s ease,
+    transform 0.28s ease;
+
   box-sizing: border-box;
-}
+} 
 
 .sidebar-inner-container {
   width: 188px;
