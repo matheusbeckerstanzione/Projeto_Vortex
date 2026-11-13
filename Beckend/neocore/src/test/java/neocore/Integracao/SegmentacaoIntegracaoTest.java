@@ -3,38 +3,46 @@ package neocore.Integracao;
 import jakarta.persistence.EntityManager;
 
 import neocore.DTO.contato.ContatoResponse;
+import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
 import neocore.DTO.segmento.SegmentoRequest;
 import neocore.DTO.segmentocontato.SegmentoContatoRequest;
+
 import neocore.Exception.ConflitoException;
 import neocore.Exception.RegraNegocioException;
+
 import neocore.Model.*;
 import neocore.Model.Enum.*;
+
 import neocore.Repository.SegmentoContatoRepository;
+
+import neocore.Service.ExportacaoService;
+import neocore.Service.SegmentacaoEmpresasService;
 import neocore.Service.SegmentoService;
 
 import org.junit.jupiter.api.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
+
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
-import neocore.Service.SegmentacaoEmpresasService;
-import neocore.Service.ExportacaoService;
-import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -249,8 +257,7 @@ public class SegmentacaoIntegracaoTest {
         em.flush();
         em.clear();
 
-        var participantes =
-                membros.findAllBySegmentoId(segmentoId);
+        var participantes = membros.findAllBySegmentoId(segmentoId);
 
         assertEquals(3, participantes.size());
 
@@ -349,7 +356,7 @@ public class SegmentacaoIntegracaoTest {
                 false
         );
 
-        // Restrição específica de outra finalidade não deve bloquear.
+        // Restrição de outra finalidade não deve bloquear.
         restricao(
                 outraFinalidade,
                 EscopoRestricao.CAMPANHA,
@@ -443,13 +450,20 @@ public class SegmentacaoIntegracaoTest {
         );
 
         var resultado = segmentacaoEmpresasService.previa(
-                new SegmentacaoEmpresasRequest(finalidade.getId(), criterios),
+                new SegmentacaoEmpresasRequest(
+                        finalidade.getId(),
+                        criterios
+                ),
                 0,
                 20
         );
 
         assertEquals(1L, resultado.getTotalElements());
-        assertEquals(saoPaulo.getId(), resultado.getContent().get(0).id());
+
+        assertEquals(
+                saoPaulo.getId(),
+                resultado.getContent().get(0).id()
+        );
 
         Map<String, Object> filtrosDivergentes = Map.of(
                 "municipioIbge", "3525904",
@@ -460,7 +474,11 @@ public class SegmentacaoIntegracaoTest {
 
         for (var filtro : filtrosDivergentes.entrySet()) {
             var criteriosAlterados = new HashMap<>(criterios);
-            criteriosAlterados.put(filtro.getKey(), filtro.getValue());
+
+            criteriosAlterados.put(
+                    filtro.getKey(),
+                    filtro.getValue()
+            );
 
             var semResultados = segmentacaoEmpresasService.previa(
                     new SegmentacaoEmpresasRequest(
@@ -474,12 +492,11 @@ public class SegmentacaoIntegracaoTest {
             assertEquals(
                     0L,
                     semResultados.getTotalElements(),
-                    "Deveria retornar zero ao alterar o filtro " + filtro.getKey()
+                    "Deveria retornar zero ao alterar o filtro "
+                            + filtro.getKey()
             );
         }
     }
-
-
 
     @Test
     void csvEmpresarialExportaSomenteORecorteEProtegeContraFormulas() {
@@ -511,13 +528,19 @@ public class SegmentacaoIntegracaoTest {
         );
 
         byte[] arquivo = exportacaoService.exportarEmpresas(request);
-        var linhas = new String(arquivo, StandardCharsets.UTF_8)
-                .lines()
-                .toList();
+
+        var linhas = new String(
+                arquivo,
+                StandardCharsets.UTF_8
+        ).lines().toList();
 
         assertEquals(2, linhas.size());
+
         assertEquals(
-                "razao_social;cnpj;cnae_principal;setor;porte;municipio;uf;municipio_ibge",
+                "razao_social;cnpj;cnae_principal;setor;porte;"
+                        + "municipio;uf;municipio_ibge;"
+                        + "email_contato;telefone_principal;"
+                        + "telefone_secundario",
                 linhas.get(0)
         );
 
@@ -530,16 +553,14 @@ public class SegmentacaoIntegracaoTest {
                 "\"" + porte + "\"",
                 "\"São Paulo\"",
                 "\"SP\"",
-                "\"3550308\""
+                "\"3550308\"",
+                "\"\"",
+                "\"\"",
+                "\"\""
         );
 
         assertEquals(linhaEsperada, linhas.get(1));
     }
-
-
-
-
-
 
     private Map<String, Object> filtros(String modo) {
         return Map.of(
@@ -579,12 +600,15 @@ public class SegmentacaoIntegracaoTest {
         var entidade = new FinalidadeTratamento();
 
         entidade.setNome("Finalidade de teste");
+
         entidade.setDescricao(
                 "Fixture exclusiva do teste automatizado"
         );
+
         entidade.setBaseLegal(
                 "Base de teste, sem uso operacional"
         );
+
         entidade.setRetencaoDias(90);
         entidade.setHabilitada(true);
         entidade.setCriadoEm(OffsetDateTime.now());
@@ -597,8 +621,8 @@ public class SegmentacaoIntegracaoTest {
     private Empresa empresa(
             String setor,
             String cidade,
-            String uf) {
-
+            String uf
+    ) {
         var entidade = new Empresa();
 
         entidade.setNome("Empresa de teste");
@@ -627,8 +651,8 @@ public class SegmentacaoIntegracaoTest {
     private Contato contato(
             Empresa empresa,
             StatusIdentidade status,
-            boolean expirado) {
-
+            boolean expirado
+    ) {
         var entidade = new Contato();
 
         entidade.setEmpresa(empresa);
@@ -652,8 +676,8 @@ public class SegmentacaoIntegracaoTest {
             Contato contato,
             EscopoRestricao escopo,
             FinalidadeTratamento finalidade,
-            boolean ativa) {
-
+            boolean ativa
+    ) {
         var entidade = new RestricaoUso();
 
         entidade.setContato(contato);

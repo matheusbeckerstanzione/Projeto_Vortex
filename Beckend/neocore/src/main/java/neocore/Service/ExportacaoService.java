@@ -3,16 +3,22 @@ package neocore.Service;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
-import neocore.Model.*;
-import neocore.Model.Enum.*;
+import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
+
+import neocore.Model.Segmento;
+import neocore.Model.SegmentoContato;
+
+import neocore.Model.Enum.EscopoRestricao;
+import neocore.Model.Enum.ResultadoAuditoria;
+import neocore.Model.Enum.StatusSegmento;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import neocore.DTO.segmento.SegmentacaoEmpresasRequest;
-import org.springframework.transaction.annotation.Isolation;
+
 @Service
 @RequiredArgsConstructor
 public class ExportacaoService {
@@ -25,7 +31,11 @@ public class ExportacaoService {
     @Transactional
     public byte[] exportarSegmento(UUID segmentoId) {
         var autor = suporte.atual();
-        var segmento = suporte.obter(Segmento.class, segmentoId);
+
+        var segmento = suporte.obter(
+                Segmento.class,
+                segmentoId
+        );
 
         suporte.dono(segmento.getCriadoPor());
 
@@ -49,8 +59,9 @@ public class ExportacaoService {
                 .getSingleResult();
 
         ServiceSupport.exigir(
-                total <= 10000,
-                "Exportação limitada a 10.000 associações; refine o segmento."
+                total <= 10_000,
+                "Exportação limitada a 10.000 associações; "
+                        + "refine o segmento."
         );
 
         StringBuilder csv = new StringBuilder(
@@ -116,40 +127,58 @@ public class ExportacaoService {
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public byte[] exportarEmpresas(SegmentacaoEmpresasRequest request) {
+    public byte[] exportarEmpresas(
+            SegmentacaoEmpresasRequest request
+    ) {
         var autor = suporte.atual();
+
         suporte.validar(request);
         suporte.finalidade(request.finalidadeId());
 
-        var filtros = criterios.validar(request.criterios());
+        var filtros = criterios.validar(
+                request.criterios()
+        );
+
         long total = criterios.contarEmpresas(filtros);
 
         ServiceSupport.exigir(
                 total <= 10_000,
-                "Exportação limitada a 10.000 empresas. Refine os filtros."
+                "Exportação limitada a 10.000 empresas. "
+                        + "Refine os filtros."
         );
 
         StringBuilder csv = new StringBuilder(
-                "razao_social;cnpj;cnae_principal;setor;porte;municipio;uf;municipio_ibge\r\n"
+                "razao_social;cnpj;cnae_principal;setor;porte;"
+                        + "municipio;uf;municipio_ibge;"
+                        + "email_contato;telefone_principal;"
+                        + "telefone_secundario\r\n"
         );
 
         for (int offset = 0; offset < total; offset += 100) {
-            var lote = criterios.buscarEmpresas(filtros, offset, 100);
+            var lote = criterios.buscarEmpresas(
+                    filtros,
+                    offset,
+                    100
+            );
 
             for (var empresa : lote) {
-                csv.append(String.join(
-                        ";",
-                        celula(empresa.getNome()),
-                        celula(empresa.getCnpj()),
-                        celula(empresa.getCnaePrincipal()),
-                        celula(empresa.getSetor()),
-                        celula(empresa.getPorte()),
-                        celula(empresa.getCidade()),
-                        celula(empresa.getUf()),
-                        celula(empresa.getMunicipioIbge())
-                )).append("\r\n");
+                csv.append(
+                        String.join(
+                                ";",
+                                celula(empresa.getNome()),
+                                celula(empresa.getCnpj()),
+                                celula(empresa.getCnaePrincipal()),
+                                celula(empresa.getSetor()),
+                                celula(empresa.getPorte()),
+                                celula(empresa.getCidade()),
+                                celula(empresa.getUf()),
+                                celula(empresa.getMunicipioIbge()),
+                                celula(empresa.getEmailContato()),
+                                celula(empresa.getTelefonePrincipal()),
+                                celula(empresa.getTelefoneSecundario())
+                        )
+                ).append("\r\n");
             }
         }
 
@@ -163,10 +192,6 @@ public class ExportacaoService {
 
         return csv.toString().getBytes(StandardCharsets.UTF_8);
     }
-
-
-
-
 
     static String celula(String valor) {
         if (valor == null) {
