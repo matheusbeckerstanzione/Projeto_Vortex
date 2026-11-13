@@ -53,7 +53,10 @@ public class EmpresaMapper {
                 entity.getDescricao(),
                 entity.getUrlSite(),
                 entity.getCriadoEm(),
-                entity.getAtualizadoEm()
+                entity.getAtualizadoEm(),
+                entity.getEmailContato(),
+                entity.getTelefonePrincipal(),
+                entity.getTelefoneSecundario()
         );
     }
 }

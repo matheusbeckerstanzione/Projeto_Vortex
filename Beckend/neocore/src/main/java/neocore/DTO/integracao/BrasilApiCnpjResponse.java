@@ -45,19 +45,71 @@ public record BrasilApiCnpjResponse(
         String descricaoTipoDeLogradouro,
 
         String logradouro,
-
         String numero,
-
         String complemento,
-
         String bairro,
-
         String municipio,
-
         String uf,
 
         @JsonProperty("codigo_municipio_ibge")
-        Integer codigoMunicipioIbge
+        Integer codigoMunicipioIbge,
 
+        String email,
+
+        @JsonProperty("ddd_telefone_1")
+        String dddTelefone1,
+
+        @JsonProperty("ddd_telefone_2")
+        String dddTelefone2
 ) {
+
+        // Preserva as chamadas existentes nos testes antigos.
+        public BrasilApiCnpjResponse(
+                String cnpj,
+                String razaoSocial,
+                String nomeFantasia,
+                String porte,
+                Integer codigoPorte,
+                Integer cnaeFiscal,
+                String cnaeFiscalDescricao,
+                String naturezaJuridica,
+                Integer situacaoCadastral,
+                String descricaoSituacaoCadastral,
+                LocalDate dataInicioAtividade,
+                String cep,
+                String descricaoTipoDeLogradouro,
+                String logradouro,
+                String numero,
+                String complemento,
+                String bairro,
+                String municipio,
+                String uf,
+                Integer codigoMunicipioIbge
+        ) {
+                this(
+                        cnpj,
+                        razaoSocial,
+                        nomeFantasia,
+                        porte,
+                        codigoPorte,
+                        cnaeFiscal,
+                        cnaeFiscalDescricao,
+                        naturezaJuridica,
+                        situacaoCadastral,
+                        descricaoSituacaoCadastral,
+                        dataInicioAtividade,
+                        cep,
+                        descricaoTipoDeLogradouro,
+                        logradouro,
+                        numero,
+                        complemento,
+                        bairro,
+                        municipio,
+                        uf,
+                        codigoMunicipioIbge,
+                        null,
+                        null,
+                        null
+                );
+        }
 }

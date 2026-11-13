@@ -1,5 +1,7 @@
 package neocore.Model;
+
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,11 +9,10 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.Map;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -54,7 +55,6 @@ public class Empresa {
     @Column(name = "atualizado_em", nullable = false)
     private OffsetDateTime atualizadoEm;
 
-
     @Version
     @Column(nullable = false)
     private Long versao;
@@ -95,11 +95,19 @@ public class Empresa {
     @Column(length = 100)
     private String bairro;
 
+    @Column(name = "email_contato", length = 254)
+    private String emailContato;
+
+    @Column(name = "telefone_principal", length = 16)
+    private String telefonePrincipal;
+
+    @Column(name = "telefone_secundario", length = 16)
+    private String telefoneSecundario;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(
             name = "origem_enriquecimento",
             columnDefinition = "jsonb"
     )
     private Map<String, Map<String, String>> origemEnriquecimento;
-
 }
