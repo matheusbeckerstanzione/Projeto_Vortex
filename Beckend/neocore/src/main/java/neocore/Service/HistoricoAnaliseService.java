@@ -16,12 +16,17 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gt;
+import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Sorts.descending;
 
 @Service
@@ -47,15 +52,39 @@ public class HistoricoAnaliseService {
     }
 
     public boolean salvarExemplo(UUID usuarioId, ChatMarketingResponse resposta) {
+        return salvar(usuarioId, resposta, null, null);
+    }
+
+    public boolean salvarReal(
+            UUID usuarioId,
+            ChatMarketingResponse resposta,
+            UUID finalidadeId,
+            int retencaoDias
+    ) {
+        Instant expiraEm = resposta.geradoEm().plus(retencaoDias, ChronoUnit.DAYS);
+        return salvar(usuarioId, resposta, finalidadeId, expiraEm);
+    }
+
+    private boolean salvar(
+            UUID usuarioId,
+            ChatMarketingResponse resposta,
+            UUID finalidadeId,
+            Instant expiraEm
+    ) {
         try {
             String id = UUID.randomUUID().toString();
 
             Document documento = new Document("_id", id)
                     .append("usuarioId", usuarioId.toString())
                     .append("operacao", resposta.operacao().name())
-                    .append("ficticio", true)
+                    .append("ficticio", expiraEm == null)
                     .append("criadoEm", Date.from(resposta.geradoEm()))
                     .append("resposta", Document.parse(mapper.writeValueAsString(resposta)));
+
+            if (expiraEm != null) {
+                documento.append("finalidadeId", finalidadeId.toString())
+                        .append("expiraEm", Date.from(expiraEm));
+            }
 
             var colecao = mongo.getCollection(COLECAO);
             var resultado = colecao.insertOne(documento);
@@ -69,8 +98,8 @@ public class HistoricoAnaliseService {
             log.info("Histórico gravado em {}. ID: {}",
                     colecao.getNamespace().getFullName(), id);
             return true;
-        } catch (MongoException | JacksonException e) {
-            log.warn("Falha ao salvar o exemplo no histórico: {}",
+        } catch (MongoException | DataAccessException | JacksonException e) {
+            log.warn("Falha ao salvar a análise no histórico: {}",
                     e.getClass().getSimpleName());
             return false;
         }
@@ -87,7 +116,13 @@ public class HistoricoAnaliseService {
         List<Document> documentos;
         try {
             documentos = mongo.getCollection(COLECAO)
-                    .find(eq("usuarioId", usuario.getId().toString()))
+                    .find(and(
+                            eq("usuarioId", usuario.getId().toString()),
+                            or(
+                                    eq("ficticio", true),
+                                    gt("expiraEm", Date.from(Instant.now()))
+                            )
+                    ))
                     .sort(descending("criadoEm", "_id"))
                     .limit(LIMITE)
                     .into(new ArrayList<>());

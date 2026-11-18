@@ -101,6 +101,7 @@ public class ChatMarketingService {
 
         String dados;
         String pergunta;
+        int retencaoDias = 0;
 
         if (exemplo) {
             validarModoExemplo(request, referencias);
@@ -122,11 +123,12 @@ public class ChatMarketingService {
 
                 var finalidade = suporte.finalidade(request.finalidadeId());
 
+                Integer prazo = finalidade.getRetencaoDias();
                 ServiceSupport.exigir(
-                        finalidade.getRetencaoDias() != null
-                                && finalidade.getRetencaoDias() > 0,
+                        prazo != null && prazo > 0,
                         "A finalidade precisa de retenção positiva."
                 );
+                retencaoDias = prazo;
             }
         }
 
@@ -274,7 +276,16 @@ public class ChatMarketingService {
                     List.copyOf(avisos)
             );
 
-            if (exemplo && !historico.salvarExemplo(usuario.getId(), resposta)) {
+            boolean salvou = true;
+            if (exemplo) {
+                salvou = historico.salvarExemplo(usuario.getId(), resposta);
+            } else if (request.operacao() == RESUMIR && retencaoDias > 0) {
+                salvou = historico.salvarReal(
+                        usuario.getId(), resposta, request.finalidadeId(), retencaoDias
+                );
+            }
+
+            if (!salvou) {
                 avisos.add("O resumo foi gerado, mas não foi salvo no histórico.");
 
                 return new ChatMarketingResponse(
