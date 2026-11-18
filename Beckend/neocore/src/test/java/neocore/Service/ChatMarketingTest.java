@@ -35,7 +35,9 @@ class ChatMarketingTest {
     @BeforeEach void preparar() {
         validadores = Validation.buildDefaultValidatorFactory();
         var suporte = new ServiceSupport(em, validadores.getValidator());
-        service = new ChatMarketingService(suporte, provider, youtube, new LimitadorRequisicoes());
+        var historico = mock(HistoricoAnaliseService.class);
+        when(historico.salvarExemplo(any(), any())).thenReturn(true);
+        service = new ChatMarketingService(suporte, provider, youtube, new LimitadorRequisicoes(), historico);
         var usuario = new Usuario();
         usuario.setId(UUID.randomUUID());
         usuario.setPerfil(PerfilUsuario.ANALISTA);

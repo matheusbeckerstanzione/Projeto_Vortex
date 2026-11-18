@@ -208,6 +208,7 @@ public class SegurancaConfig {
                                 "/contatos",
                                 "/contatos/{id}",
                                 "/fontes-dados",
+                                "/ia/historico",
                                 "/fontes-dados/{id}",
                                 "/finalidades-tratamento",
                                 "/finalidades-tratamento/{id}",
