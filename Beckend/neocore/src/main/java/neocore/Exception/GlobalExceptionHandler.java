@@ -22,6 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -210,6 +211,21 @@ public class GlobalExceptionHandler {
                 List.of()
         );
     }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErroResponse> tratarTipoMidiaNaoSuportado(
+            HttpServletRequest request
+    ) {
+        return responder(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Formato de requisição não suportado. Envie o corpo como application/json.",
+                request,
+                java.util.List.of()
+        );
+    }
+
+
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroResponse> tratarErroInesperado(

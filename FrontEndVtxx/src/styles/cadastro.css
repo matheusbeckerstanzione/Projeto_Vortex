@@ -152,6 +152,39 @@ body.dark-bg {
   opacity: 0;
 }
 
+.cad-senha-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.cad-senha-container input {
+    width: 100%;
+    padding-right: 45px;
+}
+
+.cad-olho {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.cad-olho:hover {
+    color: #2563eb;
+}
+
 /* ===== Card Wrapper ===== */
 .wrap {
   display: flex;

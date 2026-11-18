@@ -11,7 +11,19 @@ export default function Dashboard({ initialMenu = 'inicio' }) {
     document.documentElement.style.overflowY = 'auto';
     document.body.style.height = 'auto';
     document.documentElement.style.height = 'auto';
-  }, [initialMenu]);
+  }, [initialMenu]);  
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant'
+    })
+  }, [])
 
   return <DashboardContatos initialMenu={initialMenu} />;
 }

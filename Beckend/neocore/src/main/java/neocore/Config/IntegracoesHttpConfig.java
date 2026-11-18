@@ -26,6 +26,21 @@ public class IntegracoesHttpConfig {
         return criar("https://viacep.com.br");
     }
 
+    @Bean("ibgeRestClient")
+    @Lazy
+    public RestClient ibgeRestClient() {
+        return criar("https://servicodados.ibge.gov.br");
+    }
+
+
+
+    @Bean("youTubeRestClient")
+    @Lazy
+    public RestClient youTubeRestClient() {
+        return criar("https://www.googleapis.com");
+    }
+
+
     private RestClient criar(String baseUrl) {
         var http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(3))
@@ -45,4 +60,28 @@ public class IntegracoesHttpConfig {
                 )
                 .build();
     }
+
+
+
+    @Bean("geminiRestClient")
+    @Lazy
+    public RestClient geminiRestClient() {
+        var http = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .build();
+
+        var factory = new JdkClientHttpRequestFactory(http);
+        factory.setReadTimeout(Duration.ofSeconds(60));
+
+        return RestClient.builder()
+                .baseUrl("https://generativelanguage.googleapis.com")
+                .requestFactory(factory)
+                .defaultHeader(
+                        HttpHeaders.ACCEPT,
+                        MediaType.APPLICATION_JSON_VALUE
+                )
+                .build();
+    }
+
 }

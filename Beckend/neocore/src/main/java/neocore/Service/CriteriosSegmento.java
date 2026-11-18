@@ -11,6 +11,7 @@ import neocore.Model.Enum.*;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -29,7 +30,8 @@ public class CriteriosSegmento {
             "cnaePrincipal",
             "porte",
             "municipioIbge",
-            "situacaoCadastral"
+            "situacaoCadastral",
+            "linguagemGitHub"
     );
 
     public Map<String, Object> validar(
@@ -63,9 +65,13 @@ public class CriteriosSegmento {
                     "Filtro vazio: " + campo
             );
 
+            int maximo = campo.equals("cidade")
+                    || campo.equals("linguagemGitHub")
+                    ? 100
+                    : 80;
+
             ServiceSupport.exigir(
-                    valor.length()
-                            <= (campo.equals("cidade") ? 100 : 80),
+                    valor.length() <= maximo,
                     "Filtro excede tamanho permitido."
             );
 
@@ -121,6 +127,9 @@ public class CriteriosSegmento {
                 case "porte" ->
                         valor = valor.toUpperCase(Locale.ROOT);
 
+                case "linguagemGitHub" ->
+                        valor = valor.toLowerCase(Locale.ROOT);
+
                 default -> {
                 }
             }
@@ -130,9 +139,7 @@ public class CriteriosSegmento {
 
         ServiceSupport.exigir(
                 mapa.keySet().stream()
-                        .anyMatch(campo ->
-                                !campo.equals("modo")
-                        ),
+                        .anyMatch(c -> !c.equals("modo")),
                 "Informe ao menos um filtro."
         );
 
@@ -143,6 +150,7 @@ public class CriteriosSegmento {
 
     private Predicate filtroEmpresa(
             CriteriaBuilder cb,
+            AbstractQuery<?> query,
             From<?, Empresa> empresa,
             Map<String, Object> criterios
     ) {
@@ -154,35 +162,75 @@ public class CriteriosSegmento {
             String campo = entrada.getKey();
             String valor = (String) entrada.getValue();
 
-            if (campo.equals("modo")) {
-                continue;
-            }
+            switch (campo) {
+                case "modo" -> {
+                }
 
-            if (campo.equals("empresaId")) {
-                filtros.add(
-                        cb.equal(
-                                empresa.get("id"),
-                                UUID.fromString(valor)
-                        )
-                );
+                case "empresaId" ->
+                        filtros.add(
+                                cb.equal(
+                                        empresa.get("id"),
+                                        UUID.fromString(valor)
+                                )
+                        );
 
-            } else if (campo.equals("situacaoCadastral")) {
-                filtros.add(
-                        cb.equal(
-                                empresa.get("situacaoCadastral"),
-                                Integer.valueOf(valor)
-                        )
-                );
+                case "situacaoCadastral" ->
+                        filtros.add(
+                                cb.equal(
+                                        empresa.get(campo),
+                                        Integer.valueOf(valor)
+                                )
+                        );
 
-            } else {
-                filtros.add(
-                        cb.equal(
-                                cb.lower(
-                                        empresa.<String>get(campo)
-                                ),
-                                valor.toLowerCase(Locale.ROOT)
-                        )
-                );
+                case "linguagemGitHub" -> {
+                    Subquery<Integer> consulta =
+                            query.subquery(Integer.class);
+
+                    Root<EmpresaGitHub> vinculo =
+                            consulta.from(EmpresaGitHub.class);
+
+                    SetJoin<EmpresaGitHub, String> linguagem =
+                            vinculo.joinSet("linguagens");
+
+                    consulta.select(cb.literal(1)).where(
+                            cb.equal(
+                                    vinculo.get("empresaId"),
+                                    empresa.get("id")
+                            ),
+
+                            cb.isTrue(
+                                    vinculo.get("ativo")
+                            ),
+
+                            cb.isNotNull(
+                                    vinculo.get("amostra")
+                            ),
+
+                            cb.greaterThan(
+                                    vinculo.<Instant>get("validoAte"),
+                                    Instant.now()
+                            ),
+
+                            cb.equal(
+                                    linguagem,
+                                    valor
+                            )
+                    );
+
+                    filtros.add(
+                            cb.exists(consulta)
+                    );
+                }
+
+                default ->
+                        filtros.add(
+                                cb.equal(
+                                        cb.lower(
+                                                empresa.<String>get(campo)
+                                        ),
+                                        valor.toLowerCase(Locale.ROOT)
+                                )
+                        );
             }
         }
 
@@ -207,6 +255,7 @@ public class CriteriosSegmento {
 
         Predicate combinados = filtroEmpresa(
                 cb,
+                query,
                 empresa,
                 criterios
         );
@@ -338,6 +387,7 @@ public class CriteriosSegmento {
                         root.get("id"),
                         contato.getId()
                 ),
+
                 filtro(
                         cb,
                         query,
@@ -357,7 +407,9 @@ public class CriteriosSegmento {
             int limite
     ) {
         ServiceSupport.exigir(
-                offset >= 0 && limite >= 1 && limite <= 100,
+                offset >= 0
+                        && limite >= 1
+                        && limite <= 100,
                 "Paginação inválida."
         );
 
@@ -370,6 +422,7 @@ public class CriteriosSegmento {
                 .where(
                         filtroEmpresa(
                                 cb,
+                                query,
                                 empresa,
                                 criterios
                         )
@@ -396,6 +449,7 @@ public class CriteriosSegmento {
                 .where(
                         filtroEmpresa(
                                 cb,
+                                query,
                                 empresa,
                                 criterios
                         )

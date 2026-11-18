@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '../../styles/DashboardEnriquecimento.css';
+import { attribute } from 'three/tsl';
 
 // Dados mockados da prévia de resultado
 const PREVIEW_DATA = [
@@ -67,36 +68,112 @@ const PREVIEW_DATA = [
   }
 ];
 
+const STORAGE_KEYS = {
+  attributes: 'neocore_enrichment_attributes',
+  sources: 'neocore_enrichment_sources',
+  rules: 'neocore_enrichment_rules',
+  previewActions: 'neocore_enrichment_preview_actions'
+}
+
+function loadSavedData(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key)
+    return saved ? JSON.parse(saved) : fallback
+  } catch (error) {
+    console.error('Erro ao carregar configurações:', error);
+    return fallback
+  }
+}
+
 export default function DashboardEnriquecimento({ onBack, onShowToast }) {
   // Atributos selecionados
-  const [attributes, setAttributes] = useState({
-    interesses: true,
-    preferencias: true,
-    categorias: true,
-    engajamento: true
-  });
+  const [attributes, setAttributes] = useState(() =>
+    loadSavedData(STORAGE_KEYS.attributes, {
+      interesses: true,
+      preferencias: true,
+      categorias: true,
+      engajamento: true
+    })
+  )
 
   // Fontes de dados
-  const [sources, setSources] = useState({
-    crm: true,
-    engajamento: true,
-    segmentacao: true,
-    comportamental: false
-  });
+  const [sources, setSources] = useState(() =>
+    loadSavedData(STORAGE_KEYS.sources, {
+      crm: true,
+      engajamento: true,
+      segmentacao: true,
+      comportamental: false
+    })
+  )
 
   // Regras da busca
-  const [rules, setRules] = useState({
-    camposVazios: true,
-    confiancaMinima: true,
-    registrarOrigem: true,
-    sobrescrever: false
-  });
+  const [rules, setRules] = useState(() =>
+    loadSavedData(STORAGE_KEYS.rules, {
+      camposVazios: true,
+      confiancaMinima: true,
+      registrarOrigem: true,
+      sobrescrever: false
+    })
+  )
 
   // Busca
   const [searchTerm, setSearchTerm] = useState('');
 
   // Ações da prévia
-  const [previewActions, setPreviewActions] = useState({});
+  const [previewActions, setPreviewActions] = useState(() =>
+    loadSavedData(STORAGE_KEYS.previewActions, {})
+  )
+
+
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.attributes,
+      JSON.stringify(attributes)
+    )
+  }, [attributes])
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.sources,
+      JSON.stringify(sources)
+    )
+  }, [sources])
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.rules,
+      JSON.stringify(rules)
+    )
+  }, [rules])
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.previewActions,
+      JSON.stringify(previewActions)
+    )
+  }, [previewActions])
+
+
+
+
+
+  const filteredPreviewData = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+
+    if(!term) return PREVIEW_DATA
+    
+    return PREVIEW_DATA.filter(contact => {
+      const searchableContent = [
+        contact.name,
+        contact.source,
+        contact.statusLabel,
+        ...contact.attributes.map(attribute => attribute.label)
+      ].join(' ').toLowerCase()
+
+      return searchableContent.includes(term)
+    })
+  }, [searchTerm])
 
   // Contagem de atributos selecionados
   const selectedCount = useMemo(() => {
@@ -155,7 +232,25 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
   };
 
   const handleSaveSelection = () => {
-    if (onShowToast) onShowToast('Seleção de atributos e fontes salva!');
+    localStorage.setItem(
+      STORAGE_KEYS.attributes,
+      JSON.stringify(attributes)
+    )
+
+    localStorage.setItem(
+      STORAGE_KEYS.sources,
+      JSON.stringify(sources)
+    )
+
+    localStorage.setItem(
+      STORAGE_KEYS.rules,
+      JSON.stringify(rules)
+    )
+
+    if (onShowToast) {
+      onShowToast('Configurações de enriquecimento salvas!')
+    }
+
   };
 
   return (
@@ -522,7 +617,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {PREVIEW_DATA.map((row) => {
+                  {filteredPreviewData.map((row) => {
                     const action = previewActions[row.id];
                     return (
                       <tr key={row.id} className={`preview-row status-${row.status}`}>

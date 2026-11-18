@@ -202,6 +202,8 @@ public class SegurancaConfig {
                                 HttpMethod.GET,
                                 "/empresas",
                                 "/empresas/{id}",
+                                "/localidades/ufs/{uf}/municipios",
+                                "/sinais/youtube",
                                 "/empresas/{id}/enriquecimento",
                                 "/contatos",
                                 "/contatos/{id}",
@@ -222,6 +224,7 @@ public class SegurancaConfig {
                                 "/interacoes-contato",
                                 "/resultados-campanha",
                                 "/restricoes-uso",
+                                "/sinais/github/organizacoes/{organizacao}",
                                 "/exportacoes/segmentos/{id}"
                         ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
@@ -230,7 +233,10 @@ public class SegurancaConfig {
                                 HttpMethod.POST,
                                 "/autenticacao/logout",
                                 "/empresas",
+                                "/exportacoes/empresas",
                                 "/contatos",
+                                "/sinais/sugestoes",
+                                "/ia/chat",
                                 "/atributos-contato",
                                 "/atributos-empresa",
                                 "/pesquisas-enriquecimento",
@@ -269,7 +275,39 @@ public class SegurancaConfig {
                                 "/segmento-contatos/{segmentoId}/{contatoId}"
                         ).hasAnyRole("ADMINISTRADOR", "ANALISTA")
 
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/empresas/{empresaId}/github"
+                        )
+                        .hasAnyRole(
+                                "ADMINISTRADOR",
+                                "ANALISTA"
+                        )
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/empresas/{empresaId}/github/vinculo"
+                        )
+                        .hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/empresas/{empresaId}/github/vinculo"
+                        )
+                        .hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/empresas/{empresaId}/github/coleta"
+                        )
+                        .hasAnyRole(
+                                "ADMINISTRADOR",
+                                "ANALISTA"
+                        )
+
                         .anyRequest().denyAll()
+
                 )
 
                 .addFilterBefore(

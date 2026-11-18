@@ -1,0 +1,197 @@
+
+/* ======================================
+   MODAL DE INTERAÇÕES
+====================================== */
+
+.interacoes-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(3px);
+}
+
+.interacoes-modal {
+    width: 100%;
+    max-width: 460px;
+
+    padding: 30px;
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+
+    animation: interacoesEntrada 0.2s ease;
+}
+
+.interacoes-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+
+    margin-bottom: 24px;
+}
+
+.interacoes-titulo {
+    margin: 0;
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.interacoes-descricao {
+    margin: 8px 0 0;
+    color: #64748b;
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.interacoes-fechar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #f1f5f9;
+    color: #64748b;
+
+    font-size: 21px;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.interacoes-fechar:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* CAMPO DE QUANTIDADE */
+
+.interacoes-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+
+    margin-bottom: 25px;
+}
+
+.interacoes-label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.interacoes-input {
+    width: 100%;
+    height: 46px;
+
+    padding: 0 14px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+
+    outline: none;
+
+    color: #0f172a;
+    background: #ffffff;
+
+    font-size: 15px;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.interacoes-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* BOTÕES */
+
+.interacoes-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.interacoes-btn-cancelar,
+.interacoes-btn-salvar {
+    min-width: 110px;
+    height: 42px;
+
+    padding: 0 18px;
+
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.interacoes-btn-cancelar {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+}
+
+.interacoes-btn-cancelar:hover {
+    background: #f8fafc;
+}
+
+.interacoes-btn-salvar {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.interacoes-btn-salvar:hover {
+    background: #1d4ed8;
+}
+
+/* ANIMAÇÃO */
+
+@keyframes interacoesEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 480px) {
+    .interacoes-modal {
+        padding: 22px;
+    }
+
+    .interacoes-acoes {
+        flex-direction: column-reverse;
+    }
+
+    .interacoes-btn-cancelar,
+    .interacoes-btn-salvar {
+        width: 100%;
+    }
+}

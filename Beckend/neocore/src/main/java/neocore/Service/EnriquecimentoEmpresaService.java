@@ -19,10 +19,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.URI;
@@ -77,19 +75,15 @@ public class EnriquecimentoEmpresaService {
         this.empresas = empresas;
 
         leitura = new TransactionTemplate(transacoes);
-
         leitura.setReadOnly(true);
-
         leitura.setPropagationBehavior(
                 TransactionDefinition.PROPAGATION_REQUIRES_NEW
         );
 
         escrita = new TransactionTemplate(transacoes);
-
         escrita.setPropagationBehavior(
                 TransactionDefinition.PROPAGATION_REQUIRES_NEW
         );
-
         escrita.setTimeout(15);
     }
 
@@ -112,11 +106,7 @@ public class EnriquecimentoEmpresaService {
 
         var contexto = leitura.execute(status -> {
             var usuario = suporte.atual();
-
-            var empresa = suporte.obter(
-                    Empresa.class,
-                    id
-            );
+            var empresa = suporte.obter(Empresa.class, id);
 
             verificarFontes(id, request);
 
@@ -140,9 +130,7 @@ public class EnriquecimentoEmpresaService {
         suporte.validar(request);
         suporte.validar(request.parametros());
 
-        String cnpj = ServiceSupport.cnpj(
-                request.cnpj()
-        );
+        String cnpj = ServiceSupport.cnpj(request.cnpj());
 
         exigir(
                 cnpj.matches("[0-9]{14}"),
@@ -159,10 +147,7 @@ public class EnriquecimentoEmpresaService {
                     ? null
                     : empresa.getId();
 
-            verificarFontes(
-                    id,
-                    request.parametros()
-            );
+            verificarFontes(id, request.parametros());
 
             return new PreviasEmpresaStore.Contexto(
                     usuario.getId(),
@@ -188,9 +173,7 @@ public class EnriquecimentoEmpresaService {
     ) {
         var request = contexto.request();
 
-        var b = brasil.consultarCnpj(
-                contexto.cnpj()
-        );
+        var b = brasil.consultarCnpj(contexto.cnpj());
 
         if (b == null
                 || !ServiceSupport.cnpj(contexto.cnpj())
@@ -208,10 +191,10 @@ public class EnriquecimentoEmpresaService {
                         + contexto.cnpj();
 
         var campos =
-                new EnumMap<CampoEnriquecimentoEmpresa,
-                        CampoEnriquecimentoResponse>(
-                        CampoEnriquecimentoEmpresa.class
-                );
+                new EnumMap<
+                        CampoEnriquecimentoEmpresa,
+                        CampoEnriquecimentoResponse
+                        >(CampoEnriquecimentoEmpresa.class);
 
         var avisos = new ArrayList<String>();
 
@@ -222,23 +205,10 @@ public class EnriquecimentoEmpresaService {
 
         candidatos.put(NOME, b.razaoSocial());
         candidatos.put(SETOR, b.cnaeFiscalDescricao());
-
-        candidatos.put(
-                CNAE_PRINCIPAL,
-                codigo(b.cnaeFiscal())
-        );
-
+        candidatos.put(CNAE_PRINCIPAL, codigo(b.cnaeFiscal()));
         candidatos.put(PORTE, b.porte());
-
-        candidatos.put(
-                NOME_FANTASIA,
-                b.nomeFantasia()
-        );
-
-        candidatos.put(
-                NATUREZA_JURIDICA,
-                b.naturezaJuridica()
-        );
+        candidatos.put(NOME_FANTASIA, b.nomeFantasia());
+        candidatos.put(NATUREZA_JURIDICA, b.naturezaJuridica());
 
         candidatos.put(
                 SITUACAO_CADASTRAL,
@@ -277,6 +247,10 @@ public class EnriquecimentoEmpresaService {
         candidatos.put(COMPLEMENTO, b.complemento());
         candidatos.put(BAIRRO, b.bairro());
 
+        candidatos.putAll(
+                ContatosEmpresaSupport.extrair(b, avisos)
+        );
+
         candidatos.forEach((campo, valor) ->
                 propor(
                         campos,
@@ -291,8 +265,7 @@ public class EnriquecimentoEmpresaService {
                 )
         );
 
-        String cep = texto(b.cep())
-                .replace("-", "");
+        String cep = texto(b.cep()).replace("-", "");
 
         if (cep.matches("[0-9]{8}")) {
             propor(
@@ -312,9 +285,10 @@ public class EnriquecimentoEmpresaService {
 
                 if (mesmoMunicipio(b, v)) {
                     var postais =
-                            new EnumMap<CampoEnriquecimentoEmpresa, String>(
-                                    CampoEnriquecimentoEmpresa.class
-                            );
+                            new EnumMap<
+                                    CampoEnriquecimentoEmpresa,
+                                    String
+                                    >(CampoEnriquecimentoEmpresa.class);
 
                     if (texto(b.municipio()).isEmpty()) {
                         postais.put(CIDADE, v.localidade());
@@ -325,17 +299,11 @@ public class EnriquecimentoEmpresaService {
                     }
 
                     if (b.codigoMunicipioIbge() == null) {
-                        postais.put(
-                                MUNICIPIO_IBGE,
-                                v.ibge()
-                        );
+                        postais.put(MUNICIPIO_IBGE, v.ibge());
                     }
 
                     if (texto(b.logradouro()).isEmpty()) {
-                        postais.put(
-                                LOGRADOURO,
-                                v.logradouro()
-                        );
+                        postais.put(LOGRADOURO, v.logradouro());
                     }
 
                     if (texto(b.bairro()).isEmpty()) {
@@ -355,10 +323,12 @@ public class EnriquecimentoEmpresaService {
                                     request.fonteViaCepId(),
                                     "ViaCEP",
                                     "https://viacep.com.br/ws/"
-                                            + cep + "/json/",
+                                            + cep
+                                            + "/json/",
                                     instanteVia
                             )
                     );
+
                 } else {
                     avisos.add(
                             "Município/UF divergentes no ViaCEP; "
@@ -375,6 +345,7 @@ public class EnriquecimentoEmpresaService {
                                 + "prévia contém somente dados da BrasilAPI."
                 );
             }
+
         } else {
             avisos.add(
                     "BrasilAPI não informou CEP válido; "
@@ -459,10 +430,7 @@ public class EnriquecimentoEmpresaService {
                     empresa = new Empresa();
 
                     empresa.setCnpj(contexto.cnpj());
-
-                    empresa.setSlug(
-                            "cnpj-" + contexto.cnpj()
-                    );
+                    empresa.setSlug("cnpj-" + contexto.cnpj());
 
                     exigir(
                             request.campos().containsAll(
@@ -515,8 +483,7 @@ public class EnriquecimentoEmpresaService {
                         .toList();
 
                 exigir(
-                        selecionados.size()
-                                == request.campos().size(),
+                        selecionados.size() == request.campos().size(),
                         "Campo não disponível nesta prévia."
                 );
 
@@ -527,10 +494,7 @@ public class EnriquecimentoEmpresaService {
                                 + "campos selecionados."
                 );
 
-                validarEndereco(
-                        dados,
-                        request.campos()
-                );
+                validarEndereco(dados, request.campos());
 
                 for (var campo : selecionados) {
                     exigir(
@@ -538,7 +502,8 @@ public class EnriquecimentoEmpresaService {
                                     || request.sobrescrever()
                                     .contains(campo.campo()),
                             "Autorize a sobrescrita de "
-                                    + campo.campo() + "."
+                                    + campo.campo()
+                                    + "."
                     );
                 }
 
@@ -551,8 +516,7 @@ public class EnriquecimentoEmpresaService {
                     );
                 }
 
-                var agora =
-                        OffsetDateTime.now(ZoneOffset.UTC);
+                var agora = OffsetDateTime.now(ZoneOffset.UTC);
 
                 for (var campo : selecionados) {
                     aplicar(
@@ -601,7 +565,6 @@ public class EnriquecimentoEmpresaService {
 
                 if (novo) {
                     empresa.setCriadoEm(agora);
-
                     empresa = empresas.saveAndFlush(empresa);
                 }
 
@@ -627,7 +590,6 @@ public class EnriquecimentoEmpresaService {
 
         } catch (RuntimeException exception) {
             previas.liberar(request.previaId());
-
             throw exception;
         }
     }
@@ -685,7 +647,8 @@ public class EnriquecimentoEmpresaService {
                                     || uri.getPort() == 443
                     ),
                     "Cadastre a fonte HTTPS correspondente a "
-                            + host + "."
+                            + host
+                            + "."
             );
 
         } catch (IllegalArgumentException exception) {
@@ -696,8 +659,10 @@ public class EnriquecimentoEmpresaService {
     }
 
     private static void propor(
-            Map<CampoEnriquecimentoEmpresa,
-                    CampoEnriquecimentoResponse> campos,
+            Map<
+                    CampoEnriquecimentoEmpresa,
+                    CampoEnriquecimentoResponse
+                    > campos,
             List<String> avisos,
             PreviasEmpresaStore.Contexto contexto,
             CampoEnriquecimentoEmpresa campo,
@@ -718,13 +683,18 @@ public class EnriquecimentoEmpresaService {
         }
 
         int limite = switch (campo) {
-            case NOME, NOME_FANTASIA,
+            case NOME,
+                 NOME_FANTASIA,
                  NATUREZA_JURIDICA -> 160;
 
-            case SETOR, PORTE -> 80;
-            case CIDADE, BAIRRO -> 100;
+            case SETOR,
+                 PORTE -> 80;
 
-            case UF, SITUACAO_CADASTRAL -> 2;
+            case CIDADE,
+                 BAIRRO -> 100;
+
+            case UF,
+                 SITUACAO_CADASTRAL -> 2;
 
             case CNAE_PRINCIPAL,
                  MUNICIPIO_IBGE -> 7;
@@ -735,12 +705,16 @@ public class EnriquecimentoEmpresaService {
 
             case LOGRADOURO,
                  COMPLEMENTO -> 255;
+
+            case EMAIL_CONTATO -> 254;
+
+            case TELEFONE_PRINCIPAL,
+                 TELEFONE_SECUNDARIO -> 16;
         };
 
         boolean valido =
                 valor.length() <= limite
                         && switch (campo) {
-
                     case UF -> valor.matches(
                             "AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|"
                                     + "PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|"
@@ -760,12 +734,26 @@ public class EnriquecimentoEmpresaService {
                     case DATA_ABERTURA ->
                             dataValida(valor);
 
+                    case EMAIL_CONTATO ->
+                            Objects.equals(
+                                    valor,
+                                    ContatosEmpresaSupport.email(valor)
+                            );
+
+                    case TELEFONE_PRINCIPAL,
+                         TELEFONE_SECUNDARIO ->
+                            Objects.equals(
+                                    valor,
+                                    ContatosEmpresaSupport.telefone(valor)
+                            );
+
                     default -> true;
                 };
 
         if (!valido) {
             avisos.add(
-                    campo + " fora do formato/tamanho; "
+                    campo
+                            + " fora do formato/tamanho; "
                             + "campo ignorado, sem truncamento."
             );
 
@@ -814,7 +802,11 @@ public class EnriquecimentoEmpresaService {
                 dados.valoresConsultados()
                         .keySet()
                         .containsAll(
-                                Set.of(CEP, CIDADE, UF)
+                                Set.of(
+                                        CEP,
+                                        CIDADE,
+                                        UF
+                                )
                         ),
                 "Endereço incompleto na consulta: "
                         + "são necessários CEP, cidade e UF."
@@ -996,6 +988,21 @@ public class EnriquecimentoEmpresaService {
                 texto(empresa.getDataAbertura())
         );
 
+        mapa.put(
+                EMAIL_CONTATO,
+                texto(empresa.getEmailContato())
+        );
+
+        mapa.put(
+                TELEFONE_PRINCIPAL,
+                texto(empresa.getTelefonePrincipal())
+        );
+
+        mapa.put(
+                TELEFONE_SECUNDARIO,
+                texto(empresa.getTelefoneSecundario())
+        );
+
         return mapa;
     }
 
@@ -1005,16 +1012,26 @@ public class EnriquecimentoEmpresaService {
             String valor
     ) {
         switch (campo) {
-            case NOME -> empresa.setNome(valor);
-            case SETOR -> empresa.setSetor(valor);
-            case CIDADE -> empresa.setCidade(valor);
-            case UF -> empresa.setUf(valor);
+            case NOME ->
+                    empresa.setNome(valor);
+
+            case SETOR ->
+                    empresa.setSetor(valor);
+
+            case CIDADE ->
+                    empresa.setCidade(valor);
+
+            case UF ->
+                    empresa.setUf(valor);
 
             case CNAE_PRINCIPAL ->
                     empresa.setCnaePrincipal(valor);
 
-            case PORTE -> empresa.setPorte(valor);
-            case CEP -> empresa.setCep(valor);
+            case PORTE ->
+                    empresa.setPorte(valor);
+
+            case CEP ->
+                    empresa.setCep(valor);
 
             case MUNICIPIO_IBGE ->
                     empresa.setMunicipioIbge(valor);
@@ -1022,12 +1039,14 @@ public class EnriquecimentoEmpresaService {
             case LOGRADOURO ->
                     empresa.setLogradouro(valor);
 
-            case NUMERO -> empresa.setNumero(valor);
+            case NUMERO ->
+                    empresa.setNumero(valor);
 
             case COMPLEMENTO ->
                     empresa.setComplemento(valor);
 
-            case BAIRRO -> empresa.setBairro(valor);
+            case BAIRRO ->
+                    empresa.setBairro(valor);
 
             case NOME_FANTASIA ->
                     empresa.setNomeFantasia(valor);
@@ -1044,6 +1063,15 @@ public class EnriquecimentoEmpresaService {
                     empresa.setDataAbertura(
                             LocalDate.parse(valor)
                     );
+
+            case EMAIL_CONTATO ->
+                    empresa.setEmailContato(valor);
+
+            case TELEFONE_PRINCIPAL ->
+                    empresa.setTelefonePrincipal(valor);
+
+            case TELEFONE_SECUNDARIO ->
+                    empresa.setTelefoneSecundario(valor);
         }
     }
 
