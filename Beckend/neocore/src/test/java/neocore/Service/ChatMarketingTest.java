@@ -91,6 +91,56 @@ class ChatMarketingTest {
     }
 
     @Test
+    void resumoPublicoSolicitadoUsaAReferenciaESalvaSemFinalidadeInterna() {
+        when(provider.gerar(any())).thenReturn(resumo());
+        when(historico.salvarResumoPublico(any(), any())).thenReturn(true);
+        var entrada = new tools.jackson.databind.ObjectMapper().readValue("""
+                {
+                  "operacao": "RESUMIR",
+                  "pergunta": "Calcule a taxa de cliques.",
+                  "usarExemploFicticio": false,
+                  "salvarResumoPublico": true,
+                  "referencias": [{
+                    "titulo": "Relatório de campanha",
+                    "url": "https://example.test/relatorio",
+                    "publicadoEm": "2025-07-08T00:00:00Z",
+                    "trechoPublico": "Foram 621 cliques e 276901 impressões."
+                  }]
+                }
+                """, ChatMarketingRequest.class);
+
+        var resposta = service.responder(entrada);
+
+        UUID usuarioId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        assertEquals(1, resposta.fontes().size());
+        verify(provider).gerar(argThat(e -> e.dadosPublicos().isEmpty() && e.evidencias().size() == 1));
+        verify(historico).salvarResumoPublico(usuarioId, resposta);
+        verifyNoMoreInteractions(historico);
+        verify(em, never()).find(eq(FinalidadeTratamento.class), any());
+    }
+
+    @Test
+    void resumoPublicoSemSolicitacaoContinuaSemGravacao() {
+        when(provider.gerar(any())).thenReturn(resumo());
+        var referencias = List.of(referencia(OffsetDateTime.now().minusDays(1)));
+
+        service.responder(request(RESUMIR, null, null, null, referencias));
+
+        verifyNoInteractions(historico);
+    }
+
+    @Test
+    void resumoPublicoNaoAceitaDadosInternosNaModalidadePublica() {
+        var referencias = List.of(referencia(OffsetDateTime.now().minusDays(1)));
+        var entrada = new ChatMarketingRequest(RESUMIR, "Resuma a campanha.", "Dados internos.",
+                null, null, null, null, referencias, false, true);
+
+        assertThrows(RegraNegocioException.class, () -> service.responder(entrada));
+
+        verifyNoInteractions(provider, historico);
+    }
+
+    @Test
     void finalidadeDesabilitadaImpedeEnvioDeDados() {
         finalidade.setHabilitada(false);
         assertThrows(RegraNegocioException.class, () -> service.responder(

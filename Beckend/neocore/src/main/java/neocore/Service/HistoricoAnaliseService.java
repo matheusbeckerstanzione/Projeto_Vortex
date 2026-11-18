@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.and;
@@ -36,6 +37,7 @@ public class HistoricoAnaliseService {
             LoggerFactory.getLogger(HistoricoAnaliseService.class);
     private static final String COLECAO = "historico_analises";
     private static final int LIMITE = 20;
+    private static final int RETENCAO_RESUMO_PUBLICO_DIAS = 7;
 
     private final MongoTemplate mongo;
     private final ObjectMapper mapper;
@@ -55,6 +57,11 @@ public class HistoricoAnaliseService {
         return salvar(usuarioId, resposta, null, null);
     }
 
+    public boolean salvarResumoPublico(UUID usuarioId, ChatMarketingResponse resposta) {
+        Instant expiraEm = resposta.geradoEm().plus(RETENCAO_RESUMO_PUBLICO_DIAS, ChronoUnit.DAYS);
+        return salvar(usuarioId, resposta, null, expiraEm);
+    }
+
     public boolean salvarReal(
             UUID usuarioId,
             ChatMarketingResponse resposta,
@@ -62,7 +69,7 @@ public class HistoricoAnaliseService {
             int retencaoDias
     ) {
         Instant expiraEm = resposta.geradoEm().plus(retencaoDias, ChronoUnit.DAYS);
-        return salvar(usuarioId, resposta, finalidadeId, expiraEm);
+        return salvar(usuarioId, resposta, Objects.requireNonNull(finalidadeId), expiraEm);
     }
 
     private boolean salvar(
@@ -82,8 +89,10 @@ public class HistoricoAnaliseService {
                     .append("resposta", Document.parse(mapper.writeValueAsString(resposta)));
 
             if (expiraEm != null) {
-                documento.append("finalidadeId", finalidadeId.toString())
-                        .append("expiraEm", Date.from(expiraEm));
+                documento.append("expiraEm", Date.from(expiraEm));
+            }
+            if (finalidadeId != null) {
+                documento.append("finalidadeId", finalidadeId.toString());
             }
 
             var colecao = mongo.getCollection(COLECAO);

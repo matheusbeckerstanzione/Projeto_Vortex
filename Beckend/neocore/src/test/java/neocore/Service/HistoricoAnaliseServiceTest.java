@@ -128,6 +128,29 @@ class HistoricoAnaliseServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void gravaResumoPublicoComPrazoDeSeteDiasNoHistoricoDoUsuario() {
+        MongoCollection<Document> colecao = mock(MongoCollection.class);
+        when(mongo.getCollection("historico_analises")).thenReturn(colecao);
+        when(colecao.getNamespace()).thenReturn(new MongoNamespace("neocore_historico", "historico_analises"));
+        when(colecao.insertOne(any(Document.class))).thenReturn(InsertOneResult.acknowledged(new BsonString("id")));
+        var geradoEm = Instant.parse("2026-11-18T16:28:36.431Z");
+        var usuarioId = UUID.randomUUID();
+        var resposta = new ChatMarketingResponse(OperacaoMarketingIa.RESUMIR, null,
+                List.of(), "Relatório público", geradoEm, List.of());
+
+        assertTrue(service.salvarResumoPublico(usuarioId, resposta));
+
+        var documento = ArgumentCaptor.forClass(Document.class);
+        verify(colecao).insertOne(documento.capture());
+        var gravado = documento.getValue();
+        assertEquals(usuarioId.toString(), gravado.getString("usuarioId"));
+        assertFalse(gravado.getBoolean("ficticio"));
+        assertFalse(gravado.containsKey("finalidadeId"));
+        assertEquals(geradoEm.plus(7, ChronoUnit.DAYS), gravado.getDate("expiraEm").toInstant());
+    }
+
+    @Test
     void devolve503QuandoOMongoFalha() {
         autenticar(PerfilUsuario.ADMINISTRADOR);
         when(mongo.getCollection("historico_analises"))

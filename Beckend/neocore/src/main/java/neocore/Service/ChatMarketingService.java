@@ -99,6 +99,18 @@ public class ChatMarketingService {
                 ? List.<ChatMarketingRequest.Referencia>of()
                 : request.referencias();
 
+        boolean salvarResumoPublico = Boolean.TRUE.equals(request.salvarResumoPublico());
+        if (salvarResumoPublico) {
+            ServiceSupport.exigir(
+                    request.operacao() == RESUMIR
+                            && !exemplo
+                            && !referencias.isEmpty()
+                            && limpar(request.dadosPublicos()).isBlank()
+                            && request.finalidadeId() == null,
+                    "Para salvar um resumo público, envie somente referências públicas como dados."
+            );
+        }
+
         String dados;
         String pergunta;
         int retencaoDias = 0;
@@ -279,6 +291,8 @@ public class ChatMarketingService {
             boolean salvou = true;
             if (exemplo) {
                 salvou = historico.salvarExemplo(usuario.getId(), resposta);
+            } else if (salvarResumoPublico) {
+                salvou = historico.salvarResumoPublico(usuario.getId(), resposta);
             } else if (request.operacao() == RESUMIR && retencaoDias > 0) {
                 salvou = historico.salvarReal(
                         usuario.getId(), resposta, request.finalidadeId(), retencaoDias

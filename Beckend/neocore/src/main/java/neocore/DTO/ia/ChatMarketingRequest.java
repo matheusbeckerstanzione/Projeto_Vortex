@@ -34,7 +34,9 @@ public record ChatMarketingRequest(
         @Size(max = 5)
         List<@NotNull @Valid Referencia> referencias,
 
-        Boolean usarExemploFicticio
+        Boolean usarExemploFicticio,
+
+        Boolean salvarResumoPublico
 
 ) {
 
@@ -60,6 +62,21 @@ public record ChatMarketingRequest(
                         referencias,
                         false
                 );
+        }
+
+        public ChatMarketingRequest(
+                OperacaoMarketingIa operacao,
+                String pergunta,
+                String dadosPublicos,
+                UUID finalidadeId,
+                String tema,
+                String regiao,
+                Integer dias,
+                List<Referencia> referencias,
+                Boolean usarExemploFicticio
+        ) {
+                this(operacao, pergunta, dadosPublicos, finalidadeId, tema,
+                        regiao, dias, referencias, usarExemploFicticio, false);
         }
 
         public record Referencia(
