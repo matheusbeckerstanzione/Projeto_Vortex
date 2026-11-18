@@ -32,27 +32,53 @@ public record ChatMarketingRequest(
         Integer dias,
 
         @Size(max = 5)
-        List<@NotNull @Valid Referencia> referencias
+        List<@NotNull @Valid Referencia> referencias,
+
+        Boolean usarExemploFicticio
 
 ) {
 
-    public record Referencia(
+        // Mantém compatibilidade com os testes e chamadas Java existentes.
+        public ChatMarketingRequest(
+                OperacaoMarketingIa operacao,
+                String pergunta,
+                String dadosPublicos,
+                UUID finalidadeId,
+                String tema,
+                String regiao,
+                Integer dias,
+                List<Referencia> referencias
+        ) {
+                this(
+                        operacao,
+                        pergunta,
+                        dadosPublicos,
+                        finalidadeId,
+                        tema,
+                        regiao,
+                        dias,
+                        referencias,
+                        false
+                );
+        }
 
-            @NotBlank
-            @Size(max = 250)
-            String titulo,
+        public record Referencia(
 
-            @NotBlank
-            @Size(max = 800)
-            String url,
+                @NotBlank
+                @Size(max = 250)
+                String titulo,
 
-            @NotNull
-            OffsetDateTime publicadoEm,
+                @NotBlank
+                @Size(max = 800)
+                String url,
 
-            @NotBlank
-            @Size(max = 1000)
-            String trechoPublico
+                @NotNull
+                OffsetDateTime publicadoEm,
 
-    ) {
-    }
+                @NotBlank
+                @Size(max = 1000)
+                String trechoPublico
+
+        ) {
+        }
 }
