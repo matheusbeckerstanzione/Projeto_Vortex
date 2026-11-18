@@ -1,17 +1,28 @@
-/* DashboardFichaOrigem.css - Tela de Ficha de Origem NeoCore */
+
+/* ==========================================================================
+   DashboardFichaOrigem.css
+   Tela de Ficha de Origem - NeoCore
+   ========================================================================== */
+
+/* ==========================================================================
+   1. CONTAINER PRINCIPAL
+   ========================================================================== */
 
 .ficha-origem-container {
   flex: 1;
   min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 0 4px 30px 4px;
+  padding: 0 4px 30px;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
-   1. Breadcrumbs & Header
+   2. BREADCRUMBS E HEADER
    ========================================================================== */
+
 .ficha-breadcrumb {
   display: flex;
   align-items: center;
@@ -19,6 +30,7 @@
   font-size: 12.5px;
   color: #64748b;
   margin-bottom: -6px;
+  flex-wrap: wrap;
 }
 
 .breadcrumb-link {
@@ -81,6 +93,10 @@
   flex-wrap: wrap;
 }
 
+/* ==========================================================================
+   3. BOTÕES
+   ========================================================================== */
+
 .ficha-btn-outline {
   background-color: #ffffff;
   color: #0f172a;
@@ -126,9 +142,11 @@
 }
 
 /* ==========================================================================
-   2. Contact Banner Card
+   4. CARD SUPERIOR DO CONTATO
    ========================================================================== */
+
 .ficha-contact-banner {
+  width: 100%;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
@@ -139,12 +157,14 @@
   flex-wrap: wrap;
   gap: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
 }
 
 .contact-banner-left {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-width: 0;
 }
 
 .contact-banner-avatar {
@@ -166,6 +186,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .contact-banner-name {
@@ -179,6 +200,7 @@
   font-size: 13px;
   color: #64748b;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .source-linked-badge {
@@ -194,9 +216,12 @@
 }
 
 /* ==========================================================================
-   3. Card Base Styles
+   5. CARDS BASE
    ========================================================================== */
+
 .ficha-card {
+  width: 100%;
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
@@ -205,6 +230,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 .ficha-card-header {
@@ -222,13 +248,22 @@
 }
 
 /* ==========================================================================
-   4. Middle Section (Fontes Vinculadas + Dados da Origem)
+   6. GRID CENTRAL E FONTES VINCULADAS
    ========================================================================== */
+
 .ficha-middle-grid {
   display: grid;
-  grid-template-columns: 310px 1fr;
+  grid-template-columns: 310px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.sources-col-left,
+.sources-col-right {
+  min-width: 0;
+  width: 100%;
 }
 
 .sources-list-card {
@@ -239,9 +274,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
-.sources-count-badge {
+.sources-count-badge,
+.history-count-badge {
   font-size: 12px;
   color: #64748b;
   font-weight: 500;
@@ -259,7 +296,7 @@
   border-radius: 10px;
   padding: 14px 16px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -301,7 +338,10 @@
   margin: 0;
 }
 
-/* Coluna Direita: Detalhes da Origem */
+/* ==========================================================================
+   7. DETALHES DA ORIGEM
+   ========================================================================== */
+
 .source-details-card {
   gap: 20px;
 }
@@ -326,7 +366,8 @@
   font-size: 17px;
   font-weight: 800;
   color: #0f172a;
-  margin: 4px 0 2px 0;
+  margin: 4px 0 2px;
+  overflow-wrap: anywhere;
 }
 
 .source-top-sub {
@@ -335,7 +376,10 @@
   margin: 0;
 }
 
-/* Seção de campos */
+/* ==========================================================================
+   8. DADOS DA ORIGEM
+   ========================================================================== */
+
 .source-fields-section {
   display: flex;
   flex-direction: column;
@@ -355,6 +399,8 @@
   border: 1px solid #f1f5f9;
   border-radius: 8px;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .source-field-row {
@@ -364,6 +410,7 @@
   border-bottom: 1px solid #f1f5f9;
   background-color: #ffffff;
   font-size: 13px;
+  gap: 10px;
 }
 
 .source-field-row:last-child {
@@ -384,9 +431,257 @@
 .source-field-value {
   color: #0f172a;
   font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-/* Cards de Avaliação */
+/* ==========================================================================
+   9. ANÁLISE DE QUALIDADE DOS DADOS
+   ========================================================================== */
+
+.quality-analysis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  width: 100%;
+  min-width: 0;
+}
+
+.quality-analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quality-analysis-header > div {
+  min-width: 0;
+}
+
+.quality-analysis-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 5px 0 0;
+  line-height: 1.5;
+}
+
+.quality-analysis-total {
+  color: #64748b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Cartão do índice */
+
+.quality-score-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.quality-score-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.quality-score-info span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.quality-score-info strong {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.quality-score-info p {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Barra de progresso */
+
+.quality-progress {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.quality-progress-fill {
+  height: 100%;
+  background: #0284c7;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+/* Indicadores */
+
+.quality-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.quality-metric {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.quality-metric-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.quality-metric-icon.filled {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.quality-metric-icon.warning {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.quality-metric-icon.missing {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.quality-metric div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.quality-metric strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.quality-metric div span {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Detalhamento dos campos */
+
+.quality-details {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+}
+
+.quality-details h5 {
+  margin: 0;
+  padding: 13px 15px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 13px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.quality-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+.quality-detail-row:last-child {
+  border-bottom: none;
+}
+
+.quality-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quality-detail-info strong {
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.quality-detail-info span {
+  font-size: 12px;
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+
+.quality-detail-info p {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Status dos campos */
+
+.quality-status {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.quality-status.preenchido {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.quality-status.inconsistente {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.quality-status.ausente {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   10. CARDS DE AVALIAÇÃO
+   ========================================================================== */
+
 .source-evaluation-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -401,6 +696,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .eval-box-header {
@@ -420,7 +716,7 @@
   font-size: 14px;
   font-weight: 700;
   color: #0f172a;
-  margin: 2px 0 0 0;
+  margin: 2px 0 0;
 }
 
 .eval-box-desc {
@@ -430,7 +726,10 @@
   line-height: 1.4;
 }
 
-/* Callout Azul Informativo */
+/* ==========================================================================
+   11. AVISO INFORMATIVO
+   ========================================================================== */
+
 .ficha-info-callout {
   display: flex;
   align-items: center;
@@ -448,7 +747,10 @@
   flex-shrink: 0;
 }
 
-/* Rodapé do Card de Detalhes da Fonte */
+/* ==========================================================================
+   12. RODAPÉ DA FONTE
+   ========================================================================== */
+
 .source-card-footer {
   display: flex;
   align-items: center;
@@ -471,19 +773,16 @@
 }
 
 /* ==========================================================================
-   5. Tabelas: Histórico e Comparação
+   13. TABELAS
    ========================================================================== */
-.history-count-badge {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
-}
 
 .ficha-table-wrap {
   width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid #f1f5f9;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .ficha-table {
@@ -505,6 +804,7 @@
   color: #64748b;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .ficha-table tbody tr {
@@ -539,6 +839,10 @@
   color: #64748b;
 }
 
+.td-result {
+  white-space: nowrap;
+}
+
 .result-pill-green {
   display: inline-block;
   background-color: #dcfce7;
@@ -549,7 +853,8 @@
   border-radius: 12px;
 }
 
-/* Tabela de Comparação */
+/* Tabela de comparação */
+
 .td-campo-name {
   font-weight: 600;
   color: #0f172a;
@@ -565,15 +870,37 @@
   color: #94a3b8;
 }
 
+.comparison-status {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.comparison-status.convergente {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.comparison-status.divergente {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.comparison-status.sem-comparacao {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
 /* ==========================================================================
-   6. Modais (Revisão e Logs)
+   14. MODAIS
    ========================================================================== */
+
 .ficha-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-color: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(3px);
   display: flex;
@@ -581,24 +908,30 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .ficha-modal-box {
   background: #ffffff;
   border-radius: 14px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 500px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  box-sizing: border-box;
 }
 
 .ficha-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .ficha-modal-title {
@@ -644,6 +977,7 @@
   font-family: inherit;
   outline: none;
   resize: vertical;
+  box-sizing: border-box;
 }
 
 .ficha-modal-textarea:focus {
@@ -658,7 +992,10 @@
   padding-top: 8px;
 }
 
-/* Lista de Logs Rápidos no Modal */
+/* ==========================================================================
+   15. LOGS DE AUDITORIA
+   ========================================================================== */
+
 .logs-mini-list {
   display: flex;
   flex-direction: column;
@@ -687,184 +1024,448 @@
   margin: 0;
 }
 
+
+
 /* ==========================================================================
-   7. Responsive Design
+   RASTREABILIDADE DOS CAMPOS
    ========================================================================== */
+
+.source-field-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
+}
+
+.source-field-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 4px;
+}
+
+.source-field-provenance span {
+  font-size: 10px;
+  color: #94a3b8;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   STATUS DE SINCRONIZAÇÃO
+   ========================================================================== */
+
+.source-sync-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.source-sync-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sync-status-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sync-status-indicator.sincronizado {
+  background: #16a34a;
+}
+
+.sync-status-indicator.pendente {
+  background: #d97706;
+}
+
+.sync-status-indicator.falha {
+  background: #dc2626;
+}
+
+.source-sync-info strong,
+.source-sync-method strong {
+  display: block;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.source-sync-info p {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.source-sync-method {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.source-sync-method span {
+  font-size: 10px;
+  color: #64748b;
+}
+
+
+
+/* Confirmação de solicitação */
+.revision-success-message {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  background: #effaf3;
+  border: 1px solid #b8e5c6;
+  border-radius: 10px;
+  color: #166534;
+}
+
+.revision-success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #dcfce7;
+  font-weight: 700;
+}
+
+.revision-success-message div {
+  flex: 1;
+}
+
+.revision-success-message strong {
+  display: block;
+  font-size: 14px;
+}
+
+.revision-success-message p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.revision-success-message button {
+  border: none;
+  background: transparent;
+  color: #166534;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Histórico de solicitações */
+.revision-history-section {
+  margin-top: 24px;
+}
+
+.revision-history-subtitle {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.revision-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: #64748b;
+}
+
+.revision-empty-state strong {
+  display: block;
+  color: #334155;
+  font-size: 14px;
+}
+
+.revision-empty-state p {
+  margin: 7px 0 0;
+  font-size: 13px;
+}
+
+.revision-description {
+  min-width: 180px;
+  max-width: 300px;
+  white-space: normal;
+  line-height: 1.5;
+}
+
+.revision-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.revision-status-pill.pendente {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.revision-status-pill.em_analise {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.revision-status-pill.aprovada {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.revision-status-pill.rejeitada {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.revision-status-select {
+  min-width: 125px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.revision-status-select:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: #2563eb;
+}
+
+
+/* ==========================================================================
+16. RESPONSIVIDADE - TABLETS
+========================================================================== */
+
+
+@media (max-width: 768px) {
+  .revision-success-message {
+    align-items: flex-start;
+  }
+
+  .revision-history-table {
+    min-width: 850px;
+  }
+}
+
+@media (max-width: 768px) {
+  .source-sync-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .source-field-provenance {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 @media (max-width: 1024px) {
   .ficha-middle-grid {
     grid-template-columns: 1fr;
   }
+
   .source-details-top {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 640px) {
+/* ==========================================================================
+   17. RESPONSIVIDADE - CELULARES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .ficha-origem-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0 20px;
+    overflow-x: hidden;
+    gap: 14px;
+  }
+
+  .ficha-page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .ficha-page-title {
+    font-size: 22px;
+  }
+
+  .ficha-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .ficha-header-actions button,
+  .source-footer-btns button {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+
+  .ficha-contact-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .ficha-middle-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .ficha-card {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+
+  .source-details-top {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .source-field-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+  }
+
+  .source-field-label {
+    width: 100%;
+  }
+
+  .source-field-value {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .quality-analysis-section {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quality-analysis-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quality-analysis-total {
+    white-space: normal;
+  }
+
+  .quality-score-card {
+    padding: 14px;
+  }
+
+  .quality-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .quality-metric {
+    width: 100%;
+  }
+
+  .quality-detail-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quality-status {
+    align-self: flex-start;
+  }
+
   .source-evaluation-cards {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
+
   .source-card-footer {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .source-footer-btns {
+    flex-direction: column;
     width: 100%;
-    justify-content: space-between;
-  }
-}
-
-/* ficha-origem-responsive-patch */
-
-/* Responsive Patch for Mobile & Tablets */
-@media (max-width: 768px) {
-  .ficha-origem-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 0 20px 0 !important;
-    overflow-x: hidden !important;
-    gap: 14px !important;
-  }
-
-  .ficha-header {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-  }
-
-  .ficha-page-title {
-    font-size: 22px !important;
-  }
-
-  .ficha-header-actions {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    gap: 8px !important;
-  }
-
-  .ficha-btn-secondary,
-  .ficha-btn-primary {
-    width: 100% !important;
-    text-align: center !important;
-    justify-content: center !important;
-    box-sizing: border-box !important;
-    padding: 10px 14px !important;
-  }
-
-  .ficha-top-card {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 14px !important;
-    padding: 16px 14px !important;
-    border-radius: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .ficha-sources-selector {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    width: 100% !important;
-    padding-bottom: 4px !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .source-chip {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  .source-card {
-    border-radius: 12px !important;
-    padding: 16px 14px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .source-footer-btns {
-    flex-direction: column !important;
-    width: 100% !important;
-    gap: 8px !important;
-  }
-
-  .source-footer-btns button {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-}
-
-
-/* Ficha de Origem: Full Fluidity on Mobile */
-.ficha-origem-container,
-.ficha-middle-grid,
-.ficha-card,
-.ficha-contact-banner {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-@media (max-width: 768px) {
-  .ficha-origem-container {
-    overflow-x: hidden !important;
-  }
-
-  .ficha-middle-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .ficha-card {
-    padding: 16px 12px !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
-  }
-
-  .ficha-contact-banner {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 16px 12px !important;
-    gap: 12px !important;
-  }
-
-  .source-item-card {
-    padding: 12px 10px !important;
-  }
-
-  .source-fields-table {
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .source-field-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 3px !important;
-    padding: 8px 0 !important;
-  }
-
-  .source-field-val {
-    word-break: break-all !important;
-  }
-
-  .source-evaluation-cards {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
+    gap: 8px;
   }
 
   .ficha-table-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    display: block !important;
-    box-sizing: border-box !important;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .ficha-table {
-    min-width: 480px !important;
-    width: 100% !important;
+    min-width: 480px;
+    width: 100%;
+  }
+
+  .ficha-modal-box {
+    padding: 18px;
+  }
+}
+
+/* ==========================================================================
+   18. RESPONSIVIDADE - CELULARES PEQUENOS
+   ========================================================================== */
+
+@media (max-width: 400px) {
+  .ficha-page-title {
+    font-size: 20px;
+  }
+
+  .ficha-card {
+    padding: 14px 10px;
+  }
+
+  .contact-banner-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .contact-banner-name {
+    font-size: 16px;
+  }
+
+  .quality-score-info strong {
+    font-size: 25px;
+  }
+
+  .quality-detail-row {
+    padding: 12px;
+  }
+
+  .ficha-modal-overlay {
+    padding: 12px;
+  }
+
+  .ficha-modal-box {
+    padding: 16px;
   }
 }

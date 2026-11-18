@@ -1272,6 +1272,81 @@
   border: 1px solid #e2e8f0;
 }
 
+
+.cadastral-add-field-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.cadastral-add-input {
+  flex: 1;
+  min-width: 180px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  outline: none;
+}
+
+.cadastral-add-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.cadastral-add-button {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #0b3b60;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cadastral-add-button:hover {
+  background: #124d78;
+}
+
+/* ======================================
+   EXCLUSÃO DE CAMPOS CADASTRAIS
+====================================== */
+
+.cadastral-td-acoes {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.cadastral-remove-button {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #dc2626;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cadastral-remove-button:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.cadastral-remove-button:active {
+  transform: scale(0.97);
+}
+
+
 @media (max-width: 600px) {
   .cadastral-edit-actions {
     width: 100%;

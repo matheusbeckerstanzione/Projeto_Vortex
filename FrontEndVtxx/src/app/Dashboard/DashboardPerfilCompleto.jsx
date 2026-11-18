@@ -1,8 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import '../../styles/DashboardPerfilCompleto.css';
+import ModalEditarPreferencia from './ModalPerfilCompletoPreferencias';
+import ModalEditarInteracoes from './ModalPerfilCompletoInteracoes';
+import ModalRevisaoHumana from './ModalFichaOrigemRevisaoHumana';
 
 // ======================================
 // LOCAL STORAGE
@@ -48,10 +50,20 @@ export default function DashboardPerfilCompleto({
     contact?.name ||
     'demo'}`;
 
+  const revisionStorageKey = `${storageKey}-solicitacoes-revisao`;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceModal, setSourceModal] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [cadastralDraft, setCadastralDraft] = useState(null);
+  const [newFieldName, setNewFieldName] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+
+  const [showPreferenceModal, setShowPreferenceModal] = useState(false);
+  const [showInteractionsModal, setShowInteractionsModal] = useState(false);
+
+  const [isHumanReviewModalOpen, setIsHumanReviewModalOpen] = useState(false);
+  const [selectedReviewRequest, setSelectedReviewRequest] = useState(null);
 
   // ======================================
   // AFINIDADE
@@ -203,33 +215,25 @@ export default function DashboardPerfilCompleto({
   );
 
   const handleEditPreference = () => {
-    const newPreference = window.prompt(
-      'Digite a nova preferência:',
-      preferenceValue
-    );
+    setShowPreferenceModal(true);
+  };
 
-    if (newPreference && newPreference.trim()) {
-      setPreferenceValue(newPreference.trim());
-      onShowToast?.('Preferência atualizada com sucesso!');
-    }
+  const handleSavePreference = preference => {
+    setPreferenceValue(preference);
+    setShowPreferenceModal(false);
+
+    onShowToast?.('Preferência atualizada com sucesso!');
   };
 
   const handleEditInteractions = () => {
-    const newCount = window.prompt(
-      'Digite a quantidade de cliques em campanhas:',
-      interactionCount
-    );
+    setShowInteractionsModal(true);
+  };
 
-    if (newCount === null || newCount.trim() === '') return;
+  const handleSaveInteractions = interactions => {
+    setInteractionCount(interactions);
+    setShowInteractionsModal(false);
 
-    const number = Number(newCount);
-
-    if (Number.isInteger(number) && number >= 0) {
-      setInteractionCount(number);
-      onShowToast?.('Interações atualizadas com sucesso!');
-    } else {
-      onShowToast?.('Digite uma quantidade válida.');
-    }
+    onShowToast?.('Interações atualizadas com sucesso!');
   };
 
   // ======================================
@@ -314,7 +318,6 @@ export default function DashboardPerfilCompleto({
     ]
   );
 
-  // Acrescenta nome e área aos cadastros antigos sem apagar dados existentes.
   useEffect(() => {
     const camposPadrao = [
       {
@@ -398,20 +401,82 @@ export default function DashboardPerfilCompleto({
       prev.map(item =>
         item.id === id
           ? {
-              ...item,
-              valor,
-              origem: 'Edição manual',
-              confianca: 'Não avaliada',
-              badgeClass: 'neutral'
-            }
+            ...item,
+            valor,
+            origem: 'Edição manual',
+            confianca: 'Não avaliada',
+            badgeClass: 'neutral'
+          }
           : item
       )
     );
   };
 
+  const handleAddCadastralField = () => {
+    const campo = newFieldName.trim();
+    const valor = newFieldValue.trim();
+
+    if (!Array.isArray(cadastralDraft)) {
+      onShowToast?.('Entre no modo de edição antes de adicionar campos.');
+      return;
+    }
+
+    if (!campo || !valor) {
+      onShowToast?.('Preencha o nome e o valor do campo.');
+      return;
+    }
+
+    const existe = cadastralDraft.some(
+      item => item.campo.toLowerCase() === campo.toLowerCase()
+    );
+
+    if (existe) {
+      onShowToast?.('Esse campo já existe.');
+      return;
+    }
+
+    setCadastralDraft(prev => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}`,
+        icon: 'file-text',
+        campo,
+        valor,
+        origem: 'Cadastro manual',
+        confianca: 'Não avaliada',
+        badgeClass: 'neutral'
+      }
+    ]);
+
+    setNewFieldName('');
+    setNewFieldValue('');
+
+    onShowToast?.('Campo adicionado com sucesso!');
+  };
+
+  const handleRemoveCadastralField = id => {
+    const campo = cadastralDraft.find(item => item.id === id);
+
+    if (!campo) return;
+
+    if (['nome', 'email', 'cargo', 'empresa', 'area'].includes(id)) {
+      onShowToast?.('Esse campo é obrigatório e não pode ser removido.');
+      return;
+    }
+
+    setCadastralDraft(prev =>
+      prev.filter(item => item.id !== id)
+    );
+
+    onShowToast?.(`${campo?.campo || 'Campo'} removido com sucesso!`);
+  };
+
   const handleCancelCadastralEdit = () => {
     setCadastralDraft(null);
     setIsEditMode(false);
+    setNewFieldName('');
+    setNewFieldValue('');
+
     onShowToast?.('Edição cancelada. Os dados originais foram preservados.');
   };
 
@@ -470,6 +535,171 @@ export default function DashboardPerfilCompleto({
   );
 
   // ======================================
+  // SOLICITAÇÕES DE REVISÃO COMPARTILHADAS
+  // ======================================
+
+  const [reviewRequests, setReviewRequests] = useLocalStorageState(
+    revisionStorageKey,
+    []
+  );
+
+  // Sincroniza solicitações criadas ou atualizadas na Ficha de Origem.
+  useEffect(() => {
+    const syncReviewRequests = () => {
+      try {
+        const savedRequests = localStorage.getItem(revisionStorageKey);
+
+        setReviewRequests(
+          savedRequests ? JSON.parse(savedRequests) : []
+        );
+      } catch (error) {
+        console.error('Erro ao sincronizar solicitações:', error);
+      }
+    };
+
+    window.addEventListener(
+      'neocore:revision-requests-updated',
+      syncReviewRequests
+    );
+
+    window.addEventListener('storage', syncReviewRequests);
+
+    syncReviewRequests();
+
+    return () => {
+      window.removeEventListener(
+        'neocore:revision-requests-updated',
+        syncReviewRequests
+      );
+
+      window.removeEventListener('storage', syncReviewRequests);
+    };
+  }, [revisionStorageKey, setReviewRequests]);
+
+  // ======================================
+  // REVISÃO HUMANA DAS SOLICITAÇÕES
+  // ======================================
+
+  // Abre o modal de revisão humana.
+  // A solicitação continua pendente enquanto o modal estiver aberto.
+  const handleOpenHumanReview = request => {
+    if (request.status !== 'pendente') return;
+
+    setSelectedReviewRequest(request);
+    setIsHumanReviewModalOpen(true);
+  };
+
+  // Só aprova depois que o usuário concluir a revisão no modal.
+  const handleConfirmHumanReview = (decisions, justification) => {
+    if (!selectedReviewRequest) return;
+
+    const date = new Date().toISOString();
+
+    try {
+      const savedRequests = localStorage.getItem(revisionStorageKey);
+      const currentRequests = savedRequests
+        ? JSON.parse(savedRequests)
+        : [];
+
+      const updatedRequests = currentRequests.map(request => {
+        if (
+          request.id !== selectedReviewRequest.id ||
+          request.status !== 'pendente'
+        ) {
+          return request;
+        }
+
+        return {
+          ...request,
+          status: 'aprovada',
+          completedAt: date,
+          review: {
+            decisions,
+            justification,
+            reviewedAt: date,
+            reviewer: 'Responsável'
+          },
+          history: [
+            ...(request.history || []),
+            {
+              action: 'Solicitação aprovada após revisão humana',
+              date,
+              status: 'aprovada'
+            }
+          ]
+        };
+      });
+
+      localStorage.setItem(
+        revisionStorageKey,
+        JSON.stringify(updatedRequests)
+      );
+
+      setReviewRequests(updatedRequests);
+
+      window.dispatchEvent(
+        new CustomEvent('neocore:revision-requests-updated')
+      );
+
+      setIsHumanReviewModalOpen(false);
+      setSelectedReviewRequest(null);
+
+      onShowToast?.('Revisão concluída e solicitação aprovada!');
+    } catch (error) {
+      console.error('Erro ao concluir revisão:', error);
+      onShowToast?.('Não foi possível concluir a revisão.');
+    }
+  };
+
+  // Rejeita diretamente, sem abrir o modal de revisão.
+  const handleRejectRequest = requestId => {
+    const date = new Date().toISOString();
+
+    try {
+      const savedRequests = localStorage.getItem(revisionStorageKey);
+      const currentRequests = savedRequests
+        ? JSON.parse(savedRequests)
+        : [];
+
+      const updatedRequests = currentRequests.map(request => {
+        if (request.id !== requestId || request.status !== 'pendente') {
+          return request;
+        }
+
+        return {
+          ...request,
+          status: 'rejeitada',
+          completedAt: date,
+          history: [
+            ...(request.history || []),
+            {
+              action: 'Solicitação rejeitada',
+              date,
+              status: 'rejeitada'
+            }
+          ]
+        };
+      });
+
+      localStorage.setItem(
+        revisionStorageKey,
+        JSON.stringify(updatedRequests)
+      );
+
+      setReviewRequests(updatedRequests);
+
+      window.dispatchEvent(
+        new CustomEvent('neocore:revision-requests-updated')
+      );
+
+      onShowToast?.('Solicitação rejeitada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao rejeitar solicitação:', error);
+      onShowToast?.('Não foi possível rejeitar a solicitação.');
+    }
+  };
+
+  // ======================================
   // CONSULTAR FONTE
   // ======================================
 
@@ -498,6 +728,9 @@ export default function DashboardPerfilCompleto({
     };
 
     setSavedProfile(profileToSave);
+
+    console.log('Perfil pronto para ser salvo:', profileToSave);
+
     onShowToast?.('Perfil completo salvo no cadastro com sucesso!');
   };
 
@@ -671,7 +904,6 @@ export default function DashboardPerfilCompleto({
       doc.line(15, y + 3, 195, y + 3);
     };
 
-    // 1. Identificação
     doc.setTextColor(...azulEscuro);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(17);
@@ -704,7 +936,6 @@ export default function DashboardPerfilCompleto({
       align: 'center'
     });
 
-    // 2. Resumo do perfil
     adicionarTitulo('Resumo do perfil', 85);
 
     autoTable(doc, {
@@ -721,7 +952,6 @@ export default function DashboardPerfilCompleto({
       ]
     });
 
-    // 3. Dados cadastrais
     let y = doc.lastAutoTable.finalY + 13;
 
     if (y > 255) {
@@ -753,7 +983,6 @@ export default function DashboardPerfilCompleto({
       }
     });
 
-    // 4. Inteligência do contato
     y = doc.lastAutoTable.finalY + 13;
 
     if (y > 255) {
@@ -765,11 +994,11 @@ export default function DashboardPerfilCompleto({
 
     const linhasInteresses = interests.length
       ? interests.map(item => [
-          `Interesse: ${item.nome}`,
-          item.nome,
-          item.origem,
-          item.status
-        ])
+        `Interesse: ${item.nome}`,
+        item.nome,
+        item.origem,
+        item.status
+      ])
       : [['Interesses', 'Nenhum interesse cadastrado', '-', '-']];
 
     autoTable(doc, {
@@ -803,7 +1032,6 @@ export default function DashboardPerfilCompleto({
       }
     });
 
-    // 5. Histórico de revisão
     y = doc.lastAutoTable.finalY + 13;
 
     if (y > 255) {
@@ -815,25 +1043,25 @@ export default function DashboardPerfilCompleto({
 
     const revisaoData = savedReview
       ? [
-          [
-            'Situacao da afinidade',
-            statusAfinidade[savedReview.afinidade] || 'Nao informado'
-          ],
-          [
-            'Interesses revisados',
-            Array.isArray(savedReview.interesse)
-              ? savedReview.interesse.map(item => item.nome).join(', ')
-              : savedReview.interesse
-          ],
-          ['Preferencia revisada', savedReview.preferencia],
-          ['Interacoes registradas', `${savedReview.interacoes} cliques`],
-          [
-            'Data da revisao',
-            savedReview.dataReview
-              ? new Date(savedReview.dataReview).toLocaleString('pt-BR')
-              : 'Nao informada'
-          ]
+        [
+          'Situacao da afinidade',
+          statusAfinidade[savedReview.afinidade] || 'Nao informado'
+        ],
+        [
+          'Interesses revisados',
+          Array.isArray(savedReview.interesse)
+            ? savedReview.interesse.map(item => item.nome).join(', ')
+            : savedReview.interesse
+        ],
+        ['Preferencia revisada', savedReview.preferencia],
+        ['Interacoes registradas', `${savedReview.interacoes} cliques`],
+        [
+          'Data da revisao',
+          savedReview.dataReview
+            ? new Date(savedReview.dataReview).toLocaleString('pt-BR')
+            : 'Nao informada'
         ]
+      ]
       : [['Registro', 'Nenhuma revisao salva ate o momento']];
 
     autoTable(doc, {
@@ -843,7 +1071,6 @@ export default function DashboardPerfilCompleto({
       body: revisaoData
     });
 
-    // 6. Fontes e rastreabilidade
     y = doc.lastAutoTable.finalY + 13;
 
     if (y > 255) {
@@ -880,7 +1107,6 @@ export default function DashboardPerfilCompleto({
       }
     });
 
-    // 7. Data de exportação
     y = doc.lastAutoTable.finalY + 12;
 
     if (y > 270) {
@@ -893,7 +1119,6 @@ export default function DashboardPerfilCompleto({
     doc.setTextColor(...cinza);
     doc.text(`Documento gerado em ${dataAtual}`, 15, y);
 
-    // 8. Identidade visual e exportação
     adicionarIdentidade();
     doc.save(`perfil-${nomeArquivo}.pdf`);
 
@@ -1124,12 +1349,22 @@ export default function DashboardPerfilCompleto({
                           </div>
 
                           <div className="interest-row-actions">
-                            <button type="button" className="intel-link-btn" onClick={() => handleEditInterest(interest)}>
+                            <button
+                              type="button"
+                              className="intel-link-btn"
+                              onClick={() => handleEditInterest(interest)}
+                            >
                               Editar
                             </button>
-                            <button type="button" className="intel-link-btn interest-remove-btn" onClick={() => handleRemoveInterest(interest.id)}>
+
+                            <button
+                              type="button"
+                              className="intel-link-btn interest-remove-btn"
+                              onClick={() => handleRemoveInterest(interest.id)}
+                            >
                               Remover
                             </button>
+
                             <button
                               type="button"
                               className="intel-link-btn"
@@ -1160,12 +1395,20 @@ export default function DashboardPerfilCompleto({
                       }}
                     />
 
-                    <button type="button" className="interest-add-btn" onClick={handleSaveInterest}>
+                    <button
+                      type="button"
+                      className="interest-add-btn"
+                      onClick={handleSaveInterest}
+                    >
                       {editingInterestId !== null ? 'Atualizar' : '+ Adicionar'}
                     </button>
 
                     {editingInterestId !== null && (
-                      <button type="button" className="interest-cancel-btn" onClick={handleCancelInterestEdit}>
+                      <button
+                        type="button"
+                        className="interest-cancel-btn"
+                        onClick={handleCancelInterestEdit}
+                      >
                         Cancelar
                       </button>
                     )}
@@ -1186,8 +1429,15 @@ export default function DashboardPerfilCompleto({
                 </div>
 
                 <div className="intel-item-actions">
-                  <button className="intel-link-btn" onClick={handleEditPreference}>Editar</button>
+                  <button
+                    className="intel-link-btn"
+                    onClick={handleEditPreference}
+                  >
+                    Editar
+                  </button>
+
                   <span className="intel-sep">·</span>
+
                   <button
                     className="intel-link-btn"
                     onClick={() => handleConsultSource(
@@ -1221,14 +1471,20 @@ export default function DashboardPerfilCompleto({
                 <div className="intel-item-actions">
                   {affinityState === 'pending' ? (
                     <>
-                      <button className="intel-btn-confirm" onClick={handleConfirmAffinity}>Confirmar</button>
+                      <button className="intel-btn-confirm" onClick={handleConfirmAffinity}>
+                        Confirmar
+                      </button>
                       <span className="intel-sep">·</span>
-                      <button className="intel-btn-reject" onClick={handleRejectAffinity}>Rejeitar</button>
+                      <button className="intel-btn-reject" onClick={handleRejectAffinity}>
+                        Rejeitar
+                      </button>
                       <span className="intel-sep">·</span>
                     </>
                   ) : (
                     <>
-                      <button className="intel-link-btn" onClick={handleResetAffinity}>Revisar novamente</button>
+                      <button className="intel-link-btn" onClick={handleResetAffinity}>
+                        Revisar novamente
+                      </button>
                       <span className="intel-sep">·</span>
                     </>
                   )}
@@ -1258,8 +1514,15 @@ export default function DashboardPerfilCompleto({
                 </div>
 
                 <div className="intel-item-actions">
-                  <button className="intel-link-btn" onClick={handleEditInteractions}>Editar</button>
+                  <button
+                    className="intel-link-btn"
+                    onClick={handleEditInteractions}
+                  >
+                    Editar
+                  </button>
+
                   <span className="intel-sep">·</span>
+
                   <button
                     className="intel-link-btn"
                     onClick={() => handleConsultSource(
@@ -1302,6 +1565,7 @@ export default function DashboardPerfilCompleto({
                   >
                     Cancelar
                   </button>
+
                   <button
                     type="button"
                     className="perfil-btn-primary"
@@ -1322,6 +1586,34 @@ export default function DashboardPerfilCompleto({
             </div>
 
             <div className="cadastral-table-wrap">
+              {isEditMode && (
+                <div className="cadastral-add-field-form">
+                  <input
+                    type="text"
+                    className="cadastral-add-input"
+                    placeholder="Nome do campo (ex: LinkedIn)"
+                    value={newFieldName}
+                    onChange={e => setNewFieldName(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    className="cadastral-add-input"
+                    placeholder="Valor do campo (ex: linkedin.com/in/usuario)"
+                    value={newFieldValue}
+                    onChange={e => setNewFieldValue(e.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="cadastral-add-button"
+                    onClick={handleAddCadastralField}
+                  >
+                    + Adicionar campo
+                  </button>
+                </div>
+              )}
+
               <table className="cadastral-table">
                 <thead>
                   <tr>
@@ -1329,6 +1621,7 @@ export default function DashboardPerfilCompleto({
                     <th>VALOR</th>
                     <th>ORIGEM</th>
                     <th>CONFIANÇA</th>
+                    {isEditMode && <th>AÇÕES</th>}
                   </tr>
                 </thead>
 
@@ -1367,6 +1660,19 @@ export default function DashboardPerfilCompleto({
                           {row.confianca}
                         </span>
                       </td>
+
+                      {isEditMode && (
+                        <td className="cadastral-td-acoes">
+                          <button
+                            type="button"
+                            className="cadastral-remove-button"
+                            onClick={() => handleRemoveCadastralField(row.id)}
+                            title={`Remover campo ${row.campo}`}
+                          >
+                            Remover
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -1408,17 +1714,27 @@ export default function DashboardPerfilCompleto({
                 <span className="confidence-label">Esta nota</span>
                 <span className="confidence-value text-green">92 · Alta</span>
               </div>
+
               <div className="confidence-summary-row">
                 <span className="confidence-label">Campos cadastrados</span>
                 <span className="confidence-value">{cadastralData.length}</span>
               </div>
+
               <div className="confidence-summary-row">
                 <span className="confidence-label">Fontes consultadas</span>
-                <span className="confidence-value">3</span>
+                <span className="confidence-value">
+                  {new Set(cadastralData.map(item => item.origem)).size}
+                </span>
               </div>
+
               <div className="confidence-summary-row">
                 <span className="confidence-label">Campos com atenção</span>
-                <span className="confidence-value text-amber">2</span>
+                <span className="confidence-value text-amber">
+                  {cadastralData.filter(item =>
+                    item.badgeClass === 'amber' ||
+                    item.badgeClass === 'neutral'
+                  ).length}
+                </span>
               </div>
             </div>
           </section>
@@ -1430,6 +1746,90 @@ export default function DashboardPerfilCompleto({
               Confirme sugestões antes de usar em campanhas.
             </p>
 
+            {reviewRequests.length > 0 && (
+              <div className="review-requests-list">
+                <h4 className="intel-item-title">
+                  Solicitações recebidas ({reviewRequests.length})
+                </h4>
+
+                {reviewRequests.map(request => (
+                  <div className="intel-item-card" key={request.id}>
+                    <div className="intel-item-content">
+                      <h4 className="intel-item-title">
+                        Revisão de origem: {
+                          request.sourceId?.toUpperCase() || 'NÃO INFORMADA'
+                        }
+                      </h4>
+
+                      <p className="intel-item-desc">
+                        Contato: {request.contactName}
+                      </p>
+
+                      <p className="intel-item-desc">
+                        Observações: {
+                          request.notes || 'Nenhuma observação informada.'
+                        }
+                      </p>
+
+                      <p className="intel-item-desc">
+                        Enviada em: {
+                          request.createdAt
+                            ? new Date(request.createdAt).toLocaleString('pt-BR')
+                            : 'Data não informada'
+                        }
+                      </p>
+
+                      <p className="intel-item-desc">
+                        Status:{' '}
+                        <strong>
+                          {{
+                            pendente: 'Pendente',
+                            aprovada: 'Aprovada',
+                            rejeitada: 'Rejeitada'
+                          }[request.status] || request.status}
+                        </strong>
+                      </p>
+
+                      {request.completedAt && (
+                        <p className="intel-item-desc">
+                          Atualizada em:{' '}
+                          {new Date(request.completedAt).toLocaleString('pt-BR')}
+                        </p>
+                      )}
+                    </div>
+
+                    {request.status === 'pendente' && (
+                      <div className="intel-item-actions">
+                        <button
+                          type="button"
+                          className="intel-btn-confirm"
+                          onClick={() => handleOpenHumanReview(request)}
+                        >
+                          Aprovar
+                        </button>
+
+                        <span className="intel-sep">·</span>
+
+                        <button
+                          type="button"
+                          className="intel-btn-reject"
+                          onClick={() => handleRejectRequest(request.id)}
+                        >
+                          Rejeitar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {reviewRequests.length === 0 && (
+              <p className="interest-empty">
+                Nenhuma solicitação de revisão recebida.
+              </p>
+            )}
+
             {affinityState === 'pending' ? (
               <div className="intel-review-callout">
                 <div className="callout-icon">
@@ -1439,6 +1839,7 @@ export default function DashboardPerfilCompleto({
                     <line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
                 </div>
+
                 <div className="callout-text">
                   <h5 className="callout-title">1 sugestão de IA pendente</h5>
                   <p className="callout-desc">
@@ -1454,6 +1855,7 @@ export default function DashboardPerfilCompleto({
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
                 </div>
+
                 <div className="callout-text">
                   <h5 className="callout-title">Todas as sugestões revisadas!</h5>
                   <p className="callout-desc">
@@ -1463,10 +1865,17 @@ export default function DashboardPerfilCompleto({
               </div>
             )}
 
-            <button className="perfil-btn-primary full-width" onClick={handleSaveToRegister}>
+            <button
+              className="perfil-btn-primary full-width"
+              onClick={handleSaveToRegister}
+            >
               Salvar no cadastro
             </button>
-            <button className="perfil-btn-outline full-width" onClick={handleSaveReview}>
+
+            <button
+              className="perfil-btn-outline full-width"
+              onClick={handleSaveReview}
+            >
               Salvar revisão
             </button>
           </section>
@@ -1488,6 +1897,7 @@ export default function DashboardPerfilCompleto({
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                   </svg>
                 </div>
+
                 <div className="quick-action-text">
                   <span className="quick-action-title">Enriquecer contato</span>
                   <span className="quick-action-desc">Buscar novos atributos de marketing.</span>
@@ -1506,6 +1916,7 @@ export default function DashboardPerfilCompleto({
                     <line x1="12" y1="15" x2="12" y2="3" />
                   </svg>
                 </div>
+
                 <div className="quick-action-text">
                   <span className="quick-action-title">Exportar perfil</span>
                   <span className="quick-action-desc">PDF com a origem de cada dado.</span>
@@ -1528,6 +1939,7 @@ export default function DashboardPerfilCompleto({
           >
             <div className="source-modal-header">
               <h4 className="source-modal-title">Origem e Auditoria do Dado</h4>
+
               <button
                 className="source-modal-close"
                 onClick={() => setSourceModal(null)}
@@ -1566,6 +1978,38 @@ export default function DashboardPerfilCompleto({
           </div>
         </div>
       )}
+
+      {/* MODAL DE PREFERÊNCIA */}
+      <ModalEditarPreferencia
+        aberto={showPreferenceModal}
+        valorAtual={preferenceValue}
+        onClose={() => setShowPreferenceModal(false)}
+        onSave={handleSavePreference}
+      />
+
+      {/* MODAL DE INTERAÇÕES */}
+      <ModalEditarInteracoes
+        aberto={showInteractionsModal}
+        valorAtual={interactionCount}
+        onClose={() => setShowInteractionsModal(false)}
+        onSave={handleSaveInteractions}
+      />
+
+      {/* MODAL DE REVISÃO HUMANA */}
+      <ModalRevisaoHumana
+        request={isHumanReviewModalOpen ? selectedReviewRequest : null}
+        cadastralData={cadastralData}
+        interestValue={interests}
+        affinityState={affinityState}
+        preferenceValue={preferenceValue}
+        interactionCount={interactionCount}
+        onClose={() => {
+          setIsHumanReviewModalOpen(false);
+          setSelectedReviewRequest(null);
+        }}
+        onConfirm={handleConfirmHumanReview}
+      />
+
     </main>
   );
 }
