@@ -1,16 +1,67 @@
 import React, { useState } from 'react';
 import '../styles/modalRevisao.css';
 
-export default function ModalRevisao({ fecharModal, onApprove, onReject }) {
+export default function ModalRevisao({
+  fecharModal,
+  onApprove,
+  onReject,
+  itemsParaRevisao = [],
+  totalItens = 1284,
+  onConcluirRevisao
+}) {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 27;
+  const totalSteps = itemsParaRevisao.length > 0 ? itemsParaRevisao.length : 3;
+
+  const demoItems = [
+    {
+      nome: 'Brasil Comércio de Calçados',
+      iniciais: 'BC',
+      campoDuvida: 'CNPJ sem dígito verificador',
+      valorAtual: '12345678000100',
+      sugestao: '12.345.678/0001-90',
+      confianca: '68% · Média',
+      motivo: 'Formato divergente da base da Receita Federal'
+    },
+    {
+      nome: 'Ateliê Moda & Estilo',
+      iniciais: 'AM',
+      campoDuvida: 'E-mail corporativo',
+      valorAtual: 'atendimento@atelie.com',
+      sugestao: 'contato@ateliemoda.com.br',
+      confianca: '74% · Média',
+      motivo: 'Domínio atualizado no DNS do CRM'
+    },
+    {
+      nome: 'Logística Expressa Norte',
+      iniciais: 'LN',
+      campoDuvida: 'Segmento de atuação',
+      valorAtual: '— (não informado)',
+      sugestao: 'Transporte & Logística B2B',
+      confianca: '81% · Média',
+      motivo: 'Identificado via CNAE primário da empresa'
+    }
+  ];
+
+  const currentItem = itemsParaRevisao.length > 0
+    ? {
+        nome: itemsParaRevisao[currentStep - 1]?.nome || 'Empresa em Revisão',
+        iniciais: (itemsParaRevisao[currentStep - 1]?.nome || 'NC').slice(0, 2).toUpperCase(),
+        campoDuvida: itemsParaRevisao[currentStep - 1]?.alertas?.[0] || 'Validação cadastral pendente',
+        valorAtual: itemsParaRevisao[currentStep - 1]?.cnpj || itemsParaRevisao[currentStep - 1]?.email || '—',
+        sugestao: itemsParaRevisao[currentStep - 1]?.setor || 'Cadastro Unificado Recomendado',
+        confianca: '65% · Média',
+        motivo: itemsParaRevisao[currentStep - 1]?.alertas?.[0] || 'Necessita confirmação humana'
+      }
+    : demoItems[(currentStep - 1) % demoItems.length];
 
   const handleAction = (type) => {
+    if (type === 'approve' && onApprove) onApprove(currentItem);
+    if (type === 'reject' && onReject) onReject(currentItem);
+
     if (currentStep < totalSteps) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      if (type === 'approve' && onApprove) onApprove();
-      if (type === 'reject' && onReject) onReject();
+      if (onConcluirRevisao) onConcluirRevisao();
       fecharModal();
     }
   };
@@ -46,9 +97,9 @@ export default function ModalRevisao({ fecharModal, onApprove, onReject }) {
           <span className="revisao-alerta-icone">!</span>
 
           <div>
-            <strong>27 de 1.284 contatos precisam de revisão</strong>
+            <strong>{totalSteps} de {totalItens} cadastros precisam de revisão</strong>
             <p>
-              Os outros 1.257 passaram da confiança mínima de 90% e foram
+              Os outros {Math.max(0, totalItens - totalSteps)} passaram da confiança mínima de 90% e foram
               aprovados automaticamente.
             </p>
           </div>
@@ -71,26 +122,26 @@ export default function ModalRevisao({ fecharModal, onApprove, onReject }) {
         <article className="revisao-contato">
           <div className="revisao-contato-topo">
             <div className="revisao-empresa">
-              <div className="revisao-empresa-avatar">BC</div>
+              <div className="revisao-empresa-avatar">{currentItem.iniciais}</div>
 
               <div>
-                <h3>Brasil Comércio</h3>
-                <span>Campo em dúvida: Cargo</span>
+                <h3>{currentItem.nome}</h3>
+                <span>Campo em dúvida: {currentItem.campoDuvida}</span>
               </div>
             </div>
 
-            <span className="revisao-confianca">Confiança baixa · 62%</span>
+            <span className="revisao-confianca">{currentItem.confianca}</span>
           </div>
 
           <div className="revisao-comparacao">
             <div className="revisao-campo atual">
               <span>Valor atual</span>
-              <strong>— (vazio)</strong>
+              <strong>{currentItem.valorAtual}</strong>
             </div>
 
             <div className="revisao-campo sugestao">
               <span>Sugestão da IA</span>
-              <strong>Gerente de Compras</strong>
+              <strong>{currentItem.sugestao}</strong>
             </div>
           </div>
 
@@ -102,9 +153,9 @@ export default function ModalRevisao({ fecharModal, onApprove, onReject }) {
             </div>
 
             <div className="revisao-detalhes-valores">
-              <strong>Base pública de empresas</strong>
-              <strong>Cargo encontrado em apenas 1 fonte</strong>
-              <strong>Será registrada no log de auditoria</strong>
+              <strong>Arquivo importado</strong>
+              <strong>{currentItem.motivo}</strong>
+              <strong>Registrado no log de auditoria</strong>
             </div>
           </div>
         </article>
@@ -112,8 +163,8 @@ export default function ModalRevisao({ fecharModal, onApprove, onReject }) {
         <div className="revisao-privacidade">
           <span>✓</span>
           <p>
-            Os dados foram pseudonimizados antes de passar pela IA. Nada é salvo
-            no cadastro sem a sua aprovação.
+            Os dados foram tratados e validados segundo as regras de conformidade. Nada é salvo
+            no cadastro sem a sua validação.
           </p>
         </div>
 

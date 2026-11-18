@@ -479,21 +479,6 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
               <span className="nav-text">Logs de auditoria</span>
             </div>
           </nav>
-
-          {/* Bottom Update Card */}
-          <div
-            className="sidebar-update-card"
-            onClick={() => {
-              setIsContactsOpen(true);
-              handleMenuSelect('enriquecimento');
-            }}
-            style={{ cursor: 'pointer' }}
-            title="Clique para abrir enriquecimento de contatos"
-          >
-            <span className="update-tag">Atualização</span>
-            <h4 className="update-title">12 novos cadastros foram importados hoje</h4>
-            <p className="update-subtitle">3 precisam de revisão manual antes da conciliação.</p>
-          </div>
         </div>
       </aside>
 
@@ -678,6 +663,7 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
                     >
                       <option value="ALL">Todas as fontes</option>
                       <option value="Salesforce">CRM Salesforce</option>
+                      <option value="campanhas">Plataforma de campanhas</option>
                       <option value="Omie">ERP Omie</option>
                       <option value="CSV">Importação CSV</option>
                     </select>

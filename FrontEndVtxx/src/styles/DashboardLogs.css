@@ -6,7 +6,7 @@
 .layout-logs,
 .conteudo-logs {
     box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .conteudo-logs.embedded-logs {
@@ -63,34 +63,45 @@
 }
 
 .audit-info h1 {
-    margin: 0 0 5px;
-    font-size: 25px;
+    margin: 0 0 4px;
+    font-size: 26px;
     font-weight: 700;
-    color: #292929;
+    color: #0f172a;
+    line-height: 1.2;
+    letter-spacing: normal;
 }
 
 .audit-info p {
     margin: 0;
     font-size: 13px;
     line-height: 1.5;
-    color: #666666;
+    color: #64748b;
+    margin-top: 4px;
 }
 
 .export-button {
     flex-shrink: 0;
-    padding: 8px 15px;
+    padding: 9px 18px;
     border: none;
-    border-radius: 20px;
-    background-color: #00558f;
+    border-radius: 8px;
+    background-color: #0b3b60;
     color: #ffffff;
-    font-size: 10px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color 0.15s ease, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .export-button:hover {
-    background-color: #003f6b;
+    background-color: #072a45;
+}
+
+.export-button:active {
+    transform: scale(0.98);
 }
 
 /* ==============================
@@ -103,7 +114,7 @@
     background-color: #ffffff;
     border: 1px solid #e5eaf2;
     border-radius: 14px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: inherit;
 }
 
 .registro-topo {
@@ -218,21 +229,22 @@
 .historico-busca {
     display: block;
     width: calc(100% - 32px);
-    height: 30px;
-    margin: 0 16px 10px;
-    padding: 0 12px;
-    border: 1px solid transparent;
-    border-radius: 18px;
+    height: 38px;
+    margin: 0 16px 12px;
+    padding: 0 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
     outline: none;
-    background-color: #f0f1f3;
-    color: #333333;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 13px;
+    transition: all 0.2s;
 }
 
 .historico-busca:focus {
-    border-color: #9ccce8;
-    background-color: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
 /* Filtros */
@@ -240,21 +252,29 @@
 .historico-filtros {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
-    padding: 0 16px 12px;
+    gap: 8px;
+    padding: 0 16px 14px;
 }
 
 .historico-filtros select {
     width: 100%;
     min-width: 0;
-    height: 30px;
-    padding: 0 7px;
-    border: 1px solid #e0e7f0;
-    border-radius: 6px;
-    background-color: #ffffff;
-    color: #4c5a70;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 10px;
+    height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    color: #334155;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.historico-filtros select:focus {
+    border-color: #0284c7;
 }
 
 /* Tabela */
@@ -262,13 +282,28 @@
 .historico-tabela-container {
     width: 100%;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.historico-tabela-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.historico-tabela-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.historico-tabela-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
 }
 
 .historico-tabela {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: inherit;
 }
 
 .historico-tabela thead {
@@ -344,8 +379,8 @@
     border: none;
     background: transparent;
     color: #07558f;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 8px;
+    font-family: inherit;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -408,7 +443,7 @@
     border-radius: 16px;
     background-color: #ffffff;
     color: #263449;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: inherit;
 }
 
 /* Título e status */

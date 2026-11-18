@@ -1,7 +1,7 @@
 /* VortexCadastro.css - NeoCore Contatos & Perfil Unificado */
 
 :root {
-  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --bg-app: #eef2f6;
   --bg-card: #ffffff;
   --text-main: #0f172a;
@@ -330,6 +330,9 @@ body {
   top: 80px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               padding 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               margin 0.28s cubic-bezier(0.4, 0, 0.2, 1),
@@ -339,13 +342,35 @@ body {
   box-sizing: border-box;
 }
 
+.vortex-sidebar::-webkit-scrollbar {
+  width: 4px;
+  height: 0px !important;
+}
+
+.vortex-sidebar::-webkit-scrollbar-horizontal {
+  display: none !important;
+  height: 0px !important;
+  width: 0px !important;
+}
+
+.vortex-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vortex-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 .sidebar-inner-container {
-  width: 188px;
-  min-width: 188px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   flex: 1;
-  height: 100%;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
 }
 
 .vortex-sidebar.closed {
@@ -396,6 +421,9 @@ body {
   font-weight: 500;
   transition: all 0.15s ease;
   user-select: none;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .nav-item:hover {
@@ -485,6 +513,8 @@ body {
   flex-direction: column;
   gap: 2px;
   padding-left: 6px;
+  width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
   transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.2s ease,
@@ -518,6 +548,9 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .sub-item:hover {
@@ -604,14 +637,14 @@ body {
 }
 
 .page-title {
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 26px;
+  font-weight: 700;
   color: var(--text-main);
   line-height: 1.2;
 }
 
 .page-subtitle {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -756,10 +789,10 @@ body {
 
 .filter-select {
   appearance: none;
-  background: #ffffff;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 6px 30px 6px 14px;
+  border-radius: 8px;
+  padding: 8px 32px 8px 12px;
   font-size: 12.5px;
   font-weight: 500;
   color: #334155;
@@ -796,7 +829,13 @@ body {
 /* Table */
 .table-responsive {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden !important;
+  scrollbar-width: none;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 0px !important;
+  display: none !important;
 }
 
 .contacts-table {

@@ -24,18 +24,19 @@
 }
 
 .inicio-title {
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 26px;
+  font-weight: 700;
   color: #0f172a;
-  letter-spacing: -0.5px;
+  letter-spacing: normal;
   margin: 0;
   line-height: 1.2;
 }
 
 .inicio-subtitle {
-  font-size: 13.5px;
+  font-size: 13px;
   color: #64748b;
   margin: 0;
+  margin-top: 4px;
 }
 
 .inicio-actions {

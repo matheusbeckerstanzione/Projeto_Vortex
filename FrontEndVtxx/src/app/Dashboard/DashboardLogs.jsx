@@ -118,10 +118,11 @@ export default function VortexLogs({ embedded = false, onNavigate, onShowToast }
                                 <option>Fonte sincronizada</option>
                             </select>
 
-                            <select defaultValue="Todas as fontes">
-                                <option>Todas as fontes</option>
-                                <option>CRM Salesforce</option>
-                                <option>ERP Omie</option>
+                            <select defaultValue="ALL">
+                                <option value="ALL">Todas as fontes</option>
+                                <option value="crm">CRM Salesforce</option>
+                                <option value="campanhas">Plataforma de campanhas</option>
+                                <option value="erp">ERP Omie</option>
                             </select>
 
                             <select defaultValue="Todos os responsáveis">

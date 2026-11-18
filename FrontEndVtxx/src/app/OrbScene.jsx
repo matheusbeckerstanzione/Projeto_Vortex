@@ -241,7 +241,7 @@ function updateColorsFromCss(uniforms) {
  *   • reset()          — volta instantaneamente ao estado inicial.
  *   • get container()  — retorna o elemento DOM do wrapper (para animação FLIP).
  */
-const OrbScene = forwardRef(function OrbScene(_props, ref) {
+const OrbScene = forwardRef(function OrbScene({ locked = false }, ref) {
   const containerRef = useRef(null);
   const state = useRef({});
 
@@ -542,6 +542,7 @@ void main(){
     let mousePixelY = -9999;
 
     const onPointerMove = (e) => {
+      if (locked) return;
       const b = el.getBoundingClientRect();
       mousePixelX = e.clientX - b.left;
       mousePixelY = e.clientY - b.top;
@@ -691,8 +692,8 @@ void main(){
         peg.mat.opacity = opacity;
         peg.sprite.visible = opacity > 0.01;
 
-        // Se estiver de frente para a câmera, verifica hover do mouse
-        if (opacity > 0.15 && dot > 0.04) {
+        // Se estiver de frente para a câmera e não estiver bloqueado, verifica hover do mouse
+        if (!locked && opacity > 0.15 && dot > 0.04) {
           peg.sprite.getWorldPosition(tempWorldPos);
           // Eleva levemente o ponto de referência para a cabeça do boneco
           tempWorldPos.y += 0.10;
@@ -710,7 +711,7 @@ void main(){
       });
 
       // Atualiza card flutuante de localização e velocidade do globo
-      if (hoveredPeg && s.hovering && d < 0.2) {
+      if (!locked && hoveredPeg && s.hovering && d < 0.2) {
         targetRotSpeed = 0.03; // Desacelera para visualização fácil
         el.style.cursor = 'pointer';
         cityTextEl.textContent = hoveredPeg.peg.city;
@@ -721,13 +722,13 @@ void main(){
         // Aumenta o tamanho do boneco focado
         hoveredPeg.peg.sprite.scale.multiplyScalar(1.25);
       } else {
-        targetRotSpeed = 0.25; // Retoma rotação normal
-        el.style.cursor = 'default';
+        targetRotSpeed = locked ? 0.22 : 0.25; // Rotação suave contínua
+        el.style.cursor = locked ? 'not-allowed' : 'default';
         tooltipEl.classList.remove('show');
       }
 
       let on = 0;
-      if (s.hovering && d < 0.2) {
+      if (!locked && s.hovering && d < 0.2) {
         ray.setFromCamera(ndc, cam);
         const hit = ray.intersectObject(mesh)[0];
         if (hit) {

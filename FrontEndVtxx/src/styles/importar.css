@@ -86,11 +86,13 @@
 .box-section,
 .importar-content {
     font-family:
-        "Inter",
-        system-ui,
+        'Inter',
         -apple-system,
         BlinkMacSystemFont,
-        "Segoe UI",
+        'Segoe UI',
+        Roboto,
+        Helvetica,
+        Arial,
         sans-serif;
     font-size: 14px;
     line-height: 1.5;
@@ -364,18 +366,18 @@ img {
 
 .importar-cabecalho h1 {
     margin: 0;
-
-    color: var(--navy);
-    font-size: 24px;
-    font-weight: 750;
-    line-height: 1.3;
-    letter-spacing: -0.5px;
+    color: #0f172a;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: normal;
 }
 
 .importar-cabecalho>span {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 4px;
 }
 
 
@@ -387,9 +389,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    /* padding-right: 10px; */
-    gap: 9px;
-
+    gap: 12px;
     margin: 0;
 }
 
@@ -399,23 +399,23 @@ img {
 .importar-busca {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
 
-    width: 190px;
-    height: 36px;
+    width: 220px;
+    height: 38px;
 
-    padding: 0 11px;
+    padding: 0 14px;
 
     background: #ffffff;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 24px;
 }
 
 .busca-icone {
     flex-shrink: 0;
 
     color: var(--muted);
-    font-size: 19px;
+    font-size: 16px;
     line-height: 1;
 }
 
@@ -431,7 +431,7 @@ img {
     border: none;
     outline: none;
 
-    font-size: 11px;
+    font-size: 12.5px;
 }
 
 .importar-busca input::placeholder {
@@ -443,45 +443,51 @@ img {
 /* Botão Baixar modelo */
 
 .importar-modelo {
-    padding: 9px 5px;
-
-    color: var(--navy);
     background: transparent;
     border: none;
-
-    font-size: 11px;
+    color: #0f172a;
+    font-size: 13.5px;
     font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
     white-space: nowrap;
-
-    transition: color 0.2s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .importar-modelo:hover {
-    color: #2563eb;
+    background-color: #e2e8f0;
+    color: #0f172a;
 }
 
 
 /* Botão Iniciar importação */
 
 .importar-iniciar {
-    min-height: 36px;
-    padding: 9px 15px;
-
+    background-color: #0b3b60;
     color: #ffffff;
-    background: var(--blue);
-
     border: none;
-    border-radius: 999px;
-
-    font-size: 11px;
-    font-weight: 650;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
     white-space: nowrap;
-
-    transition: background-color 0.2s ease;
+    transition: background-color 0.15s ease, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .importar-iniciar:hover {
-    background: var(--blue-hover);
+    background-color: #072a45;
+}
+
+.importar-iniciar:active {
+    transform: scale(0.98);
 }
 
 
@@ -903,16 +909,25 @@ img {
     gap: 6px;
 
     min-height: 32px;
-    padding: 0 10px;
+    padding: 0 12px;
 
-    color: #475569;
+    color: #334155;
     background: #ffffff;
 
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 8px;
 
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.origem-botao:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
 }
 
 .origem-botao img {
@@ -995,15 +1010,23 @@ img {
 /* Botão ilustrativo de seleção */
 
 .upload-selecionar {
-    padding: 7px 12px;
+    padding: 7px 14px;
 
-    color: var(--navy);
+    color: #0f172a;
     background: #ffffff;
 
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 8px;
 
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.upload-selecionar:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
 }
 
 
@@ -1443,27 +1466,40 @@ img {
 .botao-resumo-principal,
 .botao-resumo-secundario {
     width: 100%;
-    min-height: 36px;
+    min-height: 38px;
 
     margin-top: 9px;
-    padding: 9px;
+    padding: 9px 16px;
 
-    border-radius: 999px;
+    border-radius: 8px;
 
-    font-size: 10px;
-    font-weight: 650;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .botao-resumo-principal {
     color: #ffffff;
-    background: var(--blue);
-    border: 1px solid var(--blue);
+    background-color: #0b3b60;
+    border: none;
+}
+
+.botao-resumo-principal:hover {
+    background-color: #072a45;
 }
 
 .botao-resumo-secundario {
-    color: var(--navy);
+    color: #0f172a;
     background: #ffffff;
     border: 1px solid var(--line);
+}
+
+.botao-resumo-secundario:hover {
+    background-color: #f1f5f9;
 }
 
 

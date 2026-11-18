@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import OrbScene from './OrbScene';
 import '../styles/acessoNegado.css';
 
 export default function AcessoNegado() {
@@ -9,6 +10,7 @@ export default function AcessoNegado() {
 
   // Validação: a tela de acesso negado só funciona se o código MFA foi 000000
   const isAuthorizedDenied =
+    import.meta.env.DEV ||
     location.state?.fromMfaDenied ||
     sessionStorage.getItem('mfa_denied') === 'true';
 
@@ -42,21 +44,7 @@ export default function AcessoNegado() {
   return (
     <main className="acesso-pagina">
       {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: '#0b4f80',
-            color: '#fff',
-            padding: '12px 20px',
-            borderRadius: '8px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            zIndex: 9999,
-            fontSize: '14px',
-            fontWeight: 500,
-          }}
-        >
+        <div className="acesso-toast">
           {toast}
         </div>
       )}
@@ -71,24 +59,46 @@ export default function AcessoNegado() {
           </p>
         </div>
 
-        {/* Ilustração 3D estilizada do cadeado */}
-        <div className="acesso-ilustracao" aria-hidden="true">
-          <div className="acesso-base">
-            <div className="acesso-base-topo" />
-          </div>
+        {/* Globo 3D do Planeta com Cadeado de Segurança na frente bloqueando interação */}
+        <div className="acesso-orb-slot">
+          <OrbScene locked={true} />
 
-          <div className="acesso-cadeado">
-            <div className="acesso-arco" />
-            <div className="acesso-corpo">
-              <div className="acesso-fechadura" />
+          {/* Cadeado de Bloqueio em frente ao Mundo */}
+          <div
+            className="acesso-lock-overlay"
+            onClick={() => {
+              setToast('Acesso negado: a visualização e interação com os territórios está bloqueada.');
+              setTimeout(() => setToast(''), 4000);
+            }}
+            title="Acesso negado: interação com o mapa e países bloqueada"
+          >
+            <div className="acesso-lock-card">
+              <div className="acesso-lock-icon-halo">
+                <svg
+                  className="acesso-lock-icon-svg"
+                  width="42"
+                  height="42"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2.5" ry="2.5" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  <circle cx="12" cy="16" r="1.5" />
+                  <path d="M12 17.5V19" />
+                </svg>
+              </div>
+
+              <div className="acesso-lock-label-wrap">
+                <span className="acesso-lock-status-dot" />
+                <span className="acesso-lock-title">ACESSO BLOQUEADO</span>
+              </div>
+              <p className="acesso-lock-caption">Navegação e territórios protegidos</p>
             </div>
           </div>
-
-          <span className="acesso-bolinha bolinha-azul" />
-          <span className="acesso-bolinha bolinha-roxa" />
-          <span className="acesso-bolinha bolinha-verde" />
-
-          <div className="acesso-alerta-ilustracao">!</div>
         </div>
       </section>
 
@@ -100,6 +110,8 @@ export default function AcessoNegado() {
             <span>A EMPRESA MAIS TOP DO MUNDO</span>
           </div>
 
+          <div className="acesso-divider" />
+
           <div className="acesso-conteudo">
             <h3>Acesso negado</h3>
             <p className="acesso-descricao">
@@ -107,8 +119,22 @@ export default function AcessoNegado() {
             </p>
 
             <div className="acesso-erro">
-              <img src="/lock.svg" alt="" />
-              <div>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#dc2626"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="acesso-erro-icon"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <div className="acesso-erro-info">
                 <span>ERRO</span>
                 <p>Permissão insuficiente</p>
               </div>

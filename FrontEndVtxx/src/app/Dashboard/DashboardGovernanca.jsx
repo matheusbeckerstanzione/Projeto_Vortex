@@ -527,9 +527,9 @@ export default function VortexGovernanca({ embedded = false, onNavigate, onShowT
                     <th style={{ width: '9%' }}>HORÁRIO</th>
                     <th style={{ width: '18%' }}>RESPONSÁVEL</th>
                     <th style={{ width: '25%' }}>AÇÃO</th>
-                    <th style={{ width: '24%' }}>RECURSO</th>
-                    <th style={{ width: '12%' }}>ORIGEM</th>
-                    <th style={{ width: '12%', textAlign: 'right' }}>RESULTADO</th>
+                    <th style={{ width: '21%' }}>RECURSO</th>
+                    <th style={{ width: '11%' }}>ORIGEM</th>
+                    <th style={{ width: '16%', minWidth: '115px', textAlign: 'right', whiteSpace: 'nowrap' }}>RESULTADO</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -547,7 +547,7 @@ export default function VortexGovernanca({ embedded = false, onNavigate, onShowT
                       <td className="gov-log-action">{log.action}</td>
                       <td className="gov-log-resource">{log.resource}</td>
                       <td className="gov-log-origin">{log.origin}</td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <span className={`gov-pill-result ${log.resultType}`}>
                           {log.result}
                         </span>

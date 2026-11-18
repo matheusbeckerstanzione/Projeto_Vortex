@@ -173,17 +173,6 @@ export default function Sidebar({
             </li>
           </ul>
         </nav>
-
-        {/* Card Inferior de Atualização */}
-        <div className="dash-update-card">
-          <span className="dash-update-label">Atualização</span>
-          <h4 className="dash-update-title">
-            12 novos cadastros foram importados hoje
-          </h4>
-          <p className="dash-update-desc">
-            3 precisam de revisão manual antes da conciliação.
-          </p>
-        </div>
       </div>
     </aside>
   );

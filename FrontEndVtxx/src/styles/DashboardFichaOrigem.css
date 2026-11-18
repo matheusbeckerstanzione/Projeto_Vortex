@@ -61,17 +61,18 @@
 
 .ficha-page-title {
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 700;
   color: #0f172a;
-  letter-spacing: -0.5px;
+  letter-spacing: normal;
   margin: 0;
   line-height: 1.2;
 }
 
 .ficha-page-subtitle {
-  font-size: 13.5px;
+  font-size: 13px;
   color: #64748b;
   margin: 0;
+  margin-top: 4px;
 }
 
 .ficha-header-actions {
@@ -482,8 +483,23 @@
 .ficha-table-wrap {
   width: 100%;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
   border: 1px solid #f1f5f9;
   border-radius: 10px;
+}
+
+.ficha-table-wrap::-webkit-scrollbar {
+  height: 4px;
+}
+
+.ficha-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ficha-table-wrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .ficha-table {
