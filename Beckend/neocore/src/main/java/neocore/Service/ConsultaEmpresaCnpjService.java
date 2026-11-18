@@ -23,10 +23,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.text.Normalizer;
@@ -39,6 +37,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import static neocore.DTO.enriquecimento.CampoEnriquecimentoEmpresa.*;
 import static neocore.Service.ServiceSupport.exigir;
 
 @Service
@@ -90,9 +89,12 @@ public class ConsultaEmpresaCnpjService {
 
         exigir(
                 entrada.matches(
-                        "[0-9]{14}|[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}/[0-9]{4}-[0-9]{2}"
+                        "[0-9]{14}|"
+                                + "[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}"
+                                + "/[0-9]{4}-[0-9]{2}"
                 ),
-                "Informe um CNPJ numérico de 14 dígitos, com ou sem máscara."
+                "Informe um CNPJ numérico de 14 dígitos, "
+                        + "com ou sem máscara."
         );
 
         String cnpj = ServiceSupport.cnpj(entrada);
@@ -247,6 +249,7 @@ public class ConsultaEmpresaCnpjService {
                     "BrasilAPI não informou CEP válido; "
                             + "ViaCEP não foi consultado."
             );
+
         } else {
             try {
                 ViaCepResponse v = viaCep.consultarCep(cep);
@@ -296,12 +299,14 @@ public class ConsultaEmpresaCnpjService {
                      * Esses campos descrevem o CEP e não
                      * necessariamente o endereço específico da empresa.
                      */
+
                 } else {
                     avisos.add(
                             "CEP/município/UF divergentes ou insuficientes "
                                     + "no ViaCEP; dados postais ignorados."
                     );
                 }
+
             } catch (
                     IntegracaoExternaException
                     | RecursoNaoEncontradoException exception
@@ -323,6 +328,29 @@ public class ConsultaEmpresaCnpjService {
                             + "não invente valores para preenchê-los."
             );
         }
+
+        var contatos = ContatosEmpresaSupport.extrair(
+                b,
+                avisos
+        );
+
+        String emailContato = valor(
+                contatos.get(EMAIL_CONTATO),
+                "emailContato",
+                origens
+        );
+
+        String telefonePrincipal = valor(
+                contatos.get(TELEFONE_PRINCIPAL),
+                "telefonePrincipal",
+                origens
+        );
+
+        String telefoneSecundario = valor(
+                contatos.get(TELEFONE_SECUNDARIO),
+                "telefoneSecundario",
+                origens
+        );
 
         var endereco = new ConsultaEmpresaCnpjResponse.Endereco(
                 cep,
@@ -350,7 +378,10 @@ public class ConsultaEmpresaCnpjService {
                 endereco,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 origens,
-                avisos
+                avisos,
+                emailContato,
+                telefonePrincipal,
+                telefoneSecundario
         );
     }
 
