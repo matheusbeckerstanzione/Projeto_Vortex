@@ -1,0 +1,242 @@
+.detalhes-contato-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+}
+
+.detalhes-contato-modal {
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+.detalhes-contato-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    padding: 24px 28px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detalhes-contato-label {
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.detalhes-contato-header h2 {
+    margin: 6px 0 0;
+    color: #0f172a;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.detalhes-contato-fechar {
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #f1f5f9;
+    color: #64748b;
+
+    font-size: 26px;
+    line-height: 1;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.detalhes-contato-fechar:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.detalhes-contato-perfil {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 24px 28px;
+
+    background: #f8fafc;
+}
+
+.detalhes-contato-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+
+    border-radius: 14px;
+    background: #e3f1ff;
+    color: #2563eb;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.detalhes-contato-perfil h3 {
+    margin: 0 0 5px;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.detalhes-contato-perfil p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.detalhes-contato-secao {
+    padding: 22px 28px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.detalhes-contato-secao h4 {
+    margin: 0 0 18px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.detalhes-contato-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.detalhes-contato-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    margin-bottom: 16px;
+    min-width: 0;
+}
+
+.detalhes-contato-campo:last-child {
+    margin-bottom: 0;
+}
+
+.detalhes-contato-campo span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.detalhes-contato-campo strong {
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.detalhes-contato-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 28px;
+}
+
+.detalhes-contato-btn {
+    padding: 10px 20px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #054f80;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.detalhes-contato-btn:hover {
+    background: #033e66;
+}
+
+.modal-contato-remover {
+    width: 100%;
+    padding: 12px 16px;
+    margin-top: 16px;
+
+    background: #fff;
+    color: #dc2626;
+
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.modal-contato-remover:hover {
+    background: #fef2f2;
+    border-color: #dc2626;
+}
+
+
+.detalhes-contato-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.detalhes-contato-btn-remover {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.detalhes-contato-btn-remover:hover {
+    background: #fef2f2;
+    border-color: #dc2626;
+}
+
+
+@media (max-width: 600px) {
+    .detalhes-contato-overlay {
+        padding: 12px;
+    }
+
+    .detalhes-contato-header,
+    .detalhes-contato-perfil,
+    .detalhes-contato-secao {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .detalhes-contato-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1806,6 +1806,264 @@
   display: none;
 }
 
+
+
+/* PAGINAÇÃO DOS CONTATOS */
+.paginacao-contatos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  padding: 18px 0 8px;
+  margin-top: 16px;
+
+  border-top: 1px solid #e2e8f0;
+}
+
+/* BOTÕES ANTERIOR E PRÓXIMA */
+.paginacao-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* EFEITO AO PASSAR O MOUSE */
+.paginacao-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+
+/* BOTÃO DESABILITADO */
+.paginacao-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* TEXTO DA PÁGINA */
+.paginacao-info {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+
+
+/* Checkbox de seleção dos contatos */
+.seg-contato-checkbox {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+
+  margin: 0 4px 0 0;
+  padding: 0;
+
+  accent-color: #2563eb;
+  cursor: pointer;
+
+  opacity: 1;
+  visibility: visible;
+  display: inline-block;
+
+  position: relative;
+  z-index: 2;
+
+  flex-shrink: 0;
+}
+
+/* Alinhamento do checkbox com o avatar e os dados */
+.seg-preview-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Garante que o checkbox receba o clique */
+.seg-preview-item {
+  cursor: pointer;
+}
+
+.seg-contato-checkbox:hover {
+  accent-color: #1d4ed8;
+}
+
+
+
+/* Barra de ações dos contatos selecionados */
+.seg-acoes-selecao {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 14px 16px;
+  margin-bottom: 16px;
+
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Botão remover selecionados */
+.seg-btn-remover-selecionados {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 14px;
+
+  background: #dc2626;
+  color: #ffffff;
+
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.seg-btn-remover-selecionados:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.seg-btn-remover-selecionados:active {
+  transform: scale(0.97);
+}
+
+/* Botão limpar seleção */
+.seg-btn-limpar-selecao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 14px;
+
+  background: #ffffff;
+  color: #475569;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.seg-btn-limpar-selecao:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+
+/* Linha de selecionar todos */
+.seg-selecionar-todos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 12px 16px;
+  margin-bottom: 12px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+/* Label do checkbox */
+.seg-selecionar-todos-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* Quantidade de contatos */
+.seg-selecionar-todos-contagem {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Checkbox */
+.seg-selecionar-todos .seg-contato-checkbox {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+
+.seg-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+
+  background: #fff;
+  color: #dc2626;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.seg-delete-btn:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.seg-delete-btn:active {
+  transform: scale(0.97);
+}
+
+
+
 /* ==========================================================================
    9. Responsive Design
    ========================================================================== */
@@ -2264,5 +2522,18 @@
     text-align: center;
     justify-content: center;
     padding: 10px 14px;
+  }
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 600px) {
+  .seg-acoes-selecao {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .seg-btn-remover-selecionados,
+  .seg-btn-limpar-selecao {
+    width: 100%;
   }
 }

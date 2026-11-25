@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import ModalRevisao from './ModalRevisao';
 import '../styles/importar.css';
 import {
@@ -21,32 +21,16 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
   const [linhasArquivo, setLinhasArquivo] = useState([]);
 
   // Histórico de importações
-  const [historicoImportacoes, setHistoricoImportacoes] = useState([
-    {
-      id: 1,
-      iniciais: 'CS',
-      nomeArquivo: 'clientes_out2026.csv',
-      detalhes: '1.284 registros · CRM Salesforce',
-      status: 'Concluído',
-      statusClasse: 'historico-ok'
-    },
-    {
-      id: 2,
-      iniciais: 'EF',
-      nomeArquivo: 'erp_financeiro.xlsx',
-      detalhes: '1.426 registros · ERP Omie',
-      status: 'Concluído',
-      statusClasse: 'historico-ok'
-    },
-    {
-      id: 3,
-      iniciais: 'LN',
-      nomeArquivo: 'leads_novos.csv',
-      detalhes: '48 registros · Planilha CSV',
-      status: 'Em análise',
-      statusClasse: 'historico-analise'
+  const [historicoImportacoes, setHistoricoImportacoes] = useState(() => {
+    try {
+      const historicoSalvo = localStorage.getItem('neocore_historico_importacoes')
+
+      return historicoSalvo ? JSON.parse(historicoSalvo) : []
+    } catch (error) {
+      console.error('Erro ao carregar historico:', error);
+      return []
     }
-  ]);
+  })
 
   // Switches das regras de validação
   const [switches, setSwitches] = useState({
@@ -123,6 +107,17 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
     reader.readAsText(file, 'UTF-8');
   };
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'neocore_historico_importacoes',
+        JSON.stringify(historicoImportacoes)
+      );
+    } catch (erro) {
+      console.error('Erro ao salvar histórico:', erro);
+    }
+  }, [historicoImportacoes]);
+
   const handleFileUpload = (e) => processFile(e.target.files?.[0]);
 
   const handleDrop = (e) => {
@@ -138,77 +133,80 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
   const validacao = useMemo(() => {
     if (linhasArquivo.length === 0) {
       return {
-        total: 1284,
+        total: 0,
         validos: [],
         comAlertas: [],
-        duplicadosCount: 18,
-        taxaAprovacao: 98
+        duplicadosCount: 0,
+        taxaAprovacao: 0
       };
     }
+
     return validarRegistros(linhasArquivo, mapeamento, switches);
   }, [linhasArquivo, mapeamento, switches]);
 
   // Função para executar a importação e envio à API
-  const executarImportacao = async (incluirAlertasRevisados = false) => {
-    setIsProcessando(true);
 
-    const listaParaEnviar = linhasArquivo.length > 0
-      ? (incluirAlertasRevisados ? [...validacao.validos, ...validacao.comAlertas] : validacao.validos)
-      : [
-          {
-            nome: 'Tecnologia Avançada S/A',
-            slug: 'tecnologia-avancada',
-            cnpj: '11222333000181',
-            setor: 'Tecnologia / SaaS',
-            cidade: 'São Paulo',
-            uf: 'SP',
-            email: 'contato@tecavancada.com.br',
-            telefone: '+55 (11) 98765-4321'
-          },
-          {
-            nome: 'Distribuidora Central Brasil',
-            slug: 'distribuidora-central',
-            cnpj: '22333444000192',
-            setor: 'Varejo',
-            cidade: 'Campinas',
-            uf: 'SP',
-            email: 'comercial@distribuidora.com.br',
-            telefone: '+55 (19) 99876-5432'
-          }
-        ];
+  const executarImportacao = async (alertasAprovados = []) => {
+
+    if (!arquivoCarregado || linhasArquivo.length === 0) {
+      showFeedback('Selecione um arquivo CSV antes de importar.');
+      return;
+    }
+
+    const listaParaEnviar = [
+      ...validacao.validos,
+      ...alertasAprovados
+    ]
+
+    if (listaParaEnviar.length === 0) {
+      showFeedback('Não existem registros válidos para importar.');
+      return;
+    }
+
+    setIsProcessando(true);
 
     try {
       const resultado = await enviarImportacaoApi(listaParaEnviar);
 
+      if (!resultado.sucesso) {
+        showFeedback(
+          `Não foi possível concluir a importação. ${resultado.totalImportado || 0} registros foram salvos.`
+        );
+        return;
+      }
+
       const novoHistorico = {
         id: Date.now(),
-        iniciais: (arquivoCarregado?.nome || 'CSV').slice(0, 2).toUpperCase(),
-        nomeArquivo: arquivoCarregado?.nome || 'importacao_direta.csv',
-        detalhes: `${listaParaEnviar.length} registros · ${origemSelecionada.toUpperCase()}`,
+        iniciais: arquivoCarregado.nome.slice(0, 2).toUpperCase(),
+        nomeArquivo: arquivoCarregado.nome,
+        detalhes: `${resultado.totalImportado} registros · ${origemSelecionada.toUpperCase()}`,
         status: 'Concluído',
         statusClasse: 'historico-ok'
       };
 
       setHistoricoImportacoes(prev => [novoHistorico, ...prev]);
 
-      if (resultado.conectouBackend) {
-        showFeedback(`Sucesso! ${listaParaEnviar.length} cadastros importados e gravados na API local (/importacoes/cnpj)!`);
-      } else {
-        showFeedback(`${listaParaEnviar.length} cadastros processados e sincronizados com a lista de Contatos!`);
-      }
-    } catch {
-      showFeedback('Erro no envio da importação.');
+      showFeedback(
+        `${resultado.totalImportado} empresas importadas e salvas nos Contatos!`
+      );
+
+      setArquivoCarregado(null);
+      setLinhasArquivo([]);
+      setHeadersDetectados([]);
+    } catch (erro) {
+      console.error('Erro na importação:', erro);
+      showFeedback('Ocorreu um erro ao salvar os contatos.');
     } finally {
       setIsProcessando(false);
       setModalRevisaoAberto(false);
     }
   };
 
-  const historicoFiltrado = historicoImportacoes.filter(item =>
-    item.nomeArquivo.toLowerCase().includes(buscaHistorico.toLowerCase()) ||
-    item.detalhes.toLowerCase().includes(buscaHistorico.toLowerCase())
-  );
 
+  const historicoFiltrado = historicoImportacoes.filter(item =>
+    (item.nomeArquivo || '').toLowerCase().includes(buscaHistorico.toLowerCase()) ||
+    (item.detalhes || '').toLowerCase().includes(buscaHistorico.toLowerCase())
+  );
   return (
     <main className={`importar-content ${embedded ? 'embedded' : ''}`}>
       {toast && (
@@ -249,12 +247,12 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
           <button
             className="importar-iniciar"
             type="button"
-            disabled={isProcessando}
+            disabled={isProcessando || !arquivoCarregado}
             onClick={() => {
               if (validacao.comAlertas.length > 0) {
                 setModalRevisaoAberto(true);
               } else {
-                executarImportacao(false);
+                executarImportacao();
               }
             }}
           >
@@ -272,8 +270,10 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
               <img src="/arquivo.svg" alt="Arquivo" />
             </div>
           </div>
-          <strong>{arquivoCarregado ? '1' : '3'}</strong>
-          <small>{arquivoCarregado ? 'Arquivo pronto para envio' : '1 aguardando processamento'}</small>
+          <strong>{arquivoCarregado ? '1' : '0'}</strong>
+          <small>
+            {arquivoCarregado ? 'Arquivo pronto para envio' : 'Nenhum arquivo carregado'}
+          </small>
         </article>
 
         <article className="indicador-card">
@@ -283,8 +283,8 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
               <img src="/banco.svg" alt="Banco" />
             </div>
           </div>
-          <strong>{linhasArquivo.length > 0 ? validacao.total.toLocaleString('pt-BR') : '1.284'}</strong>
-          <small>{linhasArquivo.length > 0 ? `${validacao.validos.length} prontos para salvar` : '+1.240 no último arquivo'}</small>
+          <strong>{validacao.total.toLocaleString('pt-BR')}</strong>
+          <small>{validacao.validos.length} prontos para salvar</small>
         </article>
 
         <article className="indicador-card">
@@ -294,8 +294,12 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
               <img src="/alert.svg" alt="Alerta" />
             </div>
           </div>
-          <strong>{linhasArquivo.length > 0 ? validacao.comAlertas.length : '27'}</strong>
-          <small>{linhasArquivo.length > 0 && validacao.comAlertas.length === 0 ? 'Nenhum erro cadastral' : 'Revisão antes de salvar'}</small>
+          <strong>{validacao.comAlertas.length}</strong>
+          <small>
+            {validacao.comAlertas.length === 0
+              ? 'Nenhum erro cadastral'
+              : 'Revisão antes de salvar'}
+          </small>
         </article>
 
         <article className="indicador-card">
@@ -306,7 +310,7 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
             </div>
           </div>
           <strong>{validacao.taxaAprovacao}%</strong>
-          <small>{linhasArquivo.length > 0 ? `${validacao.validos.length} de ${validacao.total} válidos` : '1.257 de 1.284 registros válidos'}</small>
+          <small>{validacao.validos.length} de {validacao.total} válidos</small>
         </article>
       </section>
 
@@ -565,6 +569,15 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
             </div>
 
             <div className="historico-lista">
+
+              {historicoFiltrado.length === 0 && (
+                <p className="historico-vazio">
+                  {buscaHistorico
+                    ? 'Nenhuma importação encontrada para essa busca.'
+                    : 'Nenhuma importação realizada até o momento.'}
+                </p>
+              )}
+
               {historicoFiltrado.map((item) => (
                 <div key={item.id} className="historico-item">
                   <span className="historico-avatar">{item.iniciais}</span>
@@ -586,27 +599,27 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
           <section className="painel-card painel-resumo">
             <h3>Resumo da importação</h3>
             <p className="resumo-arquivo">
-              {arquivoCarregado ? arquivoCarregado.nome : 'clientes_out2026.csv (demonstração)'}
+              {arquivoCarregado ? arquivoCarregado.nome : 'Nenhum arquivo selecionado'}
             </p>
 
             <div className="resumo-linha">
               <span>Registros lidos</span>
-              <strong>{linhasArquivo.length > 0 ? validacao.total : 1284}</strong>
+              <strong>{validacao.total}</strong>
             </div>
 
             <div className="resumo-linha">
               <span>Registros válidos</span>
-              <strong className="texto-verde">{linhasArquivo.length > 0 ? validacao.validos.length : 1257}</strong>
+              <strong className="texto-verde">{validacao.validos.length}</strong>
             </div>
 
             <div className="resumo-linha">
               <span>Com alertas</span>
-              <strong className="texto-amarelo">{linhasArquivo.length > 0 ? validacao.comAlertas.length : 27}</strong>
+              <strong className="texto-amarelo">{validacao.comAlertas.length}</strong>
             </div>
 
             <div className="resumo-linha">
               <span>Possíveis duplicados</span>
-              <strong>{linhasArquivo.length > 0 ? validacao.duplicadosCount : 18}</strong>
+              <strong>{validacao.duplicadosCount}</strong>
             </div>
 
             <div className="resumo-aviso">
@@ -621,12 +634,12 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
             <button
               className="botao-resumo-principal"
               type="button"
-              disabled={isProcessando}
+              disabled={isProcessando || !arquivoCarregado}
               onClick={() => {
                 if (validacao.comAlertas.length > 0) {
                   setModalRevisaoAberto(true);
                 } else {
-                  executarImportacao(false);
+                  executarImportacao();
                 }
               }}
             >
@@ -736,7 +749,7 @@ export default function ImportarNeocore({ embedded = false, onShowToast }) {
           totalItens={linhasArquivo.length > 0 ? validacao.total : 1284}
           onApprove={(item) => showFeedback(`Sugestão aprovada para "${item.nome}"!`)}
           onReject={(item) => showFeedback(`Sugestão rejeitada para "${item.nome}".`)}
-          onConcluirRevisao={() => executarImportacao(true)}
+          onConcluirRevisao={(aprovados) => executarImportacao(aprovados)}
         />
       )}
     </main>

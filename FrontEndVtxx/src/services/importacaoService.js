@@ -1,4 +1,3 @@
-import { apiRequest } from './api';
 import { contactService } from './contactService';
 
 /**
@@ -157,67 +156,44 @@ export function validarRegistros(rows, mapping, switches = {}) {
   };
 }
 
-// Envia lote de empresas para a API do backend (POST /importacoes/cnpj)
+
+/**
+ * Importa empresas para o armazenamento local do NeoCore.
+ * Os contatos ficam salvos no localStorage.
+ */
 export async function enviarImportacaoApi(empresasParaImportar) {
-  // O backend aceita lotes de até 100 empresas
-  const lotes = [];
-  const tamanhoLote = 100;
-
-  for (let i = 0; i < empresasParaImportar.length; i += tamanhoLote) {
-    lotes.push(empresasParaImportar.slice(i, i + tamanhoLote));
-  }
-
   const resultados = [];
-  let conectouBackend = false;
 
-  for (const lote of lotes) {
-    const payload = {
-      empresas: lote.map(emp => ({
-        nome: emp.nome.slice(0, 160),
-        slug: emp.slug.slice(0, 100) || 'empresa-' + Math.random().toString(36).substring(2, 7),
-        cnpj: normalizarCnpj(emp.cnpj),
-        setor: (emp.setor || 'Cliente - B2B').slice(0, 80),
-        cidade: (emp.cidade || 'São Paulo').slice(0, 100),
-        uf: (emp.uf || 'SP').slice(0, 2).toUpperCase(),
-        descricao: `Importado via NeoCore em ${new Date().toLocaleDateString('pt-BR')}`,
-        urlSite: `https://${emp.slug}.com.br`
-      }))
-    };
-
-    try {
-      const response = await apiRequest('/importacoes/cnpj', {
-        method: 'POST',
-        body: JSON.stringify(payload)
+  try {
+    for (const emp of empresasParaImportar) {
+      const contato = await contactService.addContact({
+        name: emp.nome,
+        company: emp.nome,
+        email: emp.email || '',
+        phone: emp.telefone || '',
+        location: `${emp.cidade || ''}, ${emp.uf || ''} - Brasil`,
+        segment: emp.setor || 'Cliente - B2B',
+        status: emp.alertas?.length > 0 ? 'Em revisão' : 'Unificado'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        resultados.push(...data);
-        conectouBackend = true;
-      }
-    } catch {
-      // Falha de conexão com backend
+      resultados.push(contato);
     }
-  }
 
-  // Também sincroniza com a lista de contatos do Front-end para refletir imediatamente
-  for (const emp of empresasParaImportar) {
-    await contactService.addContact({
-      name: emp.nome,
-      company: emp.nome,
-      email: emp.email || `contato@${emp.slug || 'empresa'}.com.br`,
-      phone: emp.telefone || '+55 (11) 90000-0000',
-      location: `${emp.cidade}, ${emp.uf} - Brasil`,
-      segment: emp.setor || 'Cliente - B2B',
-      status: emp.alertas?.length > 0 ? 'Em revisão' : 'Unificado'
-    });
-  }
+    return {
+      sucesso: true,
+      conectouBackend: false,
+      totalImportado: resultados.length,
+      resultadosBackend: resultados
+    };
+  } catch (erro) {
+    console.error('Erro ao importar empresas:', erro);
 
-  return {
-    sucesso: true,
-    conectouBackend,
-    totalImportado: empresasParaImportar.length,
-    resultadosBackend: resultados
-  };
+    return {
+      sucesso: false,
+      conectouBackend: false,
+      totalImportado: resultados.length,
+      resultadosBackend: resultados
+    };
+  }
 }
-
+  

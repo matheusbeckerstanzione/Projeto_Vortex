@@ -20,6 +20,10 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [segmentFilter, setSegmentFilter] = useState('ALL');
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const contactsPerPage = 7
+
   const [activeTab, setActiveTab] = useState('gerais');
   const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -89,13 +93,29 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
 
   // Carregar contatos iniciais do service
   useEffect(() => {
-    contactService.getContacts().then((data) => {
-      setContacts(data);
-      if (data.length > 0 && !selectedContactId) {
-        setSelectedContactId(data[0].id);
+    const carregarContatos = async () => {
+      try {
+        const data = await contactService.getContacts();
+
+        setContacts(data);
+
+        if (data.length > 0) {
+          setSelectedContactId((prev) => {
+            // Mantém o contato selecionado, se ele ainda existir
+            const contatoAindaExiste = data.some(
+              (contact) => contact.id === prev
+            );
+
+            return contatoAindaExiste ? prev : data[0].id;
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar contatos:', error);
       }
-    });
-  }, []);
+    };
+
+    carregarContatos();
+  }, [activeMenu]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -137,6 +157,18 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
       return matchesSearch && matchesStatus && matchesSource && matchesSegment;
     });
   }, [contacts, searchTerm, statusFilter, sourceFilter, segmentFilter, activeMenu]);
+
+  // Paginação dos contatos
+  const totalPages = Math.ceil(filteredContacts.length / contactsPerPage);
+
+  const startIndex = (currentPage - 1) * contactsPerPage;
+  const endIndex = startIndex + contactsPerPage;
+
+  const paginatedContacts = filteredContacts.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, sourceFilter, statusFilter, segmentFilter, activeMenu])
 
   // Contato selecionado
   const selectedContact = useMemo(() => {
@@ -342,145 +374,145 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
               </button>
             </div>
 
-          <nav className="sidebar-nav">
-            <div
-              className={`nav-item ${activeMenu === 'inicio' ? 'active' : ''}`}
-              onClick={() => {
-                handleMenuSelect('inicio');
-                setStatusFilter('ALL');
-                setSourceFilter('ALL');
-                setSegmentFilter('ALL');
-              }}
-            >
-              <span className="nav-bullet"></span>
-              <span className="nav-text">Início</span>
-            </div>
-
-            {/* Menu Group: Contatos */}
-            <div className={`nav-group ${isContactsOpen ? 'open' : 'closed'}`}>
+            <nav className="sidebar-nav">
               <div
-                className={`nav-item group-header ${isContactsOpen || ['todos-contatos', 'completar', 'enriquecimento', 'perfil-completo', 'ficha'].includes(activeMenu) ? 'active' : ''}`}
+                className={`nav-item ${activeMenu === 'inicio' ? 'active' : ''}`}
                 onClick={() => {
-                  const willOpen = !isContactsOpen;
-                  setIsContactsOpen(willOpen);
-                  if (willOpen && activeMenu === 'inicio') {
-                    handleMenuSelect('todos-contatos');
-                    setStatusFilter('ALL');
-                  }
+                  handleMenuSelect('inicio');
+                  setStatusFilter('ALL');
+                  setSourceFilter('ALL');
+                  setSegmentFilter('ALL');
                 }}
-                title="Contatos"
-                aria-expanded={isContactsOpen}
               >
-                <div className="group-left">
-                  <span className="nav-bullet"></span>
-                  <span className="nav-text">Contatos</span>
-                </div>
+                <span className="nav-bullet"></span>
+                <span className="nav-text">Início</span>
+              </div>
+
+              {/* Menu Group: Contatos */}
+              <div className={`nav-group ${isContactsOpen ? 'open' : 'closed'}`}>
                 <div
-                  className="chevron-btn"
-                  title={isContactsOpen ? "Recolher submenu" : "Expandir submenu"}
-                  aria-label={isContactsOpen ? "Recolher submenu" : "Expandir submenu"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsContactsOpen((prev) => !prev);
+                  className={`nav-item group-header ${isContactsOpen || ['todos-contatos', 'completar', 'enriquecimento', 'perfil-completo', 'ficha'].includes(activeMenu) ? 'active' : ''}`}
+                  onClick={() => {
+                    const willOpen = !isContactsOpen;
+                    setIsContactsOpen(willOpen);
+                    if (willOpen && activeMenu === 'inicio') {
+                      handleMenuSelect('todos-contatos');
+                      setStatusFilter('ALL');
+                    }
                   }}
+                  title="Contatos"
+                  aria-expanded={isContactsOpen}
                 >
-                  <svg className="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
+                  <div className="group-left">
+                    <span className="nav-bullet"></span>
+                    <span className="nav-text">Contatos</span>
+                  </div>
+                  <div
+                    className="chevron-btn"
+                    title={isContactsOpen ? "Recolher submenu" : "Expandir submenu"}
+                    aria-label={isContactsOpen ? "Recolher submenu" : "Expandir submenu"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsContactsOpen((prev) => !prev);
+                    }}
+                  >
+                    <svg className="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="nav-subitems">
+                  <div
+                    className={`sub-item ${activeMenu === 'todos-contatos' ? 'active' : ''}`}
+                    onClick={() => {
+                      handleMenuSelect('todos-contatos');
+                      setStatusFilter('ALL');
+                      setIsContactsOpen(true);
+                    }}
+                  >
+                    <span className="sub-bullet">·</span>
+                    {activeMenu === 'todos-contatos' && <span className="sub-bar"></span>}
+                    <span>Todos os contatos</span>
+                  </div>
+                  <div
+                    className={`sub-item ${activeMenu === 'enriquecimento' || activeMenu === 'completar' ? 'active' : ''}`}
+                    onClick={() => {
+                      handleMenuSelect('enriquecimento');
+                      setStatusFilter('review');
+                      setIsContactsOpen(true);
+                    }}
+                    title="Contatos com pendências cadastrais para enriquecimento"
+                  >
+                    <span className="sub-bullet">·</span>
+                    {(activeMenu === 'enriquecimento' || activeMenu === 'completar') && <span className="sub-bar"></span>}
+                    <span>Enriquecimento</span>
+                  </div>
+                  <div
+                    className={`sub-item ${activeMenu === 'perfil-completo' ? 'active' : ''}`}
+                    onClick={() => {
+                      handleMenuSelect('perfil-completo');
+                      setStatusFilter('unified');
+                      setIsContactsOpen(true);
+                    }}
+                    title="Contatos com todas as fontes unificadas"
+                  >
+                    <span className="sub-bullet">·</span>
+                    {activeMenu === 'perfil-completo' && <span className="sub-bar"></span>}
+                    <span>Perfil completo</span>
+                  </div>
+                  <div
+                    className={`sub-item ${activeMenu === 'ficha' ? 'active' : ''}`}
+                    onClick={() => {
+                      handleMenuSelect('ficha');
+                      setIsContactsOpen(true);
+                    }}
+                    title="Consultar fichas de origem brutas"
+                  >
+                    <span className="sub-bullet">·</span>
+                    {activeMenu === 'ficha' && <span className="sub-bar"></span>}
+                    <span>Ficha de origem</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="nav-subitems">
-                <div
-                  className={`sub-item ${activeMenu === 'todos-contatos' ? 'active' : ''}`}
-                  onClick={() => {
-                    handleMenuSelect('todos-contatos');
-                    setStatusFilter('ALL');
-                    setIsContactsOpen(true);
-                  }}
-                >
-                  <span className="sub-bullet">·</span>
-                  {activeMenu === 'todos-contatos' && <span className="sub-bar"></span>}
-                  <span>Todos os contatos</span>
-                </div>
-                <div
-                  className={`sub-item ${activeMenu === 'enriquecimento' || activeMenu === 'completar' ? 'active' : ''}`}
-                  onClick={() => {
-                    handleMenuSelect('enriquecimento');
-                    setStatusFilter('review');
-                    setIsContactsOpen(true);
-                  }}
-                  title="Contatos com pendências cadastrais para enriquecimento"
-                >
-                  <span className="sub-bullet">·</span>
-                  {(activeMenu === 'enriquecimento' || activeMenu === 'completar') && <span className="sub-bar"></span>}
-                  <span>Enriquecimento</span>
-                </div>
-                <div
-                  className={`sub-item ${activeMenu === 'perfil-completo' ? 'active' : ''}`}
-                  onClick={() => {
-                    handleMenuSelect('perfil-completo');
-                    setStatusFilter('unified');
-                    setIsContactsOpen(true);
-                  }}
-                  title="Contatos com todas as fontes unificadas"
-                >
-                  <span className="sub-bullet">·</span>
-                  {activeMenu === 'perfil-completo' && <span className="sub-bar"></span>}
-                  <span>Perfil completo</span>
-                </div>
-                <div
-                  className={`sub-item ${activeMenu === 'ficha' ? 'active' : ''}`}
-                  onClick={() => {
-                    handleMenuSelect('ficha');
-                    setIsContactsOpen(true);
-                  }}
-                  title="Consultar fichas de origem brutas"
-                >
-                  <span className="sub-bullet">·</span>
-                  {activeMenu === 'ficha' && <span className="sub-bar"></span>}
-                  <span>Ficha de origem</span>
-                </div>
+              <div
+                className={`nav-item ${activeMenu === 'importar' ? 'active' : ''}`}
+                onClick={() => handleMenuSelect('importar')}
+              >
+                <span className="nav-bullet"></span>
+                <span className="nav-text">Importar</span>
               </div>
-            </div>
 
-            <div
-              className={`nav-item ${activeMenu === 'importar' ? 'active' : ''}`}
-              onClick={() => handleMenuSelect('importar')}
-            >
-              <span className="nav-bullet"></span>
-              <span className="nav-text">Importar</span>
-            </div>
+              <div
+                className={`nav-item ${activeMenu === 'segmentos' ? 'active' : ''}`}
+                onClick={() => handleMenuSelect('segmentos')}
+              >
+                <span className="nav-bullet"></span>
+                <span className="nav-text">Segmentos</span>
+              </div>
 
-            <div
-              className={`nav-item ${activeMenu === 'segmentos' ? 'active' : ''}`}
-              onClick={() => handleMenuSelect('segmentos')}
-            >
-              <span className="nav-bullet"></span>
-              <span className="nav-text">Segmentos</span>
-            </div>
+              <div
+                className={`nav-item ${activeMenu === 'governanca' ? 'active' : ''}`}
+                onClick={() => handleMenuSelect('governanca')}
+              >
+                <span className="nav-bullet"></span>
+                <span className="nav-text">Governança</span>
+              </div>
 
-            <div
-              className={`nav-item ${activeMenu === 'governanca' ? 'active' : ''}`}
-              onClick={() => handleMenuSelect('governanca')}
-            >
-              <span className="nav-bullet"></span>
-              <span className="nav-text">Governança</span>
-            </div>
-
-            <div
-              className={`nav-item ${activeMenu === 'logs' ? 'active' : ''}`}
-              onClick={() => {
-                handleMenuSelect('logs');
-                setActiveTab('historico');
-              }}
-            >
-              <span className="nav-bullet"></span>
-              <span className="nav-text">Logs de auditoria</span>
-            </div>
-          </nav>
-        </div>
-      </aside>
+              <div
+                className={`nav-item ${activeMenu === 'logs' ? 'active' : ''}`}
+                onClick={() => {
+                  handleMenuSelect('logs');
+                  setActiveTab('historico');
+                }}
+              >
+                <span className="nav-bullet"></span>
+                <span className="nav-text">Logs de auditoria</span>
+              </div>
+            </nav>
+          </div>
+        </aside>
 
         {activeMenu === 'inicio' ? (
           <DashboardInicio
@@ -601,473 +633,492 @@ export default function DashboardContatos({ initialMenu = 'inicio' }) {
             <div className="vortex-contacts-content-split">
               {/* Center Content: Contatos Table */}
               <main className={`vortex-center-content ${contactMobileTab === 'details' ? 'mobile-hidden' : ''}`}>
-              <div className="content-page-header">
-                <div>
-                  <h1 className="page-title">Contatos</h1>
-                  <p className="page-subtitle">Consulte seus contatos e reúna os dados em um perfil único.</p>
-                </div>
-                <div className="page-header-actions">
-                  <button className="btn-secondary" onClick={handleExport} title="Baixar lista em CSV">
-                    Exportar
-                  </button>
-                  <button
-                    className="btn-primary"
-                    onClick={() => setIsNewContactModalOpen(true)}
-                    title="Cadastrar novo contato"
-                  >
-                    Novo contato
-                  </button>
-                </div>
-              </div>
-
-              {/* Table Card */}
-              <div className="table-card">
-                <div className="table-card-top">
-                  <h3 className="card-heading">Todos os contatos</h3>
-                  <span className="contacts-count">
-                    {filteredContacts.length} de 1.284 contatos
-                  </span>
-                </div>
-
-                {/* Search Bar */}
-                <div className="search-bar-wrapper">
-                  <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Buscar por nome, e-mail ou empresa"
-                    className="search-input"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  {searchTerm && (
-                    <button
-                      className="clear-search-btn"
-                      onClick={() => setSearchTerm('')}
-                      title="Limpar busca"
-                    >
-                      ✕
+                <div className="content-page-header">
+                  <div>
+                    <h1 className="page-title">Contatos</h1>
+                    <p className="page-subtitle">Consulte seus contatos e reúna os dados em um perfil único.</p>
+                  </div>
+                  <div className="page-header-actions">
+                    <button className="btn-secondary" onClick={handleExport} title="Baixar lista em CSV">
+                      Exportar
                     </button>
-                  )}
-                </div>
-
-                {/* Filters Row */}
-                <div className="filters-row">
-                  <div className="filter-dropdown">
-                    <select
-                      value={sourceFilter}
-                      onChange={(e) => setSourceFilter(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="ALL">Todas as fontes</option>
-                      <option value="Salesforce">CRM Salesforce</option>
-                      <option value="campanhas">Plataforma de campanhas</option>
-                      <option value="Omie">ERP Omie</option>
-                      <option value="CSV">Importação CSV</option>
-                    </select>
-                    <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </div>
-
-                  <div className="filter-dropdown">
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="ALL">Todos os status</option>
-                      <option value="unified">Unificado</option>
-                      <option value="review">Em revisão</option>
-                    </select>
-                    <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </div>
-
-                  <div className="filter-dropdown">
-                    <select
-                      value={segmentFilter}
-                      onChange={(e) => setSegmentFilter(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="ALL">Segmentos</option>
-                      <option value="Cliente - B2B">Cliente - B2B</option>
-                      <option value="Varejo">Varejo</option>
-                      <option value="Moda & Design">Moda & Design</option>
-                      <option value="Tecnologia / SaaS">Tecnologia / SaaS</option>
-                      <option value="Jurídico">Jurídico</option>
-                      <option value="Logística">Logística</option>
-                      <option value="Arquitetura">Arquitetura</option>
-                    </select>
-                    <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </div>
-
-                  {(searchTerm || sourceFilter !== 'ALL' || statusFilter !== 'ALL' || segmentFilter !== 'ALL' || activeMenu !== 'todos-contatos') && (
                     <button
-                      className="btn-clear-filters"
-                      onClick={() => {
-                        setSearchTerm('');
-                        setSourceFilter('ALL');
-                        setStatusFilter('ALL');
-                        setSegmentFilter('ALL');
-                        setActiveMenu('todos-contatos');
-                      }}
-                      title="Resetar todos os filtros"
+                      className="btn-primary"
+                      onClick={() => setIsNewContactModalOpen(true)}
+                      title="Cadastrar novo contato"
                     >
-                      Limpar filtros
+                      Novo contato
                     </button>
-                  )}
+                  </div>
                 </div>
 
-                {/* Contacts Table */}
-                <div className="table-responsive">
-                  <table className="contacts-table">
-                    <thead>
-                      <tr>
-                        <th className="th-contact">CONTATO</th>
-                        <th className="th-sources">FONTES</th>
-                        <th className="th-status">STATUS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredContacts.length === 0 ? (
+                {/* Table Card */}
+                <div className="table-card">
+                  <div className="table-card-top">
+                    <h3 className="card-heading">Todos os contatos</h3>
+                    <span className="contacts-count">
+                      {filteredContacts.length} de {contacts.length} contatos
+                    </span>
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="search-bar-wrapper">
+                    <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Buscar por nome, e-mail ou empresa"
+                      className="search-input"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <button
+                        className="clear-search-btn"
+                        onClick={() => setSearchTerm('')}
+                        title="Limpar busca"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filters Row */}
+                  <div className="filters-row">
+                    <div className="filter-dropdown">
+                      <select
+                        value={sourceFilter}
+                        onChange={(e) => setSourceFilter(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="ALL">Todas as fontes</option>
+                        <option value="Salesforce">CRM Salesforce</option>
+                        <option value="campanhas">Plataforma de campanhas</option>
+                        <option value="Omie">ERP Omie</option>
+                        <option value="CSV">Importação CSV</option>
+                      </select>
+                      <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+
+                    <div className="filter-dropdown">
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="ALL">Todos os status</option>
+                        <option value="unified">Unificado</option>
+                        <option value="review">Em revisão</option>
+                      </select>
+                      <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+
+                    <div className="filter-dropdown">
+                      <select
+                        value={segmentFilter}
+                        onChange={(e) => setSegmentFilter(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="ALL">Segmentos</option>
+                        <option value="Cliente - B2B">Cliente - B2B</option>
+                        <option value="Varejo">Varejo</option>
+                        <option value="Moda & Design">Moda & Design</option>
+                        <option value="Tecnologia / SaaS">Tecnologia / SaaS</option>
+                        <option value="Jurídico">Jurídico</option>
+                        <option value="Logística">Logística</option>
+                        <option value="Arquitetura">Arquitetura</option>
+                      </select>
+                      <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+
+                    {(searchTerm || sourceFilter !== 'ALL' || statusFilter !== 'ALL' || segmentFilter !== 'ALL' || activeMenu !== 'todos-contatos') && (
+                      <button
+                        className="btn-clear-filters"
+                        onClick={() => {
+                          setSearchTerm('');
+                          setSourceFilter('ALL');
+                          setStatusFilter('ALL');
+                          setSegmentFilter('ALL');
+                          setActiveMenu('todos-contatos');
+                        }}
+                        title="Resetar todos os filtros"
+                      >
+                        Limpar filtros
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Contacts Table */}
+                  <div className="table-responsive">
+                    <table className="contacts-table">
+                      <thead>
                         <tr>
-                          <td colSpan="3" className="no-results-td">
-                            Nenhum contato encontrado com os filtros aplicados.
-                          </td>
+                          <th className="th-contact">CONTATO</th>
+                          <th className="th-sources">FONTES</th>
+                          <th className="th-status">STATUS</th>
                         </tr>
-                      ) : (
-                        filteredContacts.map((contact) => {
-                          const isSelected = selectedContact && contact.id === selectedContact.id;
-                          return (
-                            <tr
-                              key={contact.id}
-                              className={`contact-row ${isSelected ? 'row-selected' : ''}`}
-                              onClick={() => {
-                                setSelectedContactId(contact.id);
-                                if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
-                                  setContactMobileTab('details');
-                                }
-                              }}
-                            >
-                              <td className="td-contact">
-                                <div className="contact-cell-content">
-                                  <div className={`contact-avatar ${isSelected ? 'avatar-highlight' : ''}`}>
-                                    {contact.initials}
-                                  </div>
-                                  <div className="contact-details">
-                                    <span className="contact-name">{contact.name}</span>
-                                    <span className="contact-company">{contact.company}</span>
-                                    <span className="contact-email">{contact.email}</span>
-                                    <span className="contact-sources-mobile">{contact.sourcesCount} {contact.sourcesLabel}</span>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="td-sources">
-                                <div className="sources-cell">
-                                  <span className="sources-number">{contact.sourcesCount}</span>
-                                  <span className="sources-label">{contact.sourcesLabel}</span>
-                                </div>
-                              </td>
-                              <td className="td-status">
-                                {contact.statusType === 'unified' ? (
-                                  <span className="status-badge unified">
-                                    <span className="status-dot"></span>
-                                    Unificado
-                                  </span>
-                                ) : (
-                                  <span className="status-badge review">
-                                    Em revisão
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Table Bottom Help Note */}
-                <div className="table-footer-note">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="9" y1="3" x2="9" y2="21"></line>
-                  </svg>
-                  <span>Selecione um contato para consultar o perfil unificado.</span>
-                </div>
-              </div>
-
-              {/* Pagination Controls */}
-              <div className="pagination-bar">
-                <span className="pagination-info">
-                  1-{Math.min(filteredContacts.length, 7)} de 1.284 contatos
-                </span>
-                <div className="pagination-controls">
-                  <button className="page-nav-btn" disabled aria-label="Página anterior">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                  </button>
-                  <button className="page-num active">1</button>
-                  <button className="page-nav-btn" aria-label="Próxima página">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </main>
-
-            {/* Right Sidebar: Perfil Unificado */}
-            {selectedContact && (
-              <aside className={`vortex-right-panel ${contactMobileTab === 'list' ? 'mobile-hidden' : ''}`}>
-                <div className="mobile-panel-back-bar">
-                  <button
-                    type="button"
-                    className="mobile-back-to-list-btn"
-                    onClick={() => setContactMobileTab('list')}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                    <span>Voltar para lista de contatos</span>
-                  </button>
-                </div>
-                <div className="panel-header">
-                  <h3 className="panel-title">Perfil unificado</h3>
-                  <button className="btn-edit" onClick={handleOpenEdit} title="Editar dados consolidados">
-                    Editar
-                  </button>
-                </div>
-
-                {/* Profile Identity Card */}
-                <div className="profile-identity">
-                  <div className="profile-avatar-large">
-                    {selectedContact.initials}
-                  </div>
-                  <div className="profile-info-block">
-                    <h2 className="profile-name">{selectedContact.name}</h2>
-                    <span className="profile-company">{selectedContact.company}</span>
-                    <span className="profile-id">ID NEOCORE: {selectedContact.id}</span>
-                  </div>
-                </div>
-
-                <div className="profile-status-badges">
-                  {selectedContact.statusType === 'unified' ? (
-                    <span className="status-badge unified small">
-                      <span className="status-dot"></span>
-                      Unificado
-                    </span>
-                  ) : (
-                    <span className="status-badge review small">
-                      Em revisão
-                    </span>
-                  )}
-                  <span className="records-count">
-                    {selectedContact.linkedSourcesCount} registros de origem vinculados
-                  </span>
-                </div>
-
-                {/* Tab Navigation */}
-                <div className="profile-tabs">
-                  <button
-                    className={`tab-btn ${activeTab === 'gerais' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('gerais')}
-                  >
-                    Dados gerais
-                  </button>
-                  <button
-                    className={`tab-btn ${activeTab === 'historico' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('historico')}
-                  >
-                    Histórico
-                  </button>
-                  <button
-                    className={`tab-btn ${activeTab === 'notas' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('notas')}
-                  >
-                    Notas {selectedContact.notes?.length > 0 && `(${selectedContact.notes.length})`}
-                  </button>
-                </div>
-
-                {/* Tab: Dados Gerais */}
-                {activeTab === 'gerais' && (
-                  <div className="tab-body">
-                    {/* Consolidated Data */}
-                    <div className="section-block">
-                      <div className="section-header">
-                        <h4 className="section-title">Dados consolidados</h4>
-                        <span className="section-extra-label">Fonte do dado</span>
-                      </div>
-
-                      <div className="consolidated-fields-list">
-                        {selectedContact.consolidatedData.map((item, idx) => (
-                          <div key={idx} className="field-row">
-                            <div className="field-left">
-                              <span className="field-label">{item.label}</span>
-                              <span className="field-value">{item.value}</span>
-                            </div>
-                            <div className="field-source">
-                              <svg className="link-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                              </svg>
-                              <span>{item.source}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Origin Sources */}
-                    <div className="section-block">
-                      <div className="section-header">
-                        <h4 className="section-title">Fontes de origem</h4>
-                        <button
-                          className="section-link-btn"
-                          onClick={() => setIsRecordsModalOpen(true)}
-                        >
-                          Ver registros
-                        </button>
-                      </div>
-
-                      <div className="origin-sources-list">
-                        {selectedContact.originSources.map((source, idx) => (
-                          <div key={idx} className="origin-source-card">
-                            <div className="source-card-left">
-                              <div className="source-icon-wrap">
-                                {source.type === 'crm' && (
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-                                  </svg>
-                                )}
-                                {source.type === 'erp' && (
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                                  </svg>
-                                )}
-                                {source.type === 'csv' && (
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                  </svg>
-                                )}
-                              </div>
-                              <div className="source-card-info">
-                                <span className="source-name">{source.name}</span>
-                                <span className="source-code">{source.code}</span>
-                              </div>
-                            </div>
-
-                            <div className="source-card-right">
-                              <span className="source-sync-status">{source.status}</span>
-                              <span className="source-sync-time">{source.syncDate}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Bottom Reconciled Banner */}
-                    <div className={`reconciliation-banner ${selectedContact.statusType === 'review' ? 'banner-alert' : ''}`}>
-                      <div className="banner-icon-circle">
-                        {selectedContact.statusType === 'review' ? (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                          </svg>
+                      </thead>
+                      <tbody>
+                        {filteredContacts.length === 0 ? (
+                          <tr>
+                            <td colSpan="3" className="no-results-td">
+                              Nenhum contato encontrado com os filtros aplicados.
+                            </td>
+                          </tr>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
+                          paginatedContacts.map((contact) => {
+                            const isSelected = selectedContact && contact.id === selectedContact.id;
+                            return (
+                              <tr
+                                key={contact.id}
+                                className={`contact-row ${isSelected ? 'row-selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedContactId(contact.id);
+                                  if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                                    setContactMobileTab('details');
+                                  }
+                                }}
+                              >
+                                <td className="td-contact">
+                                  <div className="contact-cell-content">
+                                    <div className={`contact-avatar ${isSelected ? 'avatar-highlight' : ''}`}>
+                                      {contact.initials}
+                                    </div>
+                                    <div className="contact-details">
+                                      <span className="contact-name">{contact.name}</span>
+                                      <span className="contact-company">{contact.company}</span>
+                                      <span className="contact-email">{contact.email}</span>
+                                      <span className="contact-sources-mobile">{contact.sourcesCount} {contact.sourcesLabel}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="td-sources">
+                                  <div className="sources-cell">
+                                    <span className="sources-number">{contact.sourcesCount}</span>
+                                    <span className="sources-label">{contact.sourcesLabel}</span>
+                                  </div>
+                                </td>
+                                <td className="td-status">
+                                  {contact.statusType === 'unified' ? (
+                                    <span className="status-badge unified">
+                                      <span className="status-dot"></span>
+                                      Unificado
+                                    </span>
+                                  ) : (
+                                    <span className="status-badge review">
+                                      Em revisão
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Table Bottom Help Note */}
+                  <div className="table-footer-note">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="9" y1="3" x2="9" y2="21"></line>
+                    </svg>
+                    <span>Selecione um contato para consultar o perfil unificado.</span>
+                  </div>
+                </div>
+
+                {/* Pagination Controls */}
+
+                <div className="pagination-bar">
+                  <span className="pagination-info">
+                    {filteredContacts.length === 0
+                      ? '0 contatos'
+                      : `${startIndex + 1}-${Math.min(endIndex, filteredContacts.length)} de ${filteredContacts.length} contatos`}
+                  </span>
+
+                  <div className="pagination-controls">
+                    <button
+                      className="page-nav-btn"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => prev - 1)}
+                      aria-label="Página anterior"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                      </svg>
+                    </button>
+
+                    <span className="page-num active">
+                      {totalPages === 0 ? 0 : currentPage} / {totalPages}
+                    </span>
+
+                    <button
+                      className="page-nav-btn"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage((prev) => prev + 1)}
+                      aria-label="Próxima página"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+              </main>
+
+              {/* Right Sidebar: Perfil Unificado */}
+              {selectedContact && (
+                <aside className={`vortex-right-panel ${contactMobileTab === 'list' ? 'mobile-hidden' : ''}`}>
+                  <div className="mobile-panel-back-bar">
+                    <button
+                      type="button"
+                      className="mobile-back-to-list-btn"
+                      onClick={() => setContactMobileTab('list')}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                      </svg>
+                      <span>Voltar para lista de contatos</span>
+                    </button>
+                  </div>
+                  <div className="panel-header">
+                    <h3 className="panel-title">Perfil unificado</h3>
+                    <button className="btn-edit" onClick={handleOpenEdit} title="Editar dados consolidados">
+                      Editar
+                    </button>
+                  </div>
+
+                  {/* Profile Identity Card */}
+                  <div className="profile-identity">
+                    <div className="profile-avatar-large">
+                      {selectedContact.initials}
+                    </div>
+                    <div className="profile-info-block">
+                      <h2 className="profile-name">{selectedContact.name}</h2>
+                      <span className="profile-company">{selectedContact.company}</span>
+                      <span className="profile-id">ID NEOCORE: {selectedContact.id}</span>
+                    </div>
+                  </div>
+
+                  <div className="profile-status-badges">
+                    {selectedContact.statusType === 'unified' ? (
+                      <span className="status-badge unified small">
+                        <span className="status-dot"></span>
+                        Unificado
+                      </span>
+                    ) : (
+                      <span className="status-badge review small">
+                        Em revisão
+                      </span>
+                    )}
+                    <span className="records-count">
+                      {selectedContact.linkedSourcesCount} registros de origem vinculados
+                    </span>
+                  </div>
+
+                  {/* Tab Navigation */}
+                  <div className="profile-tabs">
+                    <button
+                      className={`tab-btn ${activeTab === 'gerais' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('gerais')}
+                    >
+                      Dados gerais
+                    </button>
+                    <button
+                      className={`tab-btn ${activeTab === 'historico' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('historico')}
+                    >
+                      Histórico
+                    </button>
+                    <button
+                      className={`tab-btn ${activeTab === 'notas' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('notas')}
+                    >
+                      Notas {selectedContact.notes?.length > 0 && `(${selectedContact.notes.length})`}
+                    </button>
+                  </div>
+
+                  {/* Tab: Dados Gerais */}
+                  {activeTab === 'gerais' && (
+                    <div className="tab-body">
+                      {/* Consolidated Data */}
+                      <div className="section-block">
+                        <div className="section-header">
+                          <h4 className="section-title">Dados consolidados</h4>
+                          <span className="section-extra-label">Fonte do dado</span>
+                        </div>
+
+                        <div className="consolidated-fields-list">
+                          {selectedContact.consolidatedData.map((item, idx) => (
+                            <div key={idx} className="field-row">
+                              <div className="field-left">
+                                <span className="field-label">{item.label}</span>
+                                <span className="field-value">{item.value}</span>
+                              </div>
+                              <div className="field-source">
+                                <svg className="link-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                </svg>
+                                <span>{item.source}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Origin Sources */}
+                      <div className="section-block">
+                        <div className="section-header">
+                          <h4 className="section-title">Fontes de origem</h4>
+                          <button
+                            className="section-link-btn"
+                            onClick={() => setIsRecordsModalOpen(true)}
+                          >
+                            Ver registros
+                          </button>
+                        </div>
+
+                        <div className="origin-sources-list">
+                          {selectedContact.originSources.map((source, idx) => (
+                            <div key={idx} className="origin-source-card">
+                              <div className="source-card-left">
+                                <div className="source-icon-wrap">
+                                  {source.type === 'crm' && (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                                    </svg>
+                                  )}
+                                  {source.type === 'erp' && (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                    </svg>
+                                  )}
+                                  {source.type === 'csv' && (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                      <polyline points="14 2 14 8 20 8"></polyline>
+                                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                                      <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                  )}
+                                </div>
+                                <div className="source-card-info">
+                                  <span className="source-name">{source.name}</span>
+                                  <span className="source-code">{source.code}</span>
+                                </div>
+                              </div>
+
+                              <div className="source-card-right">
+                                <span className="source-sync-status">{source.status}</span>
+                                <span className="source-sync-time">{source.syncDate}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Bottom Reconciled Banner */}
+                      <div className={`reconciliation-banner ${selectedContact.statusType === 'review' ? 'banner-alert' : ''}`}>
+                        <div className="banner-icon-circle">
+                          {selectedContact.statusType === 'review' ? (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <line x1="12" y1="8" x2="12" y2="12"></line>
+                              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                          ) : (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
+                        </div>
+                        <div className="banner-text-wrap">
+                          <h5 className="banner-title">{selectedContact.reconciliation.title}</h5>
+                          <p className="banner-subtitle">{selectedContact.reconciliation.subtitle}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tab: Histórico */}
+                  {activeTab === 'historico' && (
+                    <div className="tab-body">
+                      <div className="timeline-container">
+                        {selectedContact.history && selectedContact.history.length > 0 ? (
+                          selectedContact.history.map((h, i) => (
+                            <div key={i} className="timeline-item">
+                              <div className="timeline-bullet"></div>
+                              <div className="timeline-content">
+                                <span className="timeline-date">{h.date}</span>
+                                <p className="timeline-action">{h.action}</p>
+                                <span className="timeline-source">Origem: {h.source}</span>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="tab-body-empty">
+                            <p>Nenhum histórico registrado para este contato.</p>
+                          </div>
                         )}
                       </div>
-                      <div className="banner-text-wrap">
-                        <h5 className="banner-title">{selectedContact.reconciliation.title}</h5>
-                        <p className="banner-subtitle">{selectedContact.reconciliation.subtitle}</p>
+                    </div>
+                  )}
+
+                  {/* Tab: Notas */}
+                  {activeTab === 'notas' && (
+                    <div className="tab-body">
+                      {/* Formulário de Nova Nota */}
+                      <form onSubmit={handleAddNote} className="note-form">
+                        <textarea
+                          placeholder="Adicionar nota interna sobre este contato..."
+                          value={newNoteText}
+                          onChange={(e) => setNewNoteText(e.target.value)}
+                          className="note-textarea"
+                          rows="3"
+                        />
+                        <div className="note-form-actions">
+                          <button type="submit" className="btn-primary small" disabled={!newNoteText.trim()}>
+                            Adicionar Nota
+                          </button>
+                        </div>
+                      </form>
+
+                      {/* Lista de Notas */}
+                      <div className="notes-list">
+                        {selectedContact.notes && selectedContact.notes.length > 0 ? (
+                          selectedContact.notes.map((note) => (
+                            <div key={note.id} className="note-card">
+                              <div className="note-header">
+                                <span className="note-author">{note.author}</span>
+                                <span className="note-date">{note.date}</span>
+                              </div>
+                              <p className="note-text">{note.text}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="tab-body-empty">
+                            <p>Nenhuma nota cadastrada ainda.</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {/* Tab: Histórico */}
-                {activeTab === 'historico' && (
-                  <div className="tab-body">
-                    <div className="timeline-container">
-                      {selectedContact.history && selectedContact.history.length > 0 ? (
-                        selectedContact.history.map((h, i) => (
-                          <div key={i} className="timeline-item">
-                            <div className="timeline-bullet"></div>
-                            <div className="timeline-content">
-                              <span className="timeline-date">{h.date}</span>
-                              <p className="timeline-action">{h.action}</p>
-                              <span className="timeline-source">Origem: {h.source}</span>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="tab-body-empty">
-                          <p>Nenhum histórico registrado para este contato.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Tab: Notas */}
-                {activeTab === 'notas' && (
-                  <div className="tab-body">
-                    {/* Formulário de Nova Nota */}
-                    <form onSubmit={handleAddNote} className="note-form">
-                      <textarea
-                        placeholder="Adicionar nota interna sobre este contato..."
-                        value={newNoteText}
-                        onChange={(e) => setNewNoteText(e.target.value)}
-                        className="note-textarea"
-                        rows="3"
-                      />
-                      <div className="note-form-actions">
-                        <button type="submit" className="btn-primary small" disabled={!newNoteText.trim()}>
-                          Adicionar Nota
-                        </button>
-                      </div>
-                    </form>
-
-                    {/* Lista de Notas */}
-                    <div className="notes-list">
-                      {selectedContact.notes && selectedContact.notes.length > 0 ? (
-                        selectedContact.notes.map((note) => (
-                          <div key={note.id} className="note-card">
-                            <div className="note-header">
-                              <span className="note-author">{note.author}</span>
-                              <span className="note-date">{note.date}</span>
-                            </div>
-                            <p className="note-text">{note.text}</p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="tab-body-empty">
-                          <p>Nenhuma nota cadastrada ainda.</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </aside>
-            )}
+                  )}
+                </aside>
+              )}
             </div>
           </div>
         )}

@@ -1,0 +1,190 @@
+.editar-segmento-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.editar-segmento-modal {
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+    color: #172033;
+    box-sizing: border-box; 
+}
+
+.editar-segmento-header {
+    position: relative;
+    margin-bottom: 26px;
+}
+
+.editar-segmento-tag {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.editar-segmento-tag span:first-child {
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.editar-segmento-header h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.editar-segmento-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 16px;
+}
+
+.editar-segmento-fechar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.editar-segmento-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.editar-segmento-campo label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #172033;
+}
+
+.editar-segmento-campo input,
+.editar-segmento-campo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font: inherit;
+    font-size: 15px;
+    color: #172033;
+    outline: none;
+    background: #fff;
+}
+
+.editar-segmento-campo input:focus,
+.editar-segmento-campo textarea:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+}
+
+.editar-segmento-campo textarea {
+    resize: vertical;
+    min-height: 85px;
+}
+
+.editar-segmento-aviso {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: #0369a1;
+    margin-top: 8px;
+}
+
+.editar-segmento-aviso strong {
+    font-size: 14px;
+}
+
+.editar-segmento-aviso p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.editar-segmento-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.editar-segmento-footer button {
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.editar-segmento-cancelar {
+    background: #fff;
+    color: #172033;
+    border: 1px solid #cbd5e1;
+}
+
+.editar-segmento-salvar {
+    background: #0c3b60;
+    color: #fff;
+    border: 1px solid #0c3b60;
+}
+
+.editar-segmento-disclaimer {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 18px 0 0;
+}
+
+@media (max-width: 600px) {
+    .editar-segmento-modal {
+        padding: 22px;
+        border-radius: 14px;
+    }
+
+    .editar-segmento-header h2 {
+        font-size: 21px;
+    }
+
+    .editar-segmento-footer {
+        flex-direction: column-reverse;
+    }
+
+    .editar-segmento-footer button {
+        width: 100%;
+    }
+}
