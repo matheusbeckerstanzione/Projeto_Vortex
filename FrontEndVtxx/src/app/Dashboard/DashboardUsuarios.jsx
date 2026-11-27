@@ -78,8 +78,17 @@ export default function DashboardUsuarios({ onShowToast }) {
     });
   }, [solicitacoes, searchTerm]);
 
+  const usuariosAtivos = useMemo(() => {
+    return usuarios.filter((u) => u.status !== 'DESATIVADO');
+  }, [usuarios]);
+
+  const usuariosDesativados = useMemo(() => {
+    return usuarios.filter((u) => u.status === 'DESATIVADO');
+  }, [usuarios]);
+
   const filteredUsuarios = useMemo(() => {
-    return usuarios.filter((u) => {
+    const base = activeTab === 'desativados' ? usuariosDesativados : usuariosAtivos;
+    return base.filter((u) => {
       if (!searchTerm) return true;
       const term = searchTerm.toLowerCase();
       return (
@@ -88,7 +97,7 @@ export default function DashboardUsuarios({ onShowToast }) {
         u.perfil?.toLowerCase().includes(term)
       );
     });
-  }, [usuarios, searchTerm]);
+  }, [activeTab, usuariosAtivos, usuariosDesativados, searchTerm]);
 
   // Ações de Solicitação
   const handleConfirmarAprovacao = async () => {
@@ -220,7 +229,16 @@ export default function DashboardUsuarios({ onShowToast }) {
           onClick={() => setActiveTab('usuarios')}
         >
           <span>Usuários do Sistema</span>
-          <span className="users-tab-badge secondary">{usuarios.length}</span>
+          <span className="users-tab-badge secondary">{usuariosAtivos.length}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`users-tab-btn ${activeTab === 'desativados' ? 'active' : ''}`}
+          onClick={() => setActiveTab('desativados')}
+        >
+          <span>Desativados</span>
+          <span className="users-tab-badge secondary">{usuariosDesativados.length}</span>
         </button>
 
         {/* Busca */}
@@ -326,8 +344,8 @@ export default function DashboardUsuarios({ onShowToast }) {
         </section>
       )}
 
-      {/* Conteúdo Aba 2: Usuários */}
-      {activeTab === 'usuarios' && (
+      {/* Conteúdo Aba 2 e 3: Usuários do Sistema / Desativados */}
+      {(activeTab === 'usuarios' || activeTab === 'desativados') && (
         <section className="users-card">
           <div className="users-table-responsive">
             <table className="users-table">
@@ -351,7 +369,9 @@ export default function DashboardUsuarios({ onShowToast }) {
                 ) : filteredUsuarios.length === 0 ? (
                   <tr>
                     <td colSpan="6" style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
-                      Nenhum usuário cadastrado encontrado.
+                      {activeTab === 'desativados'
+                        ? 'Nenhum usuário desativado encontrado.'
+                        : 'Nenhum usuário cadastrado encontrado.'}
                     </td>
                   </tr>
                 ) : (
@@ -382,15 +402,17 @@ export default function DashboardUsuarios({ onShowToast }) {
                           : '—'}
                       </td>
                       <td style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                        <button
-                          type="button"
-                          className="users-action-btn activate"
-                          disabled={actionLoading}
-                          onClick={() => handleGerarConvite(u)}
-                          title="Gerar link/token de ativação de conta"
-                        >
-                          Convite
-                        </button>
+                        {activeTab === 'usuarios' && (
+                          <button
+                            type="button"
+                            className="users-action-btn activate"
+                            disabled={actionLoading}
+                            onClick={() => handleGerarConvite(u)}
+                            title="Gerar link/token de ativação de conta"
+                          >
+                            Convite
+                          </button>
+                        )}
                         <button
                           type="button"
                           className={`users-action-btn ${u.status === 'ATIVO' ? 'deactivate' : 'activate'}`}
