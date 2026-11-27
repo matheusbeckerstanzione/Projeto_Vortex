@@ -1,60 +1,17 @@
-
 import React, { useState } from 'react';
 import '../styles/modalRevisao.css';
 
-export default function ModalRevisao({
-  fecharModal,
-  onApprove,
-  onReject,
-  itemsParaRevisao = [],
-  totalItens = 0,
-  onConcluirRevisao
-}) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [itensAprovados, setItensAprovados] = useState([]);
-
-  const totalSteps = itemsParaRevisao.length;
-
-  if (totalSteps === 0) return null;
-
-  const itemOriginal = itemsParaRevisao[currentStep];
-
-  const currentItem = {
-    nome: itemOriginal.nome || 'Empresa sem nome',
-    iniciais: (itemOriginal.nome || 'NC').slice(0, 2).toUpperCase(),
-    campoDuvida: itemOriginal.alertas?.join(', ') || 'Validação cadastral pendente',
-    valorAtual: itemOriginal.cnpj || itemOriginal.email || 'Não informado',
-    sugestao: itemOriginal.setor || 'Não informado',
-    confianca: 'Necessita revisão',
-    motivo: itemOriginal.alertas?.join(', ') || 'Necessita confirmação humana'
-  };
+export default function ModalRevisao({ fecharModal, onApprove, onReject, recordName = 'Registro em Revisão' }) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 1;
 
   const handleAction = (type) => {
-    let aprovadosAtualizados = [...itensAprovados];
-
-    if (type === 'approve') {
-      aprovadosAtualizados.push(itemOriginal);
-
-      setItensAprovados(aprovadosAtualizados);
-
-      if (onApprove) {
-        onApprove(itemOriginal);
-      }
-    }
-
-    if (type === 'reject' && onReject) {
-      onReject(itemOriginal);
-    }
-
-    // Avança para o próximo registro
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
-      return;
-    }
-
-    // Último registro: envia somente os aprovados
-    if (onConcluirRevisao) {
-      onConcluirRevisao(aprovadosAtualizados);
+    if (currentStep < totalSteps) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      if (type === 'approve' && onApprove) onApprove();
+      if (type === 'reject' && onReject) onReject();
+      fecharModal();
     }
   };
 
@@ -89,28 +46,23 @@ export default function ModalRevisao({
           <span className="revisao-alerta-icone">!</span>
 
           <div>
-            <strong>
-              {totalSteps} de {totalItens} cadastros precisam de revisão
-            </strong>
+            <strong>Revisão de consistência cadastral</strong>
             <p>
-              Os outros {Math.max(0, totalItens - totalSteps)} registros
-              passaram pela validação automática.
+              Validação de atributos e correspondência de campos antes da confirmação no banco de dados.
             </p>
           </div>
         </div>
 
         <div className="revisao-progresso">
           <div className="revisao-progresso-texto">
-            <strong>Revisão {currentStep + 1} de {totalSteps}</strong>
-            <span>{totalSteps - currentStep - 1} restantes</span>
+            <strong>Revisão {currentStep} de {totalSteps}</strong>
+            <span>{totalSteps - currentStep} restantes</span>
           </div>
 
           <div className="revisao-barra">
             <div
               className="revisao-barra-preenchida"
-              style={{
-                width: `${((currentStep + 1) / totalSteps) * 100}%`
-              }}
+              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
         </div>
@@ -118,44 +70,40 @@ export default function ModalRevisao({
         <article className="revisao-contato">
           <div className="revisao-contato-topo">
             <div className="revisao-empresa">
-              <div className="revisao-empresa-avatar">
-                {currentItem.iniciais}
-              </div>
+              <div className="revisao-empresa-avatar">{recordName.slice(0, 2).toUpperCase()}</div>
 
               <div>
-                <h3>{currentItem.nome}</h3>
-                <span>Campo em dúvida: {currentItem.campoDuvida}</span>
+                <h3>{recordName}</h3>
+                <span>Campo em validação: Atributo complementar</span>
               </div>
             </div>
 
-            <span className="revisao-confianca">
-              {currentItem.confianca}
-            </span>
+            <span className="revisao-confianca">Confiança baixa · 62%</span>
           </div>
 
           <div className="revisao-comparacao">
             <div className="revisao-campo atual">
               <span>Valor atual</span>
-              <strong>{currentItem.valorAtual}</strong>
+              <strong>— (vazio)</strong>
             </div>
 
             <div className="revisao-campo sugestao">
-              <span>Informação complementar</span>
-              <strong>{currentItem.sugestao}</strong>
+              <span>Sugestão da IA</span>
+              <strong>Segmento Corporativo B2B</strong>
             </div>
           </div>
 
           <div className="revisao-detalhes">
             <div>
               <span>Fonte</span>
-              <span>Motivo da dúvida</span>
+              <span>Motivo da validação</span>
               <span>Origem do dado</span>
             </div>
 
             <div className="revisao-detalhes-valores">
-              <strong>Arquivo importado</strong>
-              <strong>{currentItem.motivo}</strong>
-              <strong>Arquivo CSV</strong>
+              <strong>PostgreSQL NeoCore</strong>
+              <strong>Correspondência cadastral validada</strong>
+              <strong>Será registrada no log de auditoria</strong>
             </div>
           </div>
         </article>
@@ -163,7 +111,8 @@ export default function ModalRevisao({
         <div className="revisao-privacidade">
           <span>✓</span>
           <p>
-            Nenhum registro com alerta será salvo sem sua aprovação.
+            Os dados foram pseudonimizados antes de passar pela IA. Nada é salvo
+            no cadastro sem a sua aprovação.
           </p>
         </div>
 

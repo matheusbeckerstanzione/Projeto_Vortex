@@ -241,7 +241,7 @@ function updateColorsFromCss(uniforms) {
  *   • reset()          — volta instantaneamente ao estado inicial.
  *   • get container()  — retorna o elemento DOM do wrapper (para animação FLIP).
  */
-const OrbScene = forwardRef(function OrbScene({ locked = false }, ref) {
+const OrbScene = forwardRef(function OrbScene({ compact = false, locked = false }, ref) {
   const containerRef = useRef(null);
   const state = useRef({});
 
@@ -314,22 +314,27 @@ const OrbScene = forwardRef(function OrbScene({ locked = false }, ref) {
       'width:100%;height:100%;display:block;position:relative;z-index:1';
     el.appendChild(renderer.domElement);
 
-    // Tooltip flutuante de localização ao passar o mouse sobre os bonequinhos
-    const tooltipEl = document.createElement('div');
-    tooltipEl.className = 'orb-tooltip';
-    tooltipEl.innerHTML = `
-      <div class="orb-tooltip-title">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        <span class="orb-city-text"></span>
-      </div>
-      <div class="orb-country-text"></div>
-    `;
-    el.appendChild(tooltipEl);
-    const cityTextEl = tooltipEl.querySelector('.orb-city-text');
-    const countryTextEl = tooltipEl.querySelector('.orb-country-text');
+    // Tooltip flutuante de localização ao passar o mouse sobre os bonequinhos (desativado no modo compacto)
+    let tooltipEl = null;
+    let cityTextEl = null;
+    let countryTextEl = null;
+    if (!compact) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'orb-tooltip';
+      tooltipEl.innerHTML = `
+        <div class="orb-tooltip-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span class="orb-city-text"></span>
+        </div>
+        <div class="orb-country-text"></div>
+      `;
+      el.appendChild(tooltipEl);
+      cityTextEl = tooltipEl.querySelector('.orb-city-text');
+      countryTextEl = tooltipEl.querySelector('.orb-country-text');
+    }
 
     // Máscara com a geografia real dos continentes da Terra
     const earthMaskTexture = createEarthMaskTexture();
@@ -559,8 +564,10 @@ void main(){
       s.hovering = false;
     };
 
-    el.addEventListener('pointermove', onPointerMove);
-    el.addEventListener('pointerleave', onPointerLeave);
+    if (!compact) {
+      el.addEventListener('pointermove', onPointerMove);
+      el.addEventListener('pointerleave', onPointerLeave);
+    }
 
     /* ---------- Resize ---------- */
     function size() {
@@ -692,8 +699,8 @@ void main(){
         peg.mat.opacity = opacity;
         peg.sprite.visible = opacity > 0.01;
 
-        // Se estiver de frente para a câmera e não estiver bloqueado, verifica hover do mouse
-        if (!locked && opacity > 0.15 && dot > 0.04) {
+        // Se estiver de frente para a câmera, verifica hover do mouse (apenas fora do modo compacto e não bloqueado)
+        if (!compact && !locked && opacity > 0.15 && dot > 0.04) {
           peg.sprite.getWorldPosition(tempWorldPos);
           // Eleva levemente o ponto de referência para a cabeça do boneco
           tempWorldPos.y += 0.10;
@@ -711,24 +718,28 @@ void main(){
       });
 
       // Atualiza card flutuante de localização e velocidade do globo
-      if (!locked && hoveredPeg && s.hovering && d < 0.2) {
-        targetRotSpeed = 0.03; // Desacelera para visualização fácil
-        el.style.cursor = 'pointer';
-        cityTextEl.textContent = hoveredPeg.peg.city;
-        countryTextEl.textContent = hoveredPeg.peg.country;
-        tooltipEl.style.left = `${hoveredPeg.screenX}px`;
-        tooltipEl.style.top = `${hoveredPeg.screenY}px`;
-        tooltipEl.classList.add('show');
-        // Aumenta o tamanho do boneco focado
-        hoveredPeg.peg.sprite.scale.multiplyScalar(1.25);
+      if (!compact && tooltipEl) {
+        if (!locked && hoveredPeg && s.hovering && d < 0.2) {
+          targetRotSpeed = 0.03; // Desacelera para visualização fácil
+          el.style.cursor = 'pointer';
+          cityTextEl.textContent = hoveredPeg.peg.city;
+          countryTextEl.textContent = hoveredPeg.peg.country;
+          tooltipEl.style.left = `${hoveredPeg.screenX}px`;
+          tooltipEl.style.top = `${hoveredPeg.screenY}px`;
+          tooltipEl.classList.add('show');
+          // Aumenta o tamanho do boneco focado
+          hoveredPeg.peg.sprite.scale.multiplyScalar(1.25);
+        } else {
+          targetRotSpeed = locked ? 0.22 : 0.25; // Retoma rotação normal
+          el.style.cursor = locked ? 'not-allowed' : 'default';
+          tooltipEl.classList.remove('show');
+        }
       } else {
-        targetRotSpeed = locked ? 0.22 : 0.25; // Rotação suave contínua
-        el.style.cursor = locked ? 'not-allowed' : 'default';
-        tooltipEl.classList.remove('show');
+        targetRotSpeed = 0.28;
       }
 
       let on = 0;
-      if (!locked && s.hovering && d < 0.2) {
+      if (!compact && !locked && s.hovering && d < 0.2) {
         ray.setFromCamera(ndc, cam);
         const hit = ray.intersectObject(mesh)[0];
         if (hit) {
@@ -798,7 +809,7 @@ void main(){
 
       state.current = {};
     };
-  }, []);
+  }, [compact, locked]);
 
   return <div ref={containerRef} className="orb" aria-hidden="true" />;
 });

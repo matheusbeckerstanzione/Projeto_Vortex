@@ -1,0 +1,238 @@
+================================================================================
+              GUIA COMPLETO DO FRONT-END — PROJETO NEOCORE (VORTEX)
+================================================================================
+
+Este documento reúne toda a arquitetura, telas, rotas, serviços, globo 3D e
+integrações do front-end (pasta FrontEndVtxx) para consulta rápida e apresentação.
+
+
+--------------------------------------------------------------------------------
+1. TECNOLOGIAS E DEPENDÊNCIAS (FrontEndVtxx/package.json)
+--------------------------------------------------------------------------------
+- React 19.0.0 + React DOM 19.0.0
+- Vite 6.2.0 (build e servidor de desenvolvimento)
+- React Router DOM 7.18.4 (roteamento SPA)
+- Three.js 0.186.1 (renderização WebGL do Planeta Terra 3D)
+- world-atlas 2.0.2 + topojson-client 3.1.0 (mapa vetorial real dos continentes,
+  renderizado 100% offline em canvas sem requisições externas)
+- qrcode.react 4.2.0 (geração de QR Code para configuração de MFA/Google Auth)
+
+Comandos úteis (rodar dentro de FrontEndVtxx):
+  npm run dev     -> Sobe o servidor de desenvolvimento Vite
+  npm run build   -> Gera o build de produção em dist/
+  npm run preview -> Visualiza o build de produção localmente
+
+
+--------------------------------------------------------------------------------
+2. CONEXÃO COM A API (NUVEM)
+--------------------------------------------------------------------------------
+Arquivo: FrontEndVtxx/.env
+  VITE_API_URL=https://neocore-homologacao.onrender.com
+
+Arquivo: FrontEndVtxx/src/services/api.js
+- Centraliza todas as chamadas HTTP (get, post, put, patch, delete).
+- Lê o token JWT de localStorage ('neocore_token') e o usuário ('neocore_user').
+- Injeta automaticamente o cabeçalho "Authorization: Bearer <token>".
+- Se a API responder 401, limpa a sessão e dispara o evento
+  'neocore:session-expired'.
+
+
+--------------------------------------------------------------------------------
+3. ROTAS DA APLICAÇÃO (FrontEndVtxx/src/app/App.jsx)
+--------------------------------------------------------------------------------
+Rotas Públicas (com Layout compartilhado + Globo 3D ao lado esquerdo):
+  /                  -> LoginNeocore.jsx (tela inicial de login)
+  /login             -> LoginNeocore.jsx
+  /cadastro          -> CadastroNeocore.jsx (solicitação de acesso)
+  /ativar-conta      -> AtivarContaNeocore.jsx (ativação de conta via token de convite)
+
+Rotas do Painel (renderizam Dashboard.jsx -> DashboardContatos.jsx):
+  /dashboard         -> Abre no menu "Início" (DashboardInicio.jsx)
+  /contatos          -> Abre em "Todos os contatos"
+  /importar          -> Abre em "Importar" (ImportarNeocore.jsx)
+  /segmentos         -> Abre em "Segmentos" (DashboardSegmentos.jsx)
+  /usuarios          -> Abre em "Usuários & Acessos" (DashboardUsuarios.jsx)
+  /governanca        -> Abre em "Governança" (DashboardGovernanca.jsx)
+  /logs              -> Abre em "Logs de auditoria" (DashboardLogs.jsx)
+  /logs-auditoria    -> Abre em "Logs de auditoria" (DashboardLogs.jsx)
+
+Outras rotas:
+  /acesso-negado     -> AcessoNegado.jsx (exibida ao digitar código MFA 000000)
+  *                  -> Redireciona para /login
+
+
+--------------------------------------------------------------------------------
+4. ESTRUTURA COMPLETA DE PASTAS E ARQUIVOS (FrontEndVtxx/src/)
+--------------------------------------------------------------------------------
+
+[Raiz de src/]
+  main.jsx -> Ponto de entrada do React, monta <App /> no DOM.
+
+[src/app/ — Telas, Layouts e Efeitos 3D]
+  App.jsx
+    - Configura as rotas (BrowserRouter) e controla a transição cinematográfica
+      do login (o globo 3D viaja para o centro, dá zoom na câmera, tela
+      embranquece suavemente e revela o Dashboard).
+
+  AuthLayout.jsx
+    - Layout dividido para /login e /cadastro:
+      Esquerda: título + descrição + globo 3D (OrbScene).
+      Direita: card do formulário (<Outlet />).
+
+  OrbScene.jsx
+    - Planeta Terra 3D em Three.js com textura real dos continentes (world-atlas),
+      nuvens, brilho atmosférico e 20 marcadores (Pegmen) em cidades reais.
+    - Modo padrão (Login/Cadastro): exibe tooltips de cidade/país ao passar o
+      mouse e desacelera a rotação.
+    - Modo compacto (<OrbScene compact />): usado no botão flutuante do Dashboard;
+      desativa tooltips internos, raycasting e hover para funcionar como botão
+      limpo que abre a modal de Inteligência Artificial.
+
+  OrbContext.jsx / TransitionOrchestrator.jsx
+    - Contexto e orquestração de animações/transições do globo 3D.
+
+  LoginNeocore.jsx
+    - Formulário de login com e-mail, senha e 6 dígitos de MFA.
+    - No primeiro acesso, abre modal com QR Code e segredo para configurar no
+      Google Authenticator (POST /autenticacao/mfa/configuracao).
+    - Código 000000 redireciona para /acesso-negado (demonstração de bloqueio).
+
+  CadastroNeocore.jsx
+    - Formulário "Solicitar Acesso" (nome, e-mail, CPF, justificativa e termos).
+    - Envia para POST /solicitacoes-acesso.
+
+  AtivarContaNeocore.jsx
+    - Tela de ativação de conta (/ativar-conta?token=...) via convite gerado pelo
+      administrador, definindo a senha inicial (POST /convites/ativar).
+
+  AcessoNegado.jsx
+    - Tela de bloqueio/acesso negado com opção de retornar ao login.
+
+  Dashboard.jsx
+    - Wrapper de entrada do painel; ajusta overflow da página e renderiza
+      DashboardContatos.
+
+  ImportarNeocore.jsx + ModalRevisao.jsx
+    - Fluxo de importação de arquivos/contatos e modal de revisão pré-envio.
+
+[src/app/Dashboard/ — Telas Internas do Painel]
+  DashboardContatos.jsx (SHELL PRINCIPAL DO PAINEL)
+    - Contém o Header superior (logo, busca, saudação com perfil do usuário e
+      botão Sair), a Sidebar lateral (navegação + controle de perfil Admin),
+      a área central que alterna entre todas as sub-telas, o botão flutuante 3D
+      do globo no canto inferior direito e a modal em tela cheia da IA.
+    - Também possui a tela completa de "Todos os contatos":
+      * Listagem, busca, filtros por fonte/status/segmento
+      * Cadastro de novo contato (com seleção de empresa existente ou criação
+        de nova empresa com busca automática por CNPJ via POST /empresas/consulta-cnpj)
+      * Gerenciamento e exclusão de empresas cadastradas ("Gerenciar empresas")
+      * Painel lateral com dados consolidados, histórico, notas e exclusão de
+        contato, além de exportação em CSV.
+
+  DashboardInicio.jsx
+    - Tela "Início" (visão geral):
+      * 4 KPIs dinâmicos (Contatos enriquecidos, Interesses identificados,
+        Oportunidades pendentes, Atributos confirmados) — zerados quando não há
+        contatos no banco.
+      * Gráfico de "Afinidades do público" agrupado dinamicamente por segmento.
+      * Lista de "Inteligência recente", status do banco PostgreSQL na nuvem e
+        "Ações rápidas" (Enriquecer contatos, Criar segmentos e Inteligência IA).
+
+  DashboardEnriquecimento.jsx
+    - Tela de "Enriquecimento" / completar contatos com pendências cadastrais.
+    - Permite rodar enriquecimento em lote com estado visual no botão
+      (idle -> carregando -> concluído) e aprovar/rejeitar sugestões.
+
+  DashboardPerfilCompleto.jsx
+    - Visualização detalhada do perfil 360° de um contato unificado, com
+      confirmação/rejeição de afinidades persistida.
+
+  DashboardFichaOrigem.jsx
+    - Exibe as fichas de origem brutas de cada fonte antes da consolidação e
+      permite registrar solicitações de revisão como nota no contato.
+
+  DashboardSegmentos.jsx
+    - Catálogo de segmentos de público, filtros, detalhes de critérios, prévia
+      real de contatos (GET /segmentos/{id}/previa), recálculo (POST /segmentos/{id}/recalculo),
+      edição de nome/descrição/status (PUT /segmentos/{id}) e wizard interativo
+      ("Novo segmento" com IA em 7 etapas).
+
+  DashboardIA.jsx
+    - Módulo de Inteligência Artificial integrado à nuvem:
+      * Aberto como modal em tela cheia (95vw x 92vh) ao clicar no globo 3D
+        flutuante no canto inferior direito (ou via "Ações rápidas" no Início).
+      * Envia prompts/operações (RESUMIR, CLASSIFICAR, ENRIQUECER, CHAT) para
+        POST /ia/chat.
+      * Botão roxo "Executar Exemplo Fictício (Resumo)" para teste validado em
+        homologação (exibe resposta.conteudo.resumo).
+      * Coluna direita lista o histórico oficial da conta via GET /ia/historico.
+
+  DashboardUsuarios.jsx (Somente ADMINISTRADOR)
+    - Gestão de usuários, status (ativo/inativo), geração de convite/link de
+      ativação (/ativar-conta?token=...) e aprovação/rejeição de solicitações de acesso.
+
+  DashboardGovernanca.jsx (Somente ADMINISTRADOR)
+    - Painel de governança e conformidade LGPD: consumo de IA, alertas,
+      solicitações de exclusão, expirações, políticas e prévia de logs.
+
+  DashboardLogs.jsx (Somente ADMINISTRADOR)
+    - Tabela completa de logs de auditoria vindos do backend (/auditoria).
+
+[src/services/ — Integração com a API Spring Boot]
+  api.js               -> Cliente HTTP fetch + JWT Bearer + tratamento de 401/403
+  auth.js              -> Login, setup/confirmação de MFA, logout, solicitarAcesso
+  contactService.js    -> Contatos, empresas, consulta CNPJ, exclusões, notas e exportação CSV
+  enrichmentService.js -> Prévia/confirmação de enriquecimento e revisão de atributos
+  governancaService.js -> Fontes de dados, finalidades LGPD, logs e relatório CSV
+  iaService.js         -> POST /ia/chat e GET /ia/historico
+  importService.js     -> Processamento e envio de importações
+  segmentService.js    -> CRUD, status, prévia e recálculo de segmentos (/segmentos)
+  userService.js       -> Usuários, solicitações de acesso, convites e ativação de conta
+
+[src/styles/ — Folhas de Estilo CSS]
+  Cada tela possui seu CSS dedicado (login.css, cadastro.css, authLayout.css,
+  orbColor.css, transition.css, DashboardContatos.css, DashboardInicio.css,
+  DashboardEnriquecimento.css, DashboardPerfilCompleto.css,
+  DashboardFichaOrigem.css, DashboardSegmentos.css, DashboardUsuarios.css,
+  DashboardGovernanca.css, DashboardLogs.css, DashboardIA.css, importar.css,
+  modalRevisao.css, acessoNegado.css, dashboard.css).
+
+[src/constants/ & src/assets/]
+  governancaData.js    -> Estrutura inicial dos cards de governança e menu
+  assets/              -> Logos (logo.png, logo.svg, neocore-logo.png, Orb.svg)
+
+
+--------------------------------------------------------------------------------
+5. CONTROLE DE ACESSO (RBAC)
+--------------------------------------------------------------------------------
+- Perfil ANALISTA:
+  Acessa Início, Contatos (Todos, Enriquecimento, Perfil completo, Ficha de
+  origem), Importar, Segmentos e Inteligência IA (via globo 3D).
+- Perfil ADMINISTRADOR:
+  Acessa tudo acima + Usuários & Acessos, Governança e Logs de auditoria.
+
+
+--------------------------------------------------------------------------------
+6. ROTEIRO SUGERIDO PARA A APRESENTAÇÃO AO VIVO
+--------------------------------------------------------------------------------
+1. Tela de Login (/login):
+   - Mostrar o Planeta Terra 3D interativo com os bonecos (Pegmen) nas cidades
+     e explicar a autenticação em 2 fatores (Google Authenticator / MFA).
+   - Mostrar rapidamente /cadastro ("Solicitar Acesso").
+   - Fazer login e destacar a transição animada do planeta até o Dashboard.
+2. Tela Início (/dashboard):
+   - Mostrar que os KPIs e gráficos refletem os dados reais do banco na nuvem.
+3. Contatos & Empresas:
+   - Cadastrar ou visualizar um contato, mostrar a conciliação de perfil,
+     notas, histórico e a opção "Gerenciar empresas" (com exclusão).
+   - Passar por Enriquecimento, Perfil Completo e Ficha de Origem.
+4. Importar e Segmentos:
+   - Mostrar a importação e o wizard de criação de segmentos com checagem LGPD.
+5. Inteligência Artificial (Globo 3D no canto inferior direito):
+   - Clicar no planeta 3D flutuante -> abre a modal em tela cheia.
+   - Clicar em "Executar Exemplo Fictício (Resumo)" e mostrar a resposta da IA
+     na nuvem + atualização automática do histórico da conta (GET /ia/historico).
+6. Área Administrativa (se logado como ADMINISTRADOR):
+   - Mostrar Usuários & Acessos, Governança LGPD e Logs de Auditoria.
+
+================================================================================

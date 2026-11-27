@@ -238,6 +238,20 @@ body.dark-bg {
   text-align: center;
 }
 
+/* ===== Info Message ===== */
+.login-info {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  text-align: center;
+}
+
 /* ===== Labels ===== */
 label.l {
   display: block;
@@ -331,6 +345,13 @@ button.link:hover {
   font-size: 7.5px;
   color: #475569;
   letter-spacing: 0.04em;
+}
+
+.mfa-hint {
+  margin: 0 0 0 2px;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
 }
 
 .mfa {

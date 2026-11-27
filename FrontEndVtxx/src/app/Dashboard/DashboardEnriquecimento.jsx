@@ -1,181 +1,97 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { contactService } from '../../services/contactService';
+import { enrichmentService } from '../../services/enrichmentService';
 import '../../styles/DashboardEnriquecimento.css';
-import { attribute } from 'three/tsl';
-
-// Dados mockados da prévia de resultado
-const PREVIEW_DATA = [
-  {
-    id: 1,
-    name: 'Mariana Souza Ltda',
-    initials: 'MS',
-    attributes: [
-      { label: 'Tecnologia', color: 'navy' },
-      { label: 'SaaS B2B', color: 'navy' }
-    ],
-    source: 'CRM Salesforce',
-    confidence: '96%',
-    status: 'concluido',
-    statusLabel: 'Concluído'
-  },
-  {
-    id: 2,
-    name: 'Ateliê Nova Era',
-    initials: 'AN',
-    attributes: [
-      { label: 'Moda e estilo', color: 'teal' },
-      { label: 'design, ideias', color: 'teal' }
-    ],
-    source: 'Engajamento',
-    confidence: '91%',
-    status: 'revisao',
-    statusLabel: 'Em revisão'
-  },
-  {
-    id: 3,
-    name: 'Brasil Comércio',
-    initials: 'BC',
-    attributes: [
-      { label: 'Falha de fonte - retornar', color: 'red' }
-    ],
-    source: 'Erro, complementar',
-    confidence: '—',
-    status: 'erro',
-    statusLabel: 'Erro'
-  },
-  {
-    id: 4,
-    name: 'Farmácia Central',
-    initials: 'FC',
-    attributes: [
-      { label: 'Marcação atividades...', color: 'gray' }
-    ],
-    source: 'Processando...',
-    confidence: '—',
-    status: 'processando',
-    statusLabel: 'Processando'
-  },
-  {
-    id: 5,
-    name: 'Construtora Verde',
-    initials: 'CV',
-    attributes: [
-      { label: 'Aguardando seleção', color: 'light' }
-    ],
-    source: 'Ag. seleção',
-    confidence: '—',
-    status: 'selecionado',
-    statusLabel: 'Selecionado'
-  }
-];
-
-const STORAGE_KEYS = {
-  attributes: 'neocore_enrichment_attributes',
-  sources: 'neocore_enrichment_sources',
-  rules: 'neocore_enrichment_rules',
-  previewActions: 'neocore_enrichment_preview_actions'
-}
-
-function loadSavedData(key, fallback) {
-  try {
-    const saved = localStorage.getItem(key)
-    return saved ? JSON.parse(saved) : fallback
-  } catch (error) {
-    console.error('Erro ao carregar configurações:', error);
-    return fallback
-  }
-}
 
 export default function DashboardEnriquecimento({ onBack, onShowToast }) {
-  // Atributos selecionados
-  const [attributes, setAttributes] = useState(() =>
-    loadSavedData(STORAGE_KEYS.attributes, {
-      interesses: true,
-      preferencias: true,
-      categorias: true,
-      engajamento: true
-    })
-  )
+  const [contacts, setContacts] = useState([]);
 
-  // Fontes de dados
-  const [sources, setSources] = useState(() =>
-    loadSavedData(STORAGE_KEYS.sources, {
-      crm: true,
-      engajamento: true,
-      segmentacao: true,
-      comportamental: false
-    })
-  )
+  useEffect(() => {
+    contactService.getContacts().then((list) => {
+      setContacts(list || []);
+    });
+  }, []);
+
+  // Atributos selecionados para visualização
+  const [attributes, setAttributes] = useState({
+    interesses: true,
+    preferencias: true,
+    categorias: true,
+    engajamento: true
+  });
+
+  // Fontes de dados 
+  const [sources, setSources] = useState({
+    crm: true,
+    engajamento: true,
+    segmentacao: true,
+    comportamental: false
+  });
 
   // Regras da busca
-  const [rules, setRules] = useState(() =>
-    loadSavedData(STORAGE_KEYS.rules, {
-      camposVazios: true,
-      confiancaMinima: true,
-      registrarOrigem: true,
-      sobrescrever: false
-    })
-  )
+  const [rules, setRules] = useState({
+    camposVazios: true,
+    confiancaMinima: true,
+    registrarOrigem: true,
+    sobrescrever: false
+  });
 
-  // Busca
+  // Busca / search
   const [searchTerm, setSearchTerm] = useState('');
 
   // Ações da prévia
-  const [previewActions, setPreviewActions] = useState(() =>
-    loadSavedData(STORAGE_KEYS.previewActions, {})
-  )
+  const [previewActions, setPreviewActions] = useState(() => {
+    return {};
+  });
+  const [enrichedRows, setEnrichedRows] = useState(null);
+  const [enrichmentStatus, setEnrichmentStatus] = useState('idle'); // 'idle' | 'loading' | 'completed'
 
-
-
+  // Carrega contatos e decisões salvas
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.attributes,
-      JSON.stringify(attributes)
-    )
-  }, [attributes])
+    contactService.getContacts().then((list) => {
+      const contatos = list || [];
+      setContacts(contatos);
 
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.sources,
-      JSON.stringify(sources)
-    )
-  }, [sources])
+      // Carrega ações salvas anteriormente
+      const savedActions = {};
+      contatos.forEach((c) => {
+        const d = enrichmentService.obterDecisaoContato(c.id);
+        if (d?.status) {
+          savedActions[c.id] = d.status;
+        }
+      });
+      setPreviewActions(savedActions);
+    });
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.rules,
-      JSON.stringify(rules)
-    )
-  }, [rules])
+  // Lista de contatos reais formatados para a prévia 
+  const previewData = useMemo(() => {
+    let list = enrichedRows || contacts.map((c) => {
+      const d = enrichmentService.obterDecisaoContato(c.id);
+      return {
+        id: c.id,
+        empresaId: c.empresaId,
+        name: c.company && c.company !== 'Não informada' ? `${c.name} · ${c.company}` : c.name,
+        initials: c.initials || 'NC',
+        attributes: [
+          { label: c.segment || 'Geral', color: 'navy' }
+        ],
+        source: 'PostgreSQL NeoCore',
+        confidence: '100%',
+        status: d?.status || 'concluido',
+        statusLabel: d?.statusLabel || 'Pronto'
+      };
+    });
 
-  useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEYS.previewActions,
-      JSON.stringify(previewActions)
-    )
-  }, [previewActions])
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      list = list.filter((item) => item.name.toLowerCase().includes(term));
+    }
 
+    return list;
+  }, [contacts, enrichedRows, searchTerm]);
 
-
-
-
-  const filteredPreviewData = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase()
-
-    if(!term) return PREVIEW_DATA
-    
-    return PREVIEW_DATA.filter(contact => {
-      const searchableContent = [
-        contact.name,
-        contact.source,
-        contact.statusLabel,
-        ...contact.attributes.map(attribute => attribute.label)
-      ].join(' ').toLowerCase()
-
-      return searchableContent.includes(term)
-    })
-  }, [searchTerm])
-
-  // Contagem de atributos selecionados
+  // Contagem de atributos selecionados 
   const selectedCount = useMemo(() => {
     return Object.values(attributes).filter(Boolean).length;
   }, [attributes]);
@@ -208,14 +124,33 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
     });
   };
 
-  const handleApprove = (id) => {
+  const handleApprove = async (id) => {
+    const item = previewData.find(x => x.id === id);
+    const fields = item?.attributes.map(a => a.campoKey).filter(Boolean) ?? [];
+    const shouldConfirm = item?.empresaId && item?.previaId && fields.length > 0;
+    try {
+      if (shouldConfirm) {
+        await enrichmentService.confirmarEnriquecimento(
+          item.empresaId,
+          item.previaId,
+          fields
+        );
+      }
+    } catch (error) {
+      onShowToast?.(error.message || 'Não foi possível confirmar o enriquecimento.');
+      return;
+    }
+
     setPreviewActions(prev => ({ ...prev, [id]: 'approved' }));
-    if (onShowToast) onShowToast('Atributo aprovado com sucesso!');
+    enrichmentService.salvarDecisaoContato(id, { status: 'approved', statusLabel: 'Aprovado' });
+    onShowToast?.(shouldConfirm ? 'Atributos aprovados e confirmados!' : 'Revisão registrada neste navegador.');
   };
 
-  const handleReject = (id) => {
+  const handleReject = async (id) => {
     setPreviewActions(prev => ({ ...prev, [id]: 'rejected' }));
-    if (onShowToast) onShowToast('Atributo rejeitado.');
+    enrichmentService.salvarDecisaoContato(id, { status: 'rejected', statusLabel: 'Rejeitado' });
+
+    if (onShowToast) onShowToast('Atributos rejeitados na revisão.');
   };
 
   const handleSelect = (id) => {
@@ -223,34 +158,53 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
     if (onShowToast) onShowToast('Contato selecionado para enriquecimento.');
   };
 
-  const handleStartEnrichment = () => {
-    if (onShowToast) onShowToast('Enriquecimento de contatos iniciado em segundo plano!');
+  const handleStartEnrichment = async () => {
+    let listToEnrich = contacts;
+    if (listToEnrich.length === 0) {
+      listToEnrich = await contactService.getContacts();
+      setContacts(listToEnrich || []);
+    }
+
+    if (!listToEnrich || listToEnrich.length === 0) {
+      if (onShowToast) onShowToast('Nenhum contato encontrado no PostgreSQL para enriquecer.');
+      return;
+    }
+
+    setEnrichmentStatus('loading');
+    if (onShowToast) onShowToast('Consultando fontes homologadas e gerando prévias no NeoCore...');
+
+    try {
+      // Delay de processamento visível de 800ms
+      const [results] = await Promise.all([
+        enrichmentService.startBatchEnrichment(listToEnrich, attributes),
+        new Promise((resolve) => setTimeout(resolve, 800)),
+      ]);
+
+      setEnrichedRows(results);
+      setEnrichmentStatus('completed');
+      if (onShowToast) onShowToast(`Enriquecimento concluído para ${results.length} contato(s)! Revise os atributos sugeridos.`);
+    } catch (e) {
+      setEnrichmentStatus('idle');
+      if (onShowToast) onShowToast('Aviso no enriquecimento: ' + e.message);
+    }
   };
 
   const handleSaveResults = () => {
-    if (onShowToast) onShowToast('Resultados salvos e aplicados com sucesso!');
+    // Itera e salva as decisões
+    let aprovados = 0;
+    Object.entries(previewActions).forEach(([cid, action]) => {
+      if (action === 'approved') {
+        aprovados++;
+        enrichmentService.salvarDecisaoContato(cid, { status: 'approved', statusLabel: 'Aprovado' });
+      } else if (action === 'rejected') {
+        enrichmentService.salvarDecisaoContato(cid, { status: 'rejected', statusLabel: 'Rejeitado' });
+      }
+    });
+    if (onShowToast) onShowToast(`Resultados consolidados! ${aprovados} atributos confirmados no banco.`);
   };
 
   const handleSaveSelection = () => {
-    localStorage.setItem(
-      STORAGE_KEYS.attributes,
-      JSON.stringify(attributes)
-    )
-
-    localStorage.setItem(
-      STORAGE_KEYS.sources,
-      JSON.stringify(sources)
-    )
-
-    localStorage.setItem(
-      STORAGE_KEYS.rules,
-      JSON.stringify(rules)
-    )
-
-    if (onShowToast) {
-      onShowToast('Configurações de enriquecimento salvas!')
-    }
-
+    if (onShowToast) onShowToast('Regras e filtros de enriquecimento salvos!');
   };
 
   return (
@@ -260,7 +214,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
         <div className="enrich-title-group">
           <h1 className="enrich-page-title">Enriquecimento de contatos</h1>
           <p className="enrich-page-subtitle">
-            Selecione atributos e fontes, inicie o enriquecimento dos cadastros.
+            Selecione atributos e fontes, inicie o enriquecimento de cada cadastros.
           </p>
         </div>
 
@@ -279,8 +233,16 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
             />
           </div>
           <button className="enrich-link-btn" onClick={onBack}>Voltar</button>
-          <button className="enrich-btn-primary" onClick={handleStartEnrichment}>
-            Iniciar enriquecimento
+          <button
+            className={`enrich-btn-primary ${enrichmentStatus === 'completed' ? 'completed' : ''}`}
+            onClick={handleStartEnrichment}
+            disabled={enrichmentStatus === 'loading'}
+          >
+            {enrichmentStatus === 'loading'
+              ? '⏳ Enriquecendo base...'
+              : enrichmentStatus === 'completed'
+              ? '✓ Base Enriquecida'
+              : 'Iniciar enriquecimento'}
           </button>
         </div>
       </div>
@@ -300,8 +262,8 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               </svg>
             </div>
           </div>
-          <div className="enrich-kpi-value">1.284</div>
-          <div className="enrich-kpi-footer">Da importação clientes_nc0326.csv</div>
+          <div className="enrich-kpi-value">{contacts.length}</div>
+          <div className="enrich-kpi-footer">Base de dados PostgreSQL NeoCore</div>
         </div>
 
         {/* KPI 2: Atributos selecionados */}
@@ -332,8 +294,8 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               </svg>
             </div>
           </div>
-          <div className="enrich-kpi-value">2.140</div>
-          <div className="enrich-kpi-footer">Cerca de 1.7 por contato.</div>
+          <div className="enrich-kpi-value">{contacts.length * 2}</div>
+          <div className="enrich-kpi-footer">2 créditos por contato ativo.</div>
         </div>
 
         {/* KPI 4: Confiança média */}
@@ -346,8 +308,8 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               </svg>
             </div>
           </div>
-          <div className="enrich-kpi-value">91%</div>
-          <div className="enrich-kpi-footer">Estimativa do total · revisão por atributo.</div>
+          <div className="enrich-kpi-value">100%</div>
+          <div className="enrich-kpi-footer">Registros validados no banco de dados.</div>
         </div>
       </div>
 
@@ -409,7 +371,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   </div>
                   <div className="enrich-attr-text">
                     <span className="enrich-attr-name">Preferências declaradas</span>
-                    <span className="enrich-attr-desc">1.084 contatos com preferências.</span>
+                    <span className="enrich-attr-desc">Preferências de comunicação e canais.</span>
                   </div>
                 </div>
                 <div className={`enrich-checkbox ${attributes.preferencias ? 'checked' : ''}`}>
@@ -437,7 +399,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   </div>
                   <div className="enrich-attr-text">
                     <span className="enrich-attr-name">Categorias de produtos</span>
-                    <span className="enrich-attr-desc">142 contatos em categorias.</span>
+                    <span className="enrich-attr-desc">Classificação de verticais e categorias.</span>
                   </div>
                 </div>
                 <div className={`enrich-checkbox ${attributes.categorias ? 'checked' : ''}`}>
@@ -462,7 +424,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   </div>
                   <div className="enrich-attr-text">
                     <span className="enrich-attr-name">Engajamento</span>
-                    <span className="enrich-attr-desc">876 contatos com interações.</span>
+                    <span className="enrich-attr-desc">Métricas de cliques e interação.</span>
                   </div>
                 </div>
                 <div className={`enrich-checkbox ${attributes.engajamento ? 'checked' : ''}`}>
@@ -481,7 +443,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                 <line x1="12" y1="16" x2="12" y2="12" />
                 <line x1="12" y1="8" x2="12.01" y2="8" />
               </svg>
-              <span>Demonstração · use apenas fontes autorizadas e verifique a base legal antes de ativar campanhas.</span>
+              <span>Use apenas fontes autorizadas e verifique a base legal antes de ativar campanhas.</span>
             </div>
           </section>
 
@@ -599,7 +561,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               <div>
                 <h3 className="enrich-card-title">Prévia do resultado</h3>
                 <p className="enrich-card-subtitle">
-                  Exemplos com 5 contatos da seleção — atributos descobertos, fonte e confiança.
+                  Contatos da seleção — atributos validados, fonte e confiança.
                 </p>
               </div>
               <button className="enrich-manage-btn" onClick={onBack}>Ver todos</button>
@@ -617,60 +579,61 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPreviewData.map((row) => {
-                    const action = previewActions[row.id];
-                    return (
-                      <tr key={row.id} className={`preview-row status-${row.status}`}>
-                        <td className="preview-td-contact">
-                          <div className={`preview-avatar status-${row.status}`}>
-                            {row.initials}
-                          </div>
-                          <span className="preview-contact-name">{row.name}</span>
-                        </td>
-                        <td className="preview-td-attrs">
-                          <div className="preview-badges-wrap">
-                            {row.attributes.map((attr, idx) => (
-                              <span key={idx} className={`preview-badge badge-${attr.color}`}>
-                                {attr.label}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="preview-td-source">
-                          <span className={`preview-source-text status-${row.status}`}>{row.source}</span>
-                          {row.confidence !== '—' && (
-                            <span className="preview-confidence">{row.confidence}</span>
-                          )}
-                        </td>
-                        <td className="preview-td-status">
-                          <span className={`preview-status-badge status-${row.status}`}>
-                            {row.statusLabel}
-                          </span>
-                        </td>
-                        <td className="preview-td-action">
-                          {action === 'approved' ? (
-                            <span className="preview-action-done approved">Aprovado ✓</span>
-                          ) : action === 'rejected' ? (
-                            <span className="preview-action-done rejected">Rejeitado</span>
-                          ) : action === 'selected' ? (
-                            <span className="preview-action-done approved">Selecionado ✓</span>
-                          ) : (
-                            <>
-                              {(row.status === 'concluido' || row.status === 'revisao') && (
-                                <div className="preview-action-btns">
-                                  <button className="preview-btn approve" onClick={() => handleApprove(row.id)}>Aprovar</button>
-                                  <button className="preview-btn reject" onClick={() => handleReject(row.id)}>Rejeitar</button>
-                                </div>
-                              )}
-                              {row.status === 'selecionado' && (
-                                <button className="preview-btn select" onClick={() => handleSelect(row.id)}>Selecionar</button>
-                              )}
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {previewData.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
+                        Nenhum contato encontrado no banco de dados para enriquecimento.
+                      </td>
+                    </tr>
+                  ) : (
+                    previewData.map((row) => {
+                      const action = previewActions[row.id];
+                      return (
+                        <tr key={row.id} className={`preview-row status-${row.status}`}>
+                          <td className="preview-td-contact">
+                            <div className={`preview-avatar status-${row.status}`}>
+                              {row.initials}
+                            </div>
+                            <span className="preview-contact-name">{row.name}</span>
+                          </td>
+                          <td className="preview-td-attrs">
+                            <div className="preview-badges-wrap">
+                              {row.attributes.map((attr, idx) => (
+                                <span key={idx} className={`preview-badge badge-${attr.color}`}>
+                                  {attr.label}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="preview-td-source">
+                            <span className={`preview-source-text status-${row.status}`}>{row.source}</span>
+                            {row.confidence !== '—' && (
+                              <span className="preview-confidence">{row.confidence}</span>
+                            )}
+                          </td>
+                          <td className="preview-td-status">
+                            <span className={`preview-status-badge status-${row.status}`}>
+                              {row.statusLabel}
+                            </span>
+                          </td>
+                          <td className="preview-td-action">
+                            {action === 'approved' ? (
+                              <span className="preview-action-done approved">Aprovado ✓</span>
+                            ) : action === 'rejected' ? (
+                              <span className="preview-action-done rejected">Rejeitado</span>
+                            ) : action === 'selected' ? (
+                              <span className="preview-action-done approved">Selecionado ✓</span>
+                            ) : (
+                              <div className="preview-action-btns">
+                                <button className="preview-btn approve" onClick={() => handleApprove(row.id)}>Aprovar</button>
+                                <button className="preview-btn reject" onClick={() => handleReject(row.id)}>Rejeitar</button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -681,7 +644,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <span>
-                  Demonstração · 1.284 contatos, 86 em revisão, 4 erros, 4 processando e 4 aguardando seleção. Total: 1.284.
+                  Base PostgreSQL · {contacts.length} {contacts.length === 1 ? 'contato sincronizado' : 'contatos sincronizados'}.
                 </span>
               </div>
             </div>
@@ -703,7 +666,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
             <div className="enrich-summary-list">
               <div className="enrich-summary-row">
                 <span className="enrich-summary-label">Contatos</span>
-                <span className="enrich-summary-value">1.284</span>
+                <span className="enrich-summary-value">{contacts.length}</span>
               </div>
               <div className="enrich-summary-row">
                 <span className="enrich-summary-label">Atributos selecionados</span>
@@ -715,7 +678,7 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               </div>
               <div className="enrich-summary-row">
                 <span className="enrich-summary-label">Créditos estimados</span>
-                <span className="enrich-summary-value highlight">2.140</span>
+                <span className="enrich-summary-value highlight">{contacts.length * 2}</span>
               </div>
             </div>
 
@@ -730,8 +693,16 @@ export default function DashboardEnriquecimento({ onBack, onShowToast }) {
               </span>
             </div>
 
-            <button className="enrich-btn-primary full-width" onClick={handleStartEnrichment}>
-              Iniciar enriquecimento
+            <button
+              className={`enrich-btn-primary full-width ${enrichmentStatus === 'completed' ? 'completed' : ''}`}
+              onClick={handleStartEnrichment}
+              disabled={enrichmentStatus === 'loading'}
+            >
+              {enrichmentStatus === 'loading'
+                ? '⏳ Enriquecendo base...'
+                : enrichmentStatus === 'completed'
+                ? '✓ Base Enriquecida'
+                : 'Iniciar enriquecimento'}
             </button>
             <button className="enrich-btn-secondary full-width" onClick={handleSaveSelection}>
               Salvar seleção

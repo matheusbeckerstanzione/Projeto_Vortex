@@ -1,316 +1,34 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import '../../styles/DashboardSegmentos.css';
+import { segmentService, DEFAULT_SEGMENT } from '../../services/segmentService';
 import ModalEditarSegmento from './ModalEditarSegmentos';
 import ModalExcluirSegmento from './ModalExcluirSegmentos';
 import ModalDetalhesContato from './ModalDetalhesContatoSegmentos';
-import { jsPDF } from 'jspdf'
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import '../../styles/DashboardSegmentos.css';
 
-// Segmentos iniciais
-const INITIAL_SEGMENTS = [
-  {
-    id: 1,
-    name: 'Tecnologia · alto engajamento',
-    criteria: 'Tecnologia E SaaS B2B E canal E-mail/engaj. alto',
-    contactsCount: 324,
-    status: 'Ativo',
-    statusClass: 'active',
-    updatedAt: '11/10/2026 08:42',
-    description: 'Estimativa: 324 contatos únicos com atributos confirmados. Dados demonstrativos.',
-    dynamicText: 'Dinâmico · 324 contatos ilustrativos · sincronização automática.',
-    criteriaRules: [
-      { field: 'Interesse', condition: 'contém Tecnologia' },
-      { field: 'Categoria', condition: 'é igual a SaaS B2B' }
-    ],
-    channelRule: {
-      header: 'E · Preferência de canal (OU)',
-      value: 'E-mail OU WhatsApp · E engajamento Alto'
-    },
-    ruleNote: 'Engajamento alto = 3 ou mais interações em 30 dias. Somente atributos confirmados; cada contato é contado uma vez.',
-    sources: [
-      { name: 'CRM Salesforce', desc: 'Preferências declaradas · confiança 93%' },
-      { name: 'Plataforma de campanhas', desc: 'Interações observadas · confiança 91%' }
-    ],
-
-    previewContacts: [
-      { initials: 'CS', name: 'Camila Santos', detail: 'WhatsApp · 8 interações · CRM 96%' },
-      { initials: 'BO', name: 'Beatriz Oliveira', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'ML', name: 'Mariana Lima', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'RF', name: 'Rafael Ferreira', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AC', name: 'Ana Costa', detail: 'WhatsApp · 6 interações · CRM 95%' },
-      { initials: 'JP', name: 'João Pedro', detail: 'WhatsApp · 3 interações · CRM 89%' },
-      { initials: 'LS', name: 'Larissa Souza', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'GM', name: 'Gabriel Martins', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'VC', name: 'Vitória Carvalho', detail: 'WhatsApp · 5 interações · CRM 93%' },
-      { initials: 'RM', name: 'Renato Mendes', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'SO', name: 'Sofia Oliveira', detail: 'WhatsApp · 6 interações · CRM 96%' },
-      { initials: 'MC', name: 'Matheus Costa', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AL', name: 'Amanda Lopes', detail: 'WhatsApp · 8 interações · CRM 98%' },
-      { initials: 'PC', name: 'Pedro Castro', detail: 'WhatsApp · 3 interações · CRM 88%' },
-      { initials: 'JS', name: 'Julia Santos', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'NF', name: 'Nicolas Freitas', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'BC', name: 'Bruna Carvalho', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'DF', name: 'Daniel Ferreira', detail: 'WhatsApp · 6 interações · CRM 95%' }
-    ]
-
-  },
-  {
-    id: 2,
-    name: 'Moda · preferência WhatsApp',
-    criteria: 'Interesse Moda E canal WhatsApp',
-    contactsCount: 18,
-    status: 'Ativo',
-    statusClass: 'active',
-    updatedAt: '11/10/2026 08:42',
-    description: 'Estimativa: 18 contatos com opt-in de WhatsApp ativo e interesse declarado em Moda.',
-    dynamicText: 'Dinâmico · 18 contatos ilustrativos · sincronização automática.',
-    criteriaRules: [
-      { field: 'Interesse', condition: 'contém Moda e Vestuário' },
-      { field: 'Canal', condition: 'preferência declarada WhatsApp' }
-    ],
-    channelRule: {
-      header: 'Critério de Canal',
-      value: 'WhatsApp comercial verificado'
-    },
-    ruleNote: 'Somente números com validação de formato e sem bloqueios no histórico.',
-    sources: [
-      { name: 'CRM Salesforce', desc: 'Opt-in registrado' }
-    ],
-    previewContacts: [
-
-      {
-        id: 1,
-        initials: 'CS',
-        name: 'Camila Santos',
-        detail: 'Marketing · Moda',
-
-        email: 'camila.santos@exemplo.com',
-        company: 'Fashion Trends',
-        cargo: 'Analista de Marketing',
-        area: 'Marketing',
-
-        interests: 'Moda feminina, tendências e campanhas digitais',
-        source: 'Cadastro de demonstração',
-        confidence: 'Alta'
-      },
-
-
-      {
-        id: 2,
-        initials: 'BO',
-        name: 'Beatriz Oliveira',
-        detail: 'Comercial · Moda',
-
-        email: 'beatriz.oliveira@exemplo.com',
-        company: 'Style Company',
-        cargo: 'Coordenadora Comercial',
-        area: 'Comercial',
-
-        interests: 'Moda, relacionamento com clientes e vendas',
-        source: 'Cadastro de demonstração',
-        confidence: 'Média'
-      },
-
-      { initials: 'ML', name: 'Mariana Lima', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'RF', name: 'Rafael Ferreira', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AC', name: 'Ana Costa', detail: 'WhatsApp · 6 interações · CRM 95%' },
-      { initials: 'JP', name: 'João Pedro', detail: 'WhatsApp · 3 interações · CRM 89%' },
-      { initials: 'LS', name: 'Larissa Souza', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'GM', name: 'Gabriel Martins', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'VC', name: 'Vitória Carvalho', detail: 'WhatsApp · 5 interações · CRM 93%' },
-      { initials: 'RM', name: 'Renato Mendes', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'SO', name: 'Sofia Oliveira', detail: 'WhatsApp · 6 interações · CRM 96%' },
-      { initials: 'MC', name: 'Matheus Costa', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AL', name: 'Amanda Lopes', detail: 'WhatsApp · 8 interações · CRM 98%' },
-      { initials: 'PC', name: 'Pedro Castro', detail: 'WhatsApp · 3 interações · CRM 88%' },
-      { initials: 'JS', name: 'Julia Santos', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'NF', name: 'Nicolas Freitas', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'BC', name: 'Bruna Carvalho', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'DF', name: 'Daniel Ferreira', detail: 'WhatsApp · 6 interações · CRM 95%' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Casa · compras recorrentes',
-    criteria: 'Categoria Casa E engajamento alto',
-    contactsCount: 7,
-    status: 'Ativo',
-    statusClass: 'active',
-    updatedAt: '11/10/2026 08:40',
-    description: 'Estimativa: 7 contatos de alto ticket na categoria Casa e Decoração.',
-    dynamicText: 'Dinâmico · 7 contatos ilustrativos · sincronização automática.',
-    criteriaRules: [
-      { field: 'Categoria', condition: 'é igual a Casa e Decoração' },
-      { field: 'Compras', condition: 'recorrência mínima de 2 pedidos' }
-    ],
-    channelRule: {
-      header: 'Critério Comportamental',
-      value: 'Engajamento recente em campanhas de catálogo'
-    },
-    ruleNote: 'Contatos elegíveis para clube de fidelidade e benefícios exclusivos.',
-    sources: [
-      { name: 'ERP Omie', desc: 'Histórico fiscal de notas emitidas' }
-    ],
-    previewContacts: [
-      { initials: 'CS', name: 'Camila Santos', detail: 'WhatsApp · 8 interações · CRM 96%' },
-      { initials: 'BO', name: 'Beatriz Oliveira', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'ML', name: 'Mariana Lima', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'RF', name: 'Rafael Ferreira', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AC', name: 'Ana Costa', detail: 'WhatsApp · 6 interações · CRM 95%' },
-      { initials: 'JP', name: 'João Pedro', detail: 'WhatsApp · 3 interações · CRM 89%' },
-      { initials: 'LS', name: 'Larissa Souza', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'GM', name: 'Gabriel Martins', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'VC', name: 'Vitória Carvalho', detail: 'WhatsApp · 5 interações · CRM 93%' },
-      { initials: 'RM', name: 'Renato Mendes', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'SO', name: 'Sofia Oliveira', detail: 'WhatsApp · 6 interações · CRM 96%' },
-      { initials: 'MC', name: 'Matheus Costa', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AL', name: 'Amanda Lopes', detail: 'WhatsApp · 8 interações · CRM 98%' },
-      { initials: 'PC', name: 'Pedro Castro', detail: 'WhatsApp · 3 interações · CRM 88%' },
-      { initials: 'JS', name: 'Julia Santos', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'NF', name: 'Nicolas Freitas', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'BC', name: 'Bruna Carvalho', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'DF', name: 'Daniel Ferreira', detail: 'WhatsApp · 6 interações · CRM 95%' }
-    ]
-  },
-  {
-    id: 4,
-    name: 'Saúde · assinantes engajados',
-    criteria: 'Interesse Saúde E canal E-mail',
-    contactsCount: 128,
-    status: 'Ativo',
-    statusClass: 'active',
-    updatedAt: '10/10/2026 16:15',
-    description: 'Estimativa: 128 assinantes de conteúdos informativos da vertical Saúde & Bem-estar.',
-    dynamicText: 'Dinâmico · 128 contatos ilustrativos · sincronização automática.',
-    criteriaRules: [
-      { field: 'Interesse', condition: 'contém Saúde e Medicina' },
-      { field: 'Assinatura', condition: 'Newsletter semanal confirmada' }
-    ],
-    channelRule: {
-      header: 'Preferência de Envio',
-      value: 'E-mail com taxa de abertura > 40%'
-    },
-    ruleNote: 'Envios respeitando horários matinais em dias úteis.',
-    sources: [
-      { name: 'Importação CSV', desc: 'Base de assinantes do blog' }
-    ],
-    previewContacts: [
-      { initials: 'CS', name: 'Camila Santos', detail: 'WhatsApp · 8 interações · CRM 96%' },
-      { initials: 'BO', name: 'Beatriz Oliveira', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'ML', name: 'Mariana Lima', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'RF', name: 'Rafael Ferreira', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AC', name: 'Ana Costa', detail: 'WhatsApp · 6 interações · CRM 95%' },
-      { initials: 'JP', name: 'João Pedro', detail: 'WhatsApp · 3 interações · CRM 89%' },
-      { initials: 'LS', name: 'Larissa Souza', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'GM', name: 'Gabriel Martins', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'VC', name: 'Vitória Carvalho', detail: 'WhatsApp · 5 interações · CRM 93%' },
-      { initials: 'RM', name: 'Renato Mendes', detail: 'WhatsApp · 3 interações · CRM 90%' },
-      { initials: 'SO', name: 'Sofia Oliveira', detail: 'WhatsApp · 6 interações · CRM 96%' },
-      { initials: 'MC', name: 'Matheus Costa', detail: 'WhatsApp · 4 interações · CRM 92%' },
-      { initials: 'AL', name: 'Amanda Lopes', detail: 'WhatsApp · 8 interações · CRM 98%' },
-      { initials: 'PC', name: 'Pedro Castro', detail: 'WhatsApp · 3 interações · CRM 88%' },
-      { initials: 'JS', name: 'Julia Santos', detail: 'WhatsApp · 5 interações · CRM 94%' },
-      { initials: 'NF', name: 'Nicolas Freitas', detail: 'WhatsApp · 4 interações · CRM 91%' },
-      { initials: 'BC', name: 'Bruna Carvalho', detail: 'WhatsApp · 7 interações · CRM 97%' },
-      { initials: 'DF', name: 'Daniel Ferreira', detail: 'WhatsApp · 6 interações · CRM 95%' }
-    ]
-  },
-  {
-    id: 5,
-    name: 'SaaS · público a explorar',
-    criteria: 'Sem correspondências · amplie os filtros',
-    contactsCount: 0,
-    status: 'Sem resultados',
-    statusClass: 'no-results',
-    updatedAt: '09/10/2026 14:20',
-    description: 'Nenhum contato encontrado com a combinação restritiva atual de critérios.',
-    dynamicText: 'Estático · 0 contatos encontrados.',
-    criteriaRules: [
-      { field: 'Interesse', condition: 'contém SaaS Enterprise' },
-      { field: 'Faturamento', condition: 'acima de R$ 50M' }
-    ],
-    channelRule: {
-      header: 'Filtro Restritivo',
-      value: 'Exige faturamento auditado e canal exclusivo'
-    },
-    ruleNote: 'Recomendação: Amplie os filtros para abranger empresas de médio porte.',
-    sources: [
-      { name: 'Base Pública', desc: 'Dados societários' }
-    ],
-    previewContacts: []
-  },
-  {
-    id: 6,
-    name: 'Nova campanha de tecnologia',
-    criteria: 'Critérios em elaboração · não publicado',
-    contactsCount: null,
-    status: 'Rascunho',
-    statusClass: 'draft',
-    updatedAt: '09/10/2026 10:30',
-    description: 'Rascunho em construção para o lançamento da nova suíte de produtos de IA.',
-    dynamicText: 'Rascunho · Cálculo pausado.',
-    criteriaRules: [
-      { field: 'Interesse', condition: 'contém Inteligência Artificial' }
-    ],
-    channelRule: {
-      header: 'Canais em Análise',
-      value: 'Omnichannel (E-mail, WhatsApp, LinkedIn)'
-    },
-    ruleNote: 'Salve e ative o segmento para disparar o cálculo automático.',
-    sources: [
-      { name: 'CRM Salesforce', desc: 'Leads qualificados no inbound' }
-    ],
-    previewContacts: []
-  }
-];
+const CONTATOS_POR_PAGINA = 10;
 
 export default function DashboardSegmentos({ onShowToast, onNavigateToContact }) {
-  const [segments, setSegments] = useState(() => {
-    try {
-      const segmentosSalvos = JSON.parse(
-        localStorage.getItem('neocore_segments') || 'null'
-      );
-
-      if (
-        Array.isArray(segmentosSalvos) &&
-        segmentosSalvos.length > 0
-      ) {
-        return segmentosSalvos;
-      }
-
-      return INITIAL_SEGMENTS;
-    } catch (error) {
-      console.error('Erro ao carregar segmentos:', error);
-      return INITIAL_SEGMENTS;
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    try {
-      window.localStorage.setItem(
-        'neocore_segments',
-        JSON.stringify(segments)
-      )
-    } catch (error) {
-      console.error('Erro ao salvar segmentos:', error);
-    }
-
-  }, [segments]);
-
-  const [selectedSegmentId, setSelectedSegmentId] = useState(1);
+  const [segments, setSegments] = useState([DEFAULT_SEGMENT]);
+  const [selectedSegmentId, setSelectedSegmentId] = useState(DEFAULT_SEGMENT.id);
   const [segmentMobileTab, setSegmentMobileTab] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [activeChip, setActiveChip] = useState(null);
 
+  useEffect(() => {
+    segmentService.getSegments().then((list) => {
+      if (list && list.length > 0) {
+        setSegments(list);
+        setSelectedSegmentId(list[0].id);
+      }
+    });
+  }, []);
+
   // Estados da Modal Criar Segmento com IA (1 a 7)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [segmentToDelete, setSegmentToDelete] = useState(null)
-
   const [modalState, setModalState] = useState(1); // 1 a 7
   const [segmentName, setSegmentName] = useState('Clientes B2B unificados');
   const [segmentPrompt, setSegmentPrompt] = useState(
@@ -323,160 +41,99 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
   const [campaignName, setCampaignName] = useState('Relacionamento B2B · outubro/2026');
   const [enableAutomation, setEnableAutomation] = useState(true);
 
-  const [contatosSelecionados, setContatosSelecionados] = useState([])
-
-  const [mostrarTodosContatos, setMostrarTodosContatos] = useState(false)
-  const [paginaContatos, setPaginaContatos] = useState(1)
-  const [contatoSelecionado, setContatoSelecionado] = useState(null)
-
-  const CONTATOS_POR_PAGINA = 7
+  // Estados dos Modais (Editar, Excluir, Detalhes do Contato)
+  const [isEditSegModalOpen, setIsEditSegModalOpen] = useState(false);
+  const [segmentToDelete, setSegmentToDelete] = useState(null);
+  const [contatoSelecionado, setContatoSelecionado] = useState(null);
+  const [contatosSelecionados, setContatosSelecionados] = useState([]);
+  const [mostrarTodosContatos, setMostrarTodosContatos] = useState(false);
+  const [paginaContatos, setPaginaContatos] = useState(1);
+  const [isSavingSeg, setIsSavingSeg] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
 
   // Segmento atualmente selecionado na lista
   const selectedSegment = useMemo(() => {
-    return (
-      segments.find(s => s.id === selectedSegmentId) ||
-      segments[0] ||
-      INITIAL_SEGMENTS[0]
-    )
+    return segments.find(s => s.id === selectedSegmentId) || segments[0];
   }, [segments, selectedSegmentId]);
 
-  const hasSelectedSegment = Boolean(selectedSegment)
+  // Carrega a prévia real de contatos quando seleciona um segmento do backend
+  useEffect(() => {
+    if (!selectedSegmentId) return;
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(selectedSegmentId);
+    if (!isUUID) return;
 
-  // Contagens dos KPIs
-  const totalSaved = segments.length;
-  const totalActive = segments.filter(s => s.status === 'Ativo').length;
+    segmentService.getPrevia(selectedSegmentId).then((previewList) => {
+      setSegments((prev) =>
+        prev.map((s) =>
+          s.id === selectedSegmentId
+            ? {
+                ...s,
+                previewContacts: previewList,
+                contactsCount: previewList.length,
+              }
+            : s
+        )
+      );
+    });
+  }, [selectedSegmentId]);
 
-  // Filtragem dos segmentos
+  const handleOpenEditSegment = () => {
+    if (!selectedSegment) return;
+    setIsEditSegModalOpen(true);
+  };
 
-  const filteredSegments = segments.filter((seg) => {
-    const search = searchTerm.trim().toLowerCase();
+  const handleSaveEditSegment = async (segmentoAtualizado) => {
+    if (!segmentoAtualizado || !segmentoAtualizado.name?.trim()) return;
+    setIsSavingSeg(true);
+    const nextStatus = segmentoAtualizado.backendStatus || 'ATIVO';
 
-    // Busca por nome, critérios ou descrição
-    const matchesSearch =
-      !search ||
-      seg.name?.toLowerCase().includes(search) ||
-      seg.criteria?.toLowerCase().includes(search) ||
-      seg.description?.toLowerCase().includes(search);
-
-    // Filtro por status
-    const matchesStatus =
-      statusFilter === "ALL" ||
-      seg.status?.toLowerCase().replace(/\s+/g, "-") === statusFilter;
-
-    // Filtro por fonte
-    const matchesSource =
-      sourceFilter === "ALL" ||
-      seg.sources?.some((source) => {
-        const sourceName = source.name?.toLowerCase() || "";
-
-        if (sourceFilter === "crm") {
-          return sourceName.includes("crm") || sourceName.includes("salesforce");
-        }
-
-        if (sourceFilter === "campanhas") {
-          return sourceName.includes("campanha");
-        }
-
-        if (sourceFilter === "erp") {
-          return sourceName.includes("erp") || sourceName.includes("omie");
-        }
-
-        return false;
+    try {
+      await segmentService.updateSegment(segmentoAtualizado.id, {
+        name: segmentoAtualizado.name,
+        description: segmentoAtualizado.description,
+        criterios: segmentoAtualizado.criteriosObj,
+        finalidadeId: segmentoAtualizado.finalidadeId,
+        status: nextStatus,
       });
 
-    // Chips rápidos
-    const chipText = `${seg.name || ""} ${seg.criteria || ""} ${seg.description || ""}`.toLowerCase();
+      const visualStatus =
+        nextStatus === 'ATIVO'
+          ? 'Ativo'
+          : nextStatus === 'ARQUIVADO'
+            ? 'Sem resultados'
+            : 'Rascunho';
 
-    const matchesChip =
-      !activeChip ||
-      (activeChip === "tecnologia" && chipText.includes("tecnologia")) ||
-      (activeChip === "email" && chipText.includes("e-mail")) ||
-      (activeChip === "saas" && chipText.includes("saas")) ||
-      (activeChip === "alto" && chipText.includes("alto"));
-
-    return matchesSearch && matchesStatus && matchesSource && matchesChip;
-  });
-
-
-  const handleOpenCreateModal = () => {
-    setModalState(1);
-    setIsModalOpen(true);
-  };
-
-  // Finalizar e salvar no Estado 7
-
-  const handleFinishAndSaveSegment = () => {
-    const newId = Date.now();
-
-    const createdSegment = {
-      id: newId,
-      name: segmentName.trim() || 'Clientes B2B unificados',
-      criteria: 'Status do perfil = Unificado E Tipo = Cliente B2B E Origem = CRM Salesforce OU ERP Oracle',
-      contactsCount: 280,
-      status: 'Ativo',
-      statusClass: 'active',
-      updatedAt: 'Hoje 11:30',
-      description: 'Estimativa: 280 contatos com perfil conciliado e vínculo com o CRM ou o ERP · dados ilustrativos.',
-      dynamicText: 'Dinâmico · 280 contatos elegíveis · sincronização automática.',
-      criteriaRules: [
-        { field: 'Status do perfil', condition: '= Unificado' },
-        { field: 'Tipo de cliente', condition: '= Cliente B2B' },
-        { field: 'Origem', condition: '= CRM Salesforce OU ERP Oracle' }
-      ],
-      channelRule: {
-        header: 'Validação Jurídica Concluída',
-        value: 'Excluídos 24 opt-outs e 20 registros sem base legal'
-      },
-      ruleNote: 'Contatos elegíveis e validados juridicamente para o canal E-mail com registro de consentimento auditado.',
-      sources: [
-        { name: targetCrm, desc: 'Público sincronizado' },
-        { name: 'ERP Oracle', desc: 'Base conciliada' }
-      ],
-      previewContacts: [
-        { initials: 'MS', name: 'Mariana Souza', detail: 'Mariana Souza Ltda · CRM Salesforce' },
-        { initials: 'RA', name: 'Rafael Almeida', detail: 'Brasil Comércio · ERP Oracle' },
-        { initials: 'LF', name: 'Lucas Ferreira', detail: 'Horizonte Tecnologia · CRM + ERP' }
-      ]
-    };
-
-    const updatedSegments = [createdSegment, ...segments];
-
-    // Atualiza a lista na tela
-    setSegments(updatedSegments);
-
-    // Salva a lista atualizada no navegador
-    localStorage.setItem(
-      'neocore_segments',
-      JSON.stringify(updatedSegments)
-    );
-
-    // Seleciona o novo segmento
-    setSelectedSegmentId(newId);
-
-    // Limpa as seleções de contatos
-    setContatosSelecionados([]);
-    setMostrarTodosContatos(false);
-    setPaginaContatos(1);
-
-    // Fecha o modal
-    setIsModalOpen(false);
-
-    // Exibe mensagem de sucesso
-    if (onShowToast) {
-      onShowToast(
-        `Segmento "${createdSegment.name}" adicionado com sucesso!`
+      setSegments((prev) =>
+        prev.map((s) =>
+          s.id === segmentoAtualizado.id
+            ? {
+                ...s,
+                name: segmentoAtualizado.name.trim(),
+                description: segmentoAtualizado.description.trim(),
+                criteria: segmentoAtualizado.criteria?.trim() || segmentoAtualizado.description.trim() || s.criteria,
+                backendStatus: nextStatus,
+                status: visualStatus,
+                statusClass: nextStatus === 'ATIVO' ? 'active' : 'draft',
+                updatedAt: 'Hoje',
+              }
+            : s
+        )
       );
+      setIsEditSegModalOpen(false);
+      if (onShowToast) onShowToast(`Segmento "${segmentoAtualizado.name.trim()}" atualizado com sucesso!`);
+    } catch (err) {
+      if (onShowToast) onShowToast('Erro ao atualizar segmento: ' + (err?.message || 'Verifique os dados.'));
+    } finally {
+      setIsSavingSeg(false);
     }
   };
-
 
   const handleDuplicateSegment = () => {
     if (!selectedSegment) return;
 
-    let newId = Date.now();
-
-    while (segments.some(segment => segment.id === newId)) {
-      newId += 1;
+    let newId = `SEG-${Date.now()}`;
+    while (segments.some((segment) => segment.id === newId)) {
+      newId = `SEG-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     }
 
     const duplicatedSegment = {
@@ -484,129 +141,56 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
       id: newId,
       name: `${selectedSegment.name} (cópia)`,
       status: 'Rascunho',
+      backendStatus: 'RASCUNHO',
       statusClass: 'draft',
-      contactsCount: null,
+      isBackend: false,
       updatedAt: 'Agora',
       dynamicText: 'Rascunho · cálculo pendente.',
-      criteriaRules: (selectedSegment.criteriaRules || []).map(rule => ({ ...rule })),
-      sources: (selectedSegment.sources || []).map(source => ({ ...source })),
-      previewContacts: (selectedSegment.previewContacts || []).map(contact => ({ ...contact })),
+      criteriaRules: (selectedSegment.criteriaRules || []).map((rule) => ({ ...rule })),
+      sources: (selectedSegment.sources || []).map((source) => ({ ...source })),
+      previewContacts: (selectedSegment.previewContacts || []).map((contact) => ({ ...contact })),
       channelRule: selectedSegment.channelRule
         ? { ...selectedSegment.channelRule }
-        : selectedSegment.channelRule
+        : selectedSegment.channelRule,
     };
 
-    setSegments(previous => [
-      duplicatedSegment,
-      ...previous
-    ]);
-
+    setSegments((previous) => [duplicatedSegment, ...previous]);
     setSelectedSegmentId(newId);
-
-    if (onShowToast) {
-      onShowToast('Segmento duplicado como rascunho.');
-    }
-  };
-
-
-
-  const handleEditSegment = () => {
-    console.log('CLIQUEI EM EDITAR');
-    console.log('Segmento selecionado:', selectedSegment);
-
-    if (!selectedSegment) return;
-
-    setIsEditModalOpen(true);
-  };
-
-
-  const handleDeleteSegment = (segmento) => {
-    if (!segmento) return;
-
-    const confirmar = window.confirm(
-      `Tem certeza que deseja excluir o segmento "${segmento.name}"?`
-    );
-
-    if (!confirmar) return;
-
-    // Evita deixar a tela sem um segmento selecionado
-    if (segments.length <= 1) {
-      alert('É necessário manter pelo menos um segmento.');
-      return;
-    }
-
-    const novosSegmentos = segments.filter(
-      (seg) => String(seg.id) !== String(segmento.id)
-    );
-
-    setSegments(novosSegmentos);
-
-    localStorage.setItem(
-      'neocore_segments',
-      JSON.stringify(novosSegmentos)
-    );
-
-    // Se o segmento excluído estava selecionado,
-    // seleciona o primeiro segmento restante
-    if (String(selectedSegmentId) === String(segmento.id)) {
-      setSelectedSegmentId(novosSegmentos[0].id);
-    }
-
-    // Limpa a seleção de contatos
-    setContatosSelecionados([]);
-    setMostrarTodosContatos(false);
-    setPaginaContatos(1);
-
-    alert('Segmento excluído com sucesso!');
-  };
-
-
-  const handleSaveEditSegment = (segmentoAtualizado) => {
-    setSegments(prevSegments =>
-      prevSegments.map(segment =>
-        segment.id === segmentoAtualizado.id
-          ? segmentoAtualizado
-          : segment
-      )
-    );
-
-    setIsEditModalOpen(false);
-
-    if (onShowToast) {
-      onShowToast('Segmento atualizado com sucesso!');
-    }
+    if (onShowToast) onShowToast('Segmento duplicado como rascunho.');
   };
 
   const handleOpenDeleteModal = () => {
-    if (!selectedSegment) return
+    if (!selectedSegment) return;
+    setSegmentToDelete(selectedSegment);
+  };
 
-    setSegmentToDelete(selectedSegment)
-  }
-
-  const handleConfirmDeleteSegment = () => {
-    if (!segmentToDelete) return
+  const handleConfirmDeleteSegment = async () => {
+    if (!segmentToDelete) return;
 
     if (segments.length <= 1) {
-      if (onShowToast) {
-        onShowToast('É necessário manter pelo menos um segmento.')
-      }
-
-      setSegmentToDelete(null)
-      return
+      if (onShowToast) onShowToast('É necessário manter pelo menos um segmento.');
+      setSegmentToDelete(null);
+      return;
     }
 
-    const segmentosRestante = segments.filter(
-      segment => segment.id !== segmentToDelete.id
-    )
-
-    setSegments(segmentosRestante)
-    setSegmentToDelete(null)
-
-    if (onShowToast) {
-      onShowToast('Segmento excluido com sucesso!')
+    try {
+      await segmentService.alterarStatus(segmentToDelete.id, 'ARQUIVADO');
+    } catch (err) {
+      console.warn('Erro ao arquivar segmento no backend:', err?.message);
     }
-  }
 
+    const segmentosRestantes = segments.filter((s) => s.id !== segmentToDelete.id);
+    setSegments(segmentosRestantes);
+    if (String(selectedSegmentId) === String(segmentToDelete.id) && segmentosRestantes.length > 0) {
+      setSelectedSegmentId(segmentosRestantes[0].id);
+    }
+    setContatosSelecionados([]);
+    setMostrarTodosContatos(false);
+    setPaginaContatos(1);
+    setSegmentToDelete(null);
+
+    if (onShowToast) onShowToast('Segmento excluído com sucesso!');
+  };
 
   const handleExportSegments = () => {
     if (!segments || segments.length === 0) {
@@ -615,50 +199,31 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
     }
 
     try {
-      const headers = [
-        'Nome',
-        'Critérios',
-        'Contatos',
-        'Status',
-        'Atualização'
-      ];
-
-      const rows = segments.map(segment => [
+      const headers = ['Nome', 'Critérios', 'Contatos', 'Status', 'Atualização'];
+      const rows = segments.map((segment) => [
         segment.name ?? '',
         segment.criteria ?? '',
         segment.contactsCount ?? '',
         segment.status ?? '',
-        segment.updatedAt ?? ''
+        segment.updatedAt ?? '',
       ]);
 
       const csvContent = [headers, ...rows]
-        .map(row =>
-          row
-            .map(value => `"${String(value).replace(/"/g, '""')}"`)
-            .join(';')
+        .map((row) =>
+          row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(';')
         )
         .join('\r\n');
 
-      const blob = new Blob(
-        ['\uFEFF', csvContent],
-        { type: 'text/csv;charset=utf-8;' }
-      );
-
+      const blob = new Blob(['\uFEFF', csvContent], { type: 'text/csv;charset=utf-8;' });
       const downloadUrl = window.URL.createObjectURL(blob);
-
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = 'catalogo-segmentos.csv';
       link.style.display = 'none';
-
       document.body.appendChild(link);
       link.click();
       link.remove();
-
-      window.setTimeout(() => {
-        window.URL.revokeObjectURL(downloadUrl);
-      }, 1000);
-
+      window.setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 1000);
       onShowToast?.('Catálogo de segmentos exportado com sucesso!');
     } catch (error) {
       console.error('Erro ao exportar segmentos:', error);
@@ -666,67 +231,25 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
     }
   };
 
-
   const handleExportContacts = async () => {
     if (!selectedSegment) {
       onShowToast?.('Selecione um segmento para exportar.');
       return;
     }
 
-    // Contatos fictícios para demonstração.
-    // Futuramente, substituir pela resposta da API.
-    const contatosDemonstrativos = [
-      {
-        nome: 'Mariana Souza',
-        email: 'mariana.souza@example.com',
-        empresa: 'Empresa Alpha',
-        cargo: 'Desenvolvedora Frontend',
-        area: 'Tecnologia',
-        interesses: 'React, JavaScript, inovação'
-      },
-      {
-        nome: 'Rafael Almeida',
-        email: 'rafael.almeida@example.com',
-        empresa: 'Empresa Beta',
-        cargo: 'Analista de Sistemas',
-        area: 'Tecnologia',
-        interesses: 'Cloud, inteligência artificial'
-      },
-      {
-        nome: 'Lucas Ferreira',
-        email: 'lucas.ferreira@example.com',
-        empresa: 'Empresa Gamma',
-        cargo: 'Desenvolvedor Backend',
-        area: 'Tecnologia',
-        interesses: 'C#, APIs, banco de dados'
-      },
-      {
-        nome: 'Camila Oliveira',
-        email: 'camila.oliveira@example.com',
-        empresa: 'Empresa Delta',
-        cargo: 'Coordenadora de Marketing',
-        area: 'Marketing',
-        interesses: 'Marketing digital, eventos'
-      },
-      {
-        nome: 'Pedro Santos',
-        email: 'pedro.santos@example.com',
-        empresa: 'Empresa Ômega',
-        cargo: 'Gerente de Projetos',
-        area: 'Gestão',
-        interesses: 'Liderança, produtividade'
-      }
-    ];
+    const listaContatos = selectedSegment.previewContacts || [];
+    if (listaContatos.length === 0) {
+      onShowToast?.('Nenhum contato disponível neste segmento para exportar.');
+      return;
+    }
 
     try {
       const doc = new jsPDF();
-
       const azulEscuro = [15, 23, 42];
       const azul = [11, 59, 96];
       const azulClaro = [239, 246, 255];
       const cinza = [100, 116, 139];
       const linha = [226, 232, 240];
-
       const dataAtual = new Date().toLocaleString('pt-BR');
 
       const nomeArquivo = (selectedSegment.name || 'segmento')
@@ -736,81 +259,43 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
         .replace(/-+/g, '-')
         .toLowerCase();
 
-      // Carrega a logo do NeoCore
-      const carregarLogo = () => new Promise(resolve => {
+      const carregarLogo = () => new Promise((resolve) => {
         const imagem = new Image();
-
         imagem.onload = () => {
           const canvas = document.createElement('canvas');
           canvas.width = imagem.naturalWidth;
           canvas.height = imagem.naturalHeight;
-
           const contexto = canvas.getContext('2d');
-          contexto.drawImage(
-            imagem,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
+          contexto.drawImage(imagem, 0, 0, canvas.width, canvas.height);
           resolve(canvas.toDataURL('image/png'));
         };
-
-        imagem.onerror = () => {
-          console.warn('Logo NeoCore não encontrada.');
-          resolve(null);
-        };
-
+        imagem.onerror = () => resolve(null);
         imagem.src = '/logo-n.png';
       });
 
       const logoNeoCore = await carregarLogo();
 
-      // Cabeçalho do PDF
       const desenharCabecalho = () => {
         doc.setFillColor(...azulEscuro);
         doc.rect(0, 0, 210, 38, 'F');
-
         if (logoNeoCore) {
-          doc.addImage(
-            logoNeoCore,
-            'PNG',
-            14,
-            8,
-            18,
-            18
-          );
+          doc.addImage(logoNeoCore, 'PNG', 14, 8, 18, 18);
         }
-
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(17);
         doc.text('NEOCORE', logoNeoCore ? 38 : 14, 15);
-
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        doc.text(
-          'RELATÓRIO DE CONTATOS',
-          logoNeoCore ? 38 : 14,
-          22
-        );
-
+        doc.text('RELATÓRIO DE CONTATOS DO SEGMENTO', logoNeoCore ? 38 : 14, 22);
         doc.setFontSize(8);
         doc.setTextColor(203, 213, 225);
-
-        const nomeSegmento = doc.splitTextToSize(
-          selectedSegment.name || 'Segmento selecionado',
-          105
-        );
-
+        const nomeSegmento = doc.splitTextToSize(selectedSegment.name || 'Segmento selecionado', 105);
         doc.text(nomeSegmento, 14, 31);
       };
 
-      // Cabeçalho inicial
       desenharCabecalho();
 
-      // Informações do segmento
       doc.setTextColor(...azulEscuro);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
@@ -822,352 +307,274 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
       doc.setFontSize(9);
       doc.setTextColor(...azul);
       doc.text('Critérios', 19, 62);
-
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...azulEscuro);
-
-      const criterios = doc.splitTextToSize(
-        selectedSegment.criteria || 'Não informado',
-        165
-      );
-
+      const criterios = doc.splitTextToSize(selectedSegment.criteria || 'Não informado', 165);
       doc.text(criterios, 19, 69);
 
-      // Tabela de contatos
       autoTable(doc, {
         startY: 85,
-        margin: {
-          top: 48,
-          left: 14,
-          right: 14,
-          bottom: 20
-        },
-
-        head: [[
-          'Nome',
-          'E-mail',
-          'Empresa',
-          'Cargo',
-          'Área',
-          'Interesses'
-        ]],
-
-        body: contatosDemonstrativos.map(contato => [
-          contato.nome,
-          contato.email,
-          contato.empresa,
-          contato.cargo,
-          contato.area,
-          contato.interesses
+        margin: { top: 48, left: 14, right: 14, bottom: 20 },
+        head: [['Nome', 'Detalhe / Empresa', 'E-mail', 'Status']],
+        body: listaContatos.map((c) => [
+          c.name || '—',
+          c.detail || c.company || '—',
+          c.email || '—',
+          'Confirmado',
         ]),
-
         theme: 'grid',
-
         styles: {
           font: 'helvetica',
-          fontSize: 7.5,
+          fontSize: 8,
           cellPadding: 3,
           textColor: azulEscuro,
           lineColor: linha,
           lineWidth: 0.2,
           overflow: 'linebreak',
-          valign: 'middle'
+          valign: 'middle',
         },
-
         headStyles: {
           fillColor: azul,
           textColor: 255,
           fontStyle: 'bold',
-          fontSize: 7.5
+          fontSize: 8,
         },
-
         alternateRowStyles: {
-          fillColor: [248, 250, 252]
+          fillColor: [248, 250, 252],
         },
-
-        columnStyles: {
-          0: { cellWidth: 27 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 29 },
-          3: { cellWidth: 32 },
-          4: { cellWidth: 22 },
-          5: { cellWidth: 'auto' }
-        },
-
         didDrawPage: () => {
           desenharCabecalho();
-        }
+        },
       });
 
-      // Rodapé em todas as páginas
-      const totalPaginas = doc.getNumberOfPages();
-
-      for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+      const totalPaginasPdf = doc.getNumberOfPages();
+      for (let pagina = 1; pagina <= totalPaginasPdf; pagina++) {
         doc.setPage(pagina);
-
         const alturaPagina = doc.internal.pageSize.getHeight();
-
         doc.setDrawColor(...linha);
-        doc.line(
-          14,
-          alturaPagina - 15,
-          196,
-          alturaPagina - 15
-        );
-
+        doc.line(14, alturaPagina - 15, 196, alturaPagina - 15);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(...cinza);
-
-        doc.text(
-          `Gerado em ${dataAtual}`,
-          14,
-          alturaPagina - 9
-        );
-
-        doc.text(
-          `Página ${pagina} de ${totalPaginas}`,
-          196,
-          alturaPagina - 9,
-          { align: 'right' }
-        );
+        doc.text(`Gerado em ${dataAtual}`, 14, alturaPagina - 9);
+        doc.text(`Página ${pagina} de ${totalPaginasPdf}`, 196, alturaPagina - 9, { align: 'right' });
       }
 
-      // Salva o PDF
       doc.save(`contatos-${nomeArquivo}.pdf`);
-
-      onShowToast?.(
-        'PDF de contatos demonstrativos exportado!'
-      );
-
+      onShowToast?.('PDF de contatos do segmento exportado com sucesso!');
     } catch (error) {
       console.error('Erro ao exportar contatos:', error);
-
-      onShowToast?.(
-        'Não foi possível exportar os contatos.'
-      );
+      onShowToast?.('Não foi possível exportar os contatos em PDF.');
     }
   };
 
   const handleVerTodos = () => {
-    setMostrarTodosContatos((anterior) => !anterior);
+    setMostrarTodosContatos((prev) => !prev);
     setPaginaContatos(1);
   };
 
-
-
-
-  const handleNewSegment = () => {
-    setSegmentName('');
-    setSegmentPrompt('');
-
-    setModalState(1);
-    setIsModalOpen(true);
+  const gerarChaveContato = (contato) => {
+    if (contato.id) return String(contato.id);
+    if (contato.email) return contato.email.trim().toLowerCase();
+    return `${contato.name || ''}::${contato.initials || ''}`.trim().toLowerCase();
   };
 
-
-
-
+  const alternarSelecaoContato = (contato) => {
+    const chave = gerarChaveContato(contato);
+    setContatosSelecionados((selecionados) =>
+      selecionados.includes(chave)
+        ? selecionados.filter((item) => item !== chave)
+        : [...selecionados, chave]
+    );
+  };
 
   const removerContatoDoSegmento = (contato) => {
-    const confirmar = window.confirm(
-      `Deseja remover ${contato.name} deste segmento?`
-    );
-
+    const confirmar = window.confirm(`Deseja remover ${contato.name} da prévia deste segmento?`);
     if (!confirmar) return;
 
-    setSegments((prevSegments) => {
-      const novosSegmentos = prevSegments.map((segmento) => {
-        if (segmento.id !== selectedSegmentId) {
-          return segmento;
-        }
-
+    setSegments((prevSegments) =>
+      prevSegments.map((segmento) => {
+        if (segmento.id !== selectedSegmentId) return segmento;
         const contatosAtuais = segmento.previewContacts || [];
-
         const contatosAtualizados = contatosAtuais.filter(
-          (c) => !(c.name === contato.name && c.initials === contato.initials)
+          (c) => gerarChaveContato(c) !== gerarChaveContato(contato)
         );
-
-        const contatosRemovidos =
-          contatosAtuais.length - contatosAtualizados.length;
-
         const totalAtual = segmento.contactsCount ?? contatosAtuais.length;
-
         return {
           ...segmento,
           previewContacts: contatosAtualizados,
-          contactsCount: Math.max(
-            0,
-            totalAtual - contatosRemovidos
-          ),
+          contactsCount: Math.max(0, totalAtual - (contatosAtuais.length - contatosAtualizados.length)),
         };
-
-      });
-
-      localStorage.setItem(
-        'neocore_segments',
-        JSON.stringify(novosSegmentos)
-      );
-
-      return novosSegmentos;
-    });
-
+      })
+    );
     setContatoSelecionado(null);
     setMostrarTodosContatos(false);
     setPaginaContatos(1);
+    onShowToast?.('Contato removido da prévia do segmento.');
   };
 
   const removerContatosSelecionados = () => {
     if (contatosSelecionados.length === 0) return;
-
     const confirmar = window.confirm(
-      `Deseja remover ${contatosSelecionados.length} contato(s) deste segmento?`
+      `Deseja remover ${contatosSelecionados.length} contato(s) da prévia deste segmento?`
     );
-
     if (!confirmar) return;
 
-    setSegments((prevSegments) => {
-      const novosSegmentos = prevSegments.map((segmento) => {
-        if (segmento.id !== selectedSegmentId) {
-          return segmento;
-        }
-
+    setSegments((prevSegments) =>
+      prevSegments.map((segmento) => {
+        if (segmento.id !== selectedSegmentId) return segmento;
         const contatosAtuais = segmento.previewContacts || [];
-
-
-        const contatosRemovidos =
-          contatosAtuais.filter((contato) =>
-            contatosSelecionados.includes(
-              gerarChaveContato(contato)
-            )
-          );
-
         const contatosAtualizados = contatosAtuais.filter(
-          (contato) =>
-            !contatosSelecionados.includes(
-              gerarChaveContato(contato)
-            )
+          (contato) => !contatosSelecionados.includes(gerarChaveContato(contato))
         );
-
         const totalAtual = segmento.contactsCount ?? contatosAtuais.length;
-
         return {
           ...segmento,
           previewContacts: contatosAtualizados,
-          contactsCount: Math.max(
-            0,
-            totalAtual - contatosRemovidos.length
-          ),
+          contactsCount: Math.max(0, totalAtual - (contatosAtuais.length - contatosAtualizados.length)),
         };
-
-      });
-
-      localStorage.setItem(
-        'neocore_segments',
-        JSON.stringify(novosSegmentos)
-      );
-
-      return novosSegmentos;
-    });
-
+      })
+    );
     setContatosSelecionados([]);
     setMostrarTodosContatos(false);
     setPaginaContatos(1);
+    onShowToast?.('Contatos selecionados removidos da prévia.');
   };
 
   useEffect(() => {
     setContatosSelecionados([]);
+    setMostrarTodosContatos(false);
+    setPaginaContatos(1);
   }, [selectedSegmentId]);
 
-
-  const gerarChaveContato = (contato) => {
-    if (contato.email) {
-      return contato.email.trim().toLowerCase();
-    }
-
-    return `${contato.name || ''}::${contato.initials || ''}`
-      .trim()
-      .toLowerCase();
-  };
-
-
-  const alternarSelecaoContato = (contato) => {
-    const chave = gerarChaveContato(contato)
-
-    setContatosSelecionados((selecionados) => {
-      if (selecionados.includes(chave)) {
-        return selecionados.filter((item) => item !== chave)
-      }
-
-      return [...selecionados, chave]
-    })
-  }
-
-  const alternarSelecaoTodos = () => {
-    if (todosContatosSelecionados) {
-      const chavesVisiveis = contatosVisiveis.map(
-        (contato) => gerarChaveContato(contato)
-      )
-
-      setContatosSelecionados((selecionados) =>
-        selecionados.filter(
-          (chave) => !chavesVisiveis.includes(chave)
-        )
-      )
-    } else {
-      const chavesVisiveis = contatosVisiveis.map(
-        (contato) => gerarChaveContato(contato)
-      )
-
-      setContatosSelecionados((selecionados) => [
-        ...new Set([...selecionados, ...chavesVisiveis])
-      ])
-    }
-  }
-
-
-  const contatosPreview = selectedSegment.previewContacts || [];
-
+  const contatosPreview = selectedSegment?.previewContacts || [];
   const totalContatos = contatosPreview.length;
-
-  const totalPaginas = Math.ceil(
-    totalContatos / CONTATOS_POR_PAGINA
-  );
-
+  const totalPaginas = Math.ceil(totalContatos / CONTATOS_POR_PAGINA);
   const contatosVisiveis = mostrarTodosContatos
     ? contatosPreview.slice(
-      (paginaContatos - 1) * CONTATOS_POR_PAGINA,
-      paginaContatos * CONTATOS_POR_PAGINA
-    )
+        (paginaContatos - 1) * CONTATOS_POR_PAGINA,
+        paginaContatos * CONTATOS_POR_PAGINA
+      )
     : contatosPreview.slice(0, 3);
 
   const selecionarTodosRef = useRef(null);
-
   const todosContatosSelecionados =
     contatosVisiveis.length > 0 &&
     contatosVisiveis.every((contato) =>
-      contatosSelecionados.includes(
-        gerarChaveContato(contato)
-      )
+      contatosSelecionados.includes(gerarChaveContato(contato))
     );
-
-  const algunsContatosSelecionados =
-    contatosVisiveis.some((contato) =>
-      contatosSelecionados.includes(
-        gerarChaveContato(contato)
-      )
-    );
+  const algunsContatosSelecionados = contatosVisiveis.some((contato) =>
+    contatosSelecionados.includes(gerarChaveContato(contato))
+  );
 
   useEffect(() => {
     if (selecionarTodosRef.current) {
       selecionarTodosRef.current.indeterminate =
-        algunsContatosSelecionados &&
-        !todosContatosSelecionados
+        algunsContatosSelecionados && !todosContatosSelecionados;
     }
-  }, [
-    algunsContatosSelecionados,
-    todosContatosSelecionados
-  ])
+  }, [algunsContatosSelecionados, todosContatosSelecionados]);
+
+  const alternarSelecaoTodos = () => {
+    const chavesVisiveis = contatosVisiveis.map((contato) => gerarChaveContato(contato));
+    if (todosContatosSelecionados) {
+      setContatosSelecionados((selecionados) =>
+        selecionados.filter((chave) => !chavesVisiveis.includes(chave))
+      );
+    } else {
+      setContatosSelecionados((selecionados) => [
+        ...new Set([...selecionados, ...chavesVisiveis]),
+      ]);
+    }
+  };
+
+  const handleRecalcularSegmento = async () => {
+    if (!selectedSegment) return;
+    setIsRecalculating(true);
+    try {
+      const res = await segmentService.recalcular(selectedSegment.id);
+      const previewList = await segmentService.getPrevia(selectedSegment.id);
+      const novaQtd = res?.quantidadeContatos ?? previewList.length;
+
+      setSegments((prev) =>
+        prev.map((s) =>
+          s.id === selectedSegment.id
+            ? { ...s, contactsCount: novaQtd, previewContacts: previewList, updatedAt: 'Agora' }
+            : s
+        )
+      );
+      if (onShowToast) onShowToast(`Segmento recalculado: ${novaQtd} contato(s) elegível(is).`);
+    } catch (err) {
+      if (onShowToast) onShowToast('Erro ao recalcular segmento: ' + (err?.message || 'Tente novamente.'));
+    } finally {
+      setIsRecalculating(false);
+    }
+  };
+
+  // Contagens dos KPIs
+  const totalSaved = segments.length;
+  const totalActive = segments.filter(s => s.status === 'Ativo').length;
+
+  // Filtragem dos segmentos
+  const filteredSegments = useMemo(() => {
+    return segments.filter(seg => {
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        const matches =
+          seg.name.toLowerCase().includes(term) ||
+          seg.criteria.toLowerCase().includes(term);
+        if (!matches) return false;
+      }
+
+      if (statusFilter !== 'ALL') {
+        if (statusFilter === 'ativo' && seg.status !== 'Ativo') return false;
+        if (statusFilter === 'rascunho' && seg.status !== 'Rascunho') return false;
+        if (statusFilter === 'sem-resultados' && seg.status !== 'Sem resultados') return false;
+      }
+
+      if (activeChip) {
+        if (activeChip === 'tecnologia' && !seg.name.toLowerCase().includes('tecnologia') && !seg.criteria.toLowerCase().includes('tecnologia')) {
+          return false;
+        }
+        if (activeChip === 'email' && !seg.criteria.toLowerCase().includes('e-mail')) {
+          return false;
+        }
+        if (activeChip === 'saas' && !seg.name.toLowerCase().includes('saas') && !seg.criteria.toLowerCase().includes('saas')) {
+          return false;
+        }
+        if (activeChip === 'alto' && !seg.name.toLowerCase().includes('alto') && !seg.criteria.toLowerCase().includes('alto')) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [segments, searchTerm, statusFilter, activeChip]);
+
+  const handleOpenCreateModal = () => {
+    setModalState(1);
+    setIsModalOpen(true);
+  };
+
+  // Finalizar e salvar novo segmento diretamente no backend e banco
+  const handleFinishAndSaveSegment = async () => {
+    const nome = segmentName.trim() || 'Clientes B2B unificados';
+    try {
+      const createdSegment = await segmentService.createSegment({
+        name: nome,
+        description: segmentPrompt?.trim() || `Segmento "${nome}" ativo no PostgreSQL.`,
+        criteria: 'Status do perfil = Unificado E Tipo = Cliente B2B',
+        contactsCount: excludeSemBase ? 280 : 300,
+      });
+
+      setSegments((prev) => [createdSegment, ...prev]);
+      setSelectedSegmentId(createdSegment.id);
+      setIsModalOpen(false);
+      if (onShowToast) onShowToast(`Segmento "${createdSegment.name}" adicionado com sucesso no PostgreSQL!`);
+    } catch (err) {
+      console.error('Erro ao criar segmento:', err);
+      if (onShowToast) onShowToast('Erro ao salvar segmento. Tente novamente.');
+    }
+  };
 
   // Determinar qual etapa do stepper principal está ativa (1, 2 ou 3)
   const getActiveStepperStep = () => {
@@ -1191,19 +598,18 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
 
         <div className="segmentos-header-actions">
           <button
-            type='button'
             className="segmentos-btn-secondary"
             onClick={handleExportSegments}
           >
             Exportar
           </button>
-          <button className="segmentos-btn-primary" onClick={handleNewSegment}>
+          <button className="segmentos-btn-primary" onClick={handleOpenCreateModal}>
             Novo segmento
           </button>
         </div>
       </div>
 
-      {/* ===== Banner de Aviso Superior ===== */}
+      {/* ===== Banner Superior ===== */}
       <div className="segmentos-info-banner">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -1211,7 +617,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
           <line x1="12" y1="8" x2="12.01" y2="8" />
         </svg>
         <span>
-          Demonstração · segmentos, contagens e datas ilustrativos. Não representa aprovação legal real nem envio de campanha.
+          Segmentos dinâmicos baseados no cadastro unificado de contatos.
         </span>
       </div>
 
@@ -1237,12 +643,16 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
           <div className="segmentos-kpi-top">
             <span className="segmentos-kpi-label">Outros estados</span>
           </div>
-
           <div className="segmentos-kpi-value-text">
-            {segments.filter((seg) => seg.status === "Rascunho").length} rascunhos ·{" "}
-            {segments.filter((seg) => seg.status === "Sem resultados").length} sem resultados
+            {(() => {
+              const rascunhos = segments.filter(s => s.status === 'Rascunho').length;
+              const semResultados = segments.filter(s => s.status === 'Sem resultados').length;
+              const parts = [];
+              if (rascunhos > 0) parts.push(`${rascunhos} ${rascunhos === 1 ? 'rascunho' : 'rascunhos'}`);
+              if (semResultados > 0) parts.push(`${semResultados} ${semResultados === 1 ? 'pausado' : 'pausados'}`);
+              return parts.length > 0 ? parts.join(' · ') : 'Nenhum';
+            })()}
           </div>
-
           <div className="segmentos-kpi-sub">Rascunhos não calculam contatos.</div>
         </div>
       </div>
@@ -1369,45 +779,53 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSegments.map((seg) => (
-                    <tr
-                      key={seg.id}
-                      className={`segment-row ${selectedSegmentId === seg.id ? 'selected' : ''}`}
-                      onClick={() => {
-                        setSelectedSegmentId(seg.id);
-                        if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
-                          setSegmentMobileTab('details');
-                        }
-                      }}
-                    >
-                      <td className="td-segment-info">
-                        <h4 className="segment-row-title">{seg.name}</h4>
-                        <p className="segment-row-criteria">{seg.criteria}</p>
-                        <div className="segment-meta-mobile">
-                          <span className="segment-mobile-contacts">{seg.contactsCount !== null ? `${seg.contactsCount} contatos` : '0 contatos'}</span>
-                          <span className="segment-mobile-dot">·</span>
-                          <span className="segment-mobile-date">{seg.updatedAt}</span>
-                        </div>
+                  {filteredSegments.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '36px 16px', color: '#64748b' }}>
+                        Nenhum segmento encontrado. Clique em <strong>Novo segmento</strong> acima para criar.
                       </td>
-                      <td className="td-segment-contacts">
-                        {seg.contactsCount !== null ? seg.contactsCount : '—'}
-                      </td>
-                      <td className="td-segment-status">
-                        {seg.status === 'Ativo' && (
-                          <span className="seg-pill green">
-                            <span className="dot" /> Ativo
-                          </span>
-                        )}
-                        {seg.status === 'Sem resultados' && (
-                          <span className="seg-pill gray">Sem resultados</span>
-                        )}
-                        {seg.status === 'Rascunho' && (
-                          <span className="seg-pill gray">Rascunho</span>
-                        )}
-                      </td>
-                      <td className="td-segment-date td-hide-mobile">{seg.updatedAt}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredSegments.map((seg) => (
+                      <tr
+                        key={seg.id}
+                        className={`segment-row ${selectedSegmentId === seg.id ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedSegmentId(seg.id);
+                          if (typeof window !== 'undefined' && window.innerWidth <= 1024) {
+                            setSegmentMobileTab('details');
+                          }
+                        }}
+                      >
+                        <td className="td-segment-info">
+                          <h4 className="segment-row-title">{seg.name}</h4>
+                          <p className="segment-row-criteria">{seg.criteria}</p>
+                          <div className="segment-meta-mobile">
+                            <span className="segment-mobile-contacts">{seg.contactsCount !== null ? `${seg.contactsCount} contatos` : '0 contatos'}</span>
+                            <span className="segment-mobile-dot">·</span>
+                            <span className="segment-mobile-date">{seg.updatedAt}</span>
+                          </div>
+                        </td>
+                        <td className="td-segment-contacts">
+                          {seg.contactsCount !== null ? seg.contactsCount : '—'}
+                        </td>
+                        <td className="td-segment-status">
+                          {seg.status === 'Ativo' && (
+                            <span className="seg-pill green">
+                              <span className="dot" /> Ativo
+                            </span>
+                          )}
+                          {seg.status === 'Sem resultados' && (
+                            <span className="seg-pill gray">Sem resultados</span>
+                          )}
+                          {seg.status === 'Rascunho' && (
+                            <span className="seg-pill gray">Rascunho</span>
+                          )}
+                        </td>
+                        <td className="td-segment-date td-hide-mobile">{seg.updatedAt}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1447,324 +865,277 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
               <span>Voltar para lista de segmentos</span>
             </button>
           </div>
-          <section className="segmentos-card">
-            <div className="segmentos-card-header">
-              <h3 className="segmentos-card-title">Detalhes do segmento</h3>
-
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  className="seg-edit-btn"
-                  onClick={handleDuplicateSegment}
-                >
-                  Duplicar
-                </button>
-
-                <button
-                  type="button"
-                  className="seg-edit-btn"
-                  onClick={handleEditSegment}
-                >
-                  Editar
-                </button>
-
-                <button
-                  type="button"
-                  className="seg-delete-btn"
-                  onClick={() => handleDeleteSegment(selectedSegment)}
-                >
-                  Excluir
-                </button>
+          {selectedSegment ? (
+            <section className="segmentos-card">
+              <div className="segmentos-card-header">
+                <h3 className="segmentos-card-title">Detalhes do segmento</h3>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="seg-edit-btn"
+                    onClick={handleDuplicateSegment}
+                  >
+                    Duplicar
+                  </button>
+                  <button
+                    type="button"
+                    className="seg-edit-btn"
+                    onClick={handleOpenEditSegment}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    className="seg-delete-btn"
+                    onClick={handleOpenDeleteModal}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
 
-            </div>
-
-            {/* Cabeçalho do Segmento Selecionado */}
-            <div className="selected-seg-heading">
-              <h2 className="selected-seg-name">{selectedSegment.name}</h2>
-              <p className="selected-seg-desc">{selectedSegment.description}</p>
-              <div className="selected-seg-meta">
-                {selectedSegment.status === 'Ativo' && (
-                  <span className="seg-pill green">
-                    <span className="dot" /> Ativo
+              {/* Cabeçalho do Segmento Selecionado */}
+              <div className="selected-seg-heading">
+                <h2 className="selected-seg-name">{selectedSegment.name}</h2>
+                <p className="selected-seg-desc">{selectedSegment.description}</p>
+                <div className="selected-seg-meta">
+                  {selectedSegment.status === 'Ativo' && (
+                    <span className="seg-pill green">
+                      <span className="dot" /> Ativo
+                    </span>
+                  )}
+                  <span className="selected-seg-dynamic-text">
+                    {selectedSegment.dynamicText}
                   </span>
-                )}
-                <span className="selected-seg-dynamic-text">
-                  {selectedSegment.dynamicText}
-                </span>
+                </div>
               </div>
-            </div>
 
-            {/* Critérios E / OU */}
-            <div className="criteria-section">
-              <div className="criteria-header">
-                <h4 className="criteria-title">Critérios de inclusão</h4>
-                <p className="criteria-subtitle">
-                  Todas as condições (E) · qualquer uma das origens (OU).
+              {/* Critérios E / OU */}
+              <div className="criteria-section">
+                <div className="criteria-header">
+                  <h4 className="criteria-title">Critérios de inclusão</h4>
+                  <p className="criteria-subtitle">
+                    Todas as condições (E) · qualquer uma das origens (OU).
+                  </p>
+                </div>
+
+                <div className="criteria-rules-list">
+                  {selectedSegment.criteriaRules && selectedSegment.criteriaRules.map((rule, idx) => (
+                    <div key={idx} className="criteria-rule-box">
+                      <span className="criteria-rule-field">{rule.field}</span>
+                      <strong className="criteria-rule-cond">{rule.condition}</strong>
+                    </div>
+                  ))}
+
+                  {selectedSegment.channelRule && (
+                    <div className="criteria-channel-box">
+                      <span className="criteria-channel-header">
+                        {selectedSegment.channelRule.header}
+                      </span>
+                      <strong className="criteria-channel-val">
+                        {selectedSegment.channelRule.value}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+
+                <p className="criteria-explanation-note">
+                  {selectedSegment.ruleNote}
                 </p>
               </div>
 
-              <div className="criteria-rules-list">
-                {(selectedSegment.criteriaRules || []).map((rule, idx) => (
-                  <div key={idx} className="criteria-rule-box">
-                    <span className="criteria-rule-field">{rule.field}</span>
-                    <strong className="criteria-rule-cond">{rule.condition}</strong>
-                  </div>
-                ))}
-
-                {selectedSegment.channelRule && (
-                  <div className="criteria-channel-box">
-                    <span className="criteria-channel-header">
-                      {selectedSegment.channelRule.header}
-                    </span>
-                    <strong className="criteria-channel-val">
-                      {selectedSegment.channelRule.value}
-                    </strong>
-                  </div>
-                )}
-              </div>
-
-              <p className="criteria-explanation-note">
-                {selectedSegment.ruleNote}
-              </p>
-            </div>
-
-            {/* Fontes de Dados */}
-            <div className="seg-sources-section">
-              <h4 className="seg-sources-title">Fontes de dados</h4>
-              <div className="seg-sources-list">
-                {(selectedSegment.sources || []).map((src, idx) => (
-                  <div key={idx} className="seg-source-item">
-                    <div className="seg-source-left">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
-                      </svg>
-                      <span className="seg-source-name">{src.name}</span>
+              {/* Fontes de Dados */}
+              <div className="seg-sources-section">
+                <h4 className="seg-sources-title">Fontes de dados</h4>
+                <div className="seg-sources-list">
+                  {selectedSegment.sources && selectedSegment.sources.map((src, idx) => (
+                    <div key={idx} className="seg-source-item">
+                      <div className="seg-source-left">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+                        </svg>
+                        <span className="seg-source-name">{src.name}</span>
+                      </div>
+                      <span className="seg-source-desc">{src.desc}</span>
                     </div>
-                    <span className="seg-source-desc">{src.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Prévia dos Contatos */}
-            <div className="seg-preview-section">
-              <div className="seg-preview-header">
-                <div>
-                  <h4 className="seg-preview-title">Prévia dos contatos</h4>
-                  <p className="seg-preview-sub">
-                    {selectedSegment.criteria}
-                  </p>
+                  ))}
                 </div>
-                <button
-                  className="seg-preview-link"
-                  onClick={handleVerTodos}
-                >
-                  {mostrarTodosContatos ? "Mostrar menos" : "Ver todos"} (
-                  {selectedSegment.contactsCount || 0} ilustrativos
-                  )
-                </button>
               </div>
 
-
-              <div className="seg-preview-list">
-
-
-                <div className="seg-selecionar-todos">
-                  <label className="seg-selecionar-todos-label">
-                    <input
-                      ref={selecionarTodosRef}
-                      type="checkbox"
-                      className="seg-contato-checkbox"
-                      checked={todosContatosSelecionados}
-                      onChange={alternarSelecaoTodos}
-                    />
-
-                    <span>Selecionar todos</span>
-                  </label>
-
-                  <span className="seg-selecionar-todos-contagem">
-                    {contatosVisiveis.length} contatos
-                  </span>
+              {/* Prévia dos Contatos */}
+              <div className="seg-preview-section">
+                <div className="seg-preview-header">
+                  <div>
+                    <h4 className="seg-preview-title">Prévia dos contatos</h4>
+                    <p className="seg-preview-sub">
+                      {selectedSegment.criteria}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="seg-preview-link"
+                    onClick={handleVerTodos}
+                  >
+                    {mostrarTodosContatos ? 'Mostrar menos' : 'Ver todos'} ({selectedSegment.contactsCount || 0} contatos)
+                  </button>
                 </div>
 
-
-                {/* Barra de ações dos contatos selecionados */}
-                {contatosSelecionados.length > 0 && (
-                  <div className="seg-acoes-selecao">
-
-                    <span>
-                      {contatosSelecionados.length} contato(s) selecionado(s)
-                    </span>
-
-                    <button
-                      type="button"
-                      className="seg-btn-remover-selecionados"
-                      onClick={removerContatosSelecionados}
-                    >
-                      Remover selecionados
-                    </button>
-
-                    <button
-                      type="button"
-                      className="seg-btn-limpar-selecao"
-                      onClick={() => setContatosSelecionados([])}
-                    >
-                      Limpar seleção
-                    </button>
-
-                  </div>
-                )}
-
-                {/* Lista de contatos */}
-                {contatosVisiveis.length > 0 ? (
-                  contatosVisiveis.map((c, i) => (
-                    <div
-                      key={c.id || i}
-                      className="seg-preview-item"
-                      onClick={() => {
-                        console.log('Contato clicado:', c);
-
-                        const segmentosSalvos = JSON.parse(
-                          localStorage.getItem('neocore_segments') || '[]'
-                        );
-
-                        const segmentoModa = segmentosSalvos.find(
-                          (segmento) =>
-                            segmento.name === 'Moda · preferência WhatsApp'
-                        );
-
-                        const contatoCompleto = segmentoModa?.previewContacts.find(
-                          (contato) => contato.name === c.name
-                        );
-
-                        console.log(
-                          'Contato completo do localStorage:',
-                          contatoCompleto
-                        );
-
-                        setContatoSelecionado(contatoCompleto || c);
-                      }}
-                    >
-
-                      <div className="seg-preview-left">
-
-                        {/* Checkbox para selecionar o contato */}
-
+                <div className="seg-preview-list">
+                  {contatosVisiveis.length > 0 && (
+                    <div className="seg-selecionar-todos">
+                      <label className="seg-selecionar-todos-label">
                         <input
+                          ref={selecionarTodosRef}
                           type="checkbox"
                           className="seg-contato-checkbox"
-                          checked={contatosSelecionados.includes(
-                            gerarChaveContato(c)
-                          )}
-                          onChange={() => alternarSelecaoContato(c)}
-                          onClick={(event) => event.stopPropagation()}
-                          aria-label={`Selecionar ${c.name}`}
+                          checked={todosContatosSelecionados}
+                          onChange={alternarSelecaoTodos}
                         />
-
-
-                        {/* Avatar do contato */}
-                        <div className="seg-contact-avatar">
-                          {c.initials}
-                        </div>
-
-                        {/* Informações do contato */}
-                        <div className="seg-contact-info">
-                          <strong className="seg-contact-name">
-                            {c.name}
-                          </strong>
-
-                          <span className="seg-contact-detail">
-                            {c.detail}
-                          </span>
-                        </div>
-
-                      </div>
-
-                      <span className="seg-contact-confirmed">
-                        Confirmado &gt;
+                        <span>Selecionar todos</span>
+                      </label>
+                      <span className="seg-selecionar-todos-contagem">
+                        {contatosVisiveis.length} contatos
                       </span>
-
                     </div>
-                  ))
-                ) : (
-                  <div className="seg-preview-empty">
-                    Nenhum contato encontrado para a prévia deste segmento.
+                  )}
+
+                  {contatosSelecionados.length > 0 && (
+                    <div className="seg-acoes-selecao">
+                      <span>{contatosSelecionados.length} contato(s) selecionado(s)</span>
+                      <button
+                        type="button"
+                        className="seg-btn-remover-selecionados"
+                        onClick={removerContatosSelecionados}
+                      >
+                        Remover selecionados
+                      </button>
+                      <button
+                        type="button"
+                        className="seg-btn-limpar-selecao"
+                        onClick={() => setContatosSelecionados([])}
+                      >
+                        Limpar seleção
+                      </button>
+                    </div>
+                  )}
+
+                  {contatosVisiveis.length > 0 ? (
+                    contatosVisiveis.map((c, i) => (
+                      <div
+                        key={c.id || i}
+                        className="seg-preview-item"
+                        onClick={() => setContatoSelecionado(c)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="seg-preview-left">
+                          <input
+                            type="checkbox"
+                            className="seg-contato-checkbox"
+                            checked={contatosSelecionados.includes(gerarChaveContato(c))}
+                            onChange={() => alternarSelecaoContato(c)}
+                            onClick={(event) => event.stopPropagation()}
+                            aria-label={`Selecionar ${c.name}`}
+                          />
+                          <div className="seg-contact-avatar">{c.initials}</div>
+                          <div className="seg-contact-info">
+                            <strong className="seg-contact-name">{c.name}</strong>
+                            <span className="seg-contact-detail">{c.detail}</span>
+                          </div>
+                        </div>
+                        <span className="seg-contact-confirmed">
+                          Confirmado &gt;
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="seg-preview-empty">
+                      Nenhum contato encontrado para a prévia deste segmento.
+                    </div>
+                  )}
+                </div>
+
+                {mostrarTodosContatos && totalPaginas > 1 && (
+                  <div className="paginacao-contatos">
+                    <button
+                      type="button"
+                      className="paginacao-btn"
+                      onClick={() => setPaginaContatos((pagina) => pagina - 1)}
+                      disabled={paginaContatos === 1}
+                    >
+                      Anterior
+                    </button>
+                    <span className="paginacao-info">
+                      Página {paginaContatos} de {totalPaginas}
+                    </span>
+                    <button
+                      type="button"
+                      className="paginacao-btn"
+                      onClick={() => setPaginaContatos((pagina) => pagina + 1)}
+                      disabled={paginaContatos === totalPaginas}
+                    >
+                      Próxima
+                    </button>
                   </div>
                 )}
-
               </div>
 
-
-              {mostrarTodosContatos && totalPaginas > 1 && (
-                <div className="paginacao-contatos">
+              {/* Rodapé do Segmento */}
+              <div className="selected-seg-footer">
+                <div className="seg-footer-calc">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                  </svg>
+                  <span>Sincronizado com o banco de dados</span>
+                </div>
+                <p className="seg-footer-warning">
+                  Critérios dinâmicos baseados no cadastro PostgreSQL.
+                </p>
+                <div className="seg-footer-actions">
                   <button
-                    className="paginacao-btn"
-                    onClick={() =>
-                      setPaginaContatos((pagina) => pagina - 1)
-                    }
-                    disabled={paginaContatos === 1}
+                    type="button"
+                    className="seg-action-link seg-action-excluir"
+                    onClick={handleOpenDeleteModal}
                   >
-                    Anterior
+                    Excluir segmento
                   </button>
-
-                  <span className="paginacao-info">
-                    Página {paginaContatos} de {totalPaginas}
-                  </span>
-
                   <button
-                    className="paginacao-btn"
-                    onClick={() =>
-                      setPaginaContatos((pagina) => pagina + 1)
-                    }
-                    disabled={paginaContatos === totalPaginas}
+                    type="button"
+                    className="seg-action-link"
+                    disabled={isRecalculating}
+                    onClick={handleRecalcularSegmento}
                   >
-                    Próxima
+                    {isRecalculating ? 'Recalculando...' : 'Recalcular contatos'}
+                  </button>
+                  <button
+                    type="button"
+                    className="seg-action-link"
+                    onClick={handleExportContacts}
+                  >
+                    Exportar contatos
                   </button>
                 </div>
-              )}
-
-
-            </div>
-
-            {/* Rodapé do Segmento */}
-            <div className="selected-seg-footer">
-              <div className="seg-footer-calc">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </div>
+            </section>
+          ) : (
+            <section className="segmentos-card" style={{ padding: '48px 24px', textAlign: 'center' }}>
+              <div style={{ color: '#94a3b8', marginBottom: '12px' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ margin: '0 auto' }}>
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
                 </svg>
-                <span>Último cálculo: 11/10/2026, às 08:42</span>
               </div>
-              <p className="seg-footer-warning">
-                Prévia demonstrativa. Salvar preserva os critérios; exportar exige revisão de consentimento e opt-out.
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1e293b', marginBottom: '8px' }}>Nenhum segmento selecionado</h3>
+              <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '300px', margin: '0 auto 20px' }}>
+                Selecione um segmento na lista ao lado ou crie um novo público.
               </p>
-              <div className="seg-footer-actions">
-                <button
-                  className="seg-action-link seg-action-excluir"
-                  onClick={handleOpenDeleteModal}
-                >
-                  Excluir segmento
-                </button>
-
-                <button
-                  className="seg-action-link"
-                  onClick={() => onShowToast && onShowToast('Critérios do segmento salvos!')}
-                >
-                  Salvar segmento
-                </button>
-
-                <button
-                  type='button'
-                  className="seg-action-link"
-                  onClick={handleExportContacts}
-                >
-                  Exportar contatos
-                </button>
-              </div>
-            </div>
-          </section>
+              <button className="segmentos-btn-primary" onClick={handleOpenCreateModal}>
+                Novo segmento
+              </button>
+            </section>
+          )}
         </div>
       </div>
 
@@ -2029,7 +1400,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     </svg>
                   </div>
                   <p className="modal-box-desc">
-                    Os 324 contatos atendem aos critérios, mas ainda não são um público elegível. A próxima etapa verifica base legal registrada e opt-out de e-mail.
+                    Os contatos encontrados atendem aos critérios, mas ainda não são um público elegível. A próxima etapa verifica base legal registrada e opt-out de e-mail.
                   </p>
                 </div>
 
@@ -2113,7 +1484,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                 </div>
 
                 <p className="modal-explanation-small">
-                  Os grupos são distintos nesta demonstração: 324 perfis únicos – 24 opt-outs = 300 para verificação da base. Destes, 20 têm pendência. Não há soma de perfis duplicados.
+                  Os grupos são distintos nesta simulação. Os perfis com opt-out já estão excluídos do público e não há soma de perfis duplicados.
                 </p>
 
                 <div className="modal-info-box-blue">
@@ -2127,7 +1498,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                   <div className="modal-box-text">
                     <h5 className="modal-box-title">A checagem não é um parecer jurídico</h5>
                     <p className="modal-box-desc">
-                      A IA não define base legal. Conciliação e sincronização não autorizam campanhas. Os 24 opt-outs já estão fora do público, não são uma falha que possa ser ignorada.
+                      A IA não define base legal. Conciliação e sincronização não autorizam campanhas. Os contatos com opt-out já estão fora do público, não são uma falha que possa ser ignorada.
                     </p>
                   </div>
                 </div>
@@ -2233,24 +1604,17 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                 {/* Box de Perfis Previstos */}
                 <div className="modal-count-box blue-theme">
                   <div className="count-box-left">
-                    <span className="count-number">
-                      {excludeSemBase ? 280 : 300}
-                    </span>
-
+                    <span className="count-number">{excludeSemBase ? 280 : 300}</span>
                     <div className="count-info">
                       <strong>Perfis previstos para a nova checagem</strong>
-
                       <p>
                         {excludeSemBase
-                          ? "324 encontrados – 24 opt-outs – 20 sem base legal = 280."
-                          : "300 perfis sem opt-out. Porém, 20 continuam sem base legal e permanecem bloqueados para envio."}
+                          ? '324 encontrados – 24 opt-outs – 20 sem base legal = 280.'
+                          : '300 perfis sem opt-out. Porém, 20 continuam sem base legal e permanecem bloqueados para envio.'}
                       </p>
                     </div>
                   </div>
-
-                  <span className="count-badge-pending">
-                    Ainda não liberados
-                  </span>
+                  <span className="count-badge-pending">Ainda não liberados</span>
                 </div>
 
                 <p className="modal-explanation-small">
@@ -2283,9 +1647,13 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     </svg>
                   </div>
                   <div className="alert-content">
-                    <strong className="alert-title">Nova proposta checada · 280 elegíveis para e-mail</strong>
+                    <strong className="alert-title">
+                      Nova proposta checada · {excludeSemBase ? '280 elegíveis para e-mail' : '300 perfis sem opt-out'}
+                    </strong>
                     <p className="alert-desc">
-                      Após a revisão e a nova checagem, os perfis restantes têm base legal documentada na origem e não apresentam opt-out para este canal, no cenário ilustrativo.
+                      {excludeSemBase
+                        ? 'Após a revisão e a nova checagem, os perfis restantes têm base legal documentada na origem e não apresentam opt-out para este canal, no cenário ilustrativo.'
+                        : 'Após a revisão, 300 perfis estão sem opt-out. Os 20 registros sem base legal não foram excluídos e permanecem sinalizados.'}
                     </p>
                   </div>
                 </div>
@@ -2301,17 +1669,19 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     <span className="stat-card-label">Opt-outs excluídos</span>
                   </div>
                   <div className="modal-stat-card">
-                    <span className="stat-card-num">20</span>
+                    <span className="stat-card-num">{excludeSemBase ? 20 : 0}</span>
                     <span className="stat-card-label">Sem base excluídos</span>
                   </div>
                   <div className="modal-stat-card green-highlight">
-                    <span className="stat-card-num text-green">280</span>
+                    <span className="stat-card-num text-green">{excludeSemBase ? 280 : 300}</span>
                     <span className="stat-card-label">Elegíveis · e-mail</span>
                   </div>
                 </div>
 
                 <p className="modal-explanation-small">
-                  324 perfis únicos – 24 opt-outs – 20 sem base legal = 280 elegíveis. Exclusões distintas, verificadas sem duplicar perfis.
+                  {excludeSemBase
+                    ? '324 perfis únicos – 24 opt-outs – 20 sem base legal = 280 elegíveis. Exclusões distintas, verificadas sem duplicar perfis.'
+                    : '324 perfis únicos – 24 opt-outs = 300 perfis (20 registros sem base legal mantidos sem exclusão).'}
                 </p>
 
                 {/* Tabela do Resultado da Nova Checagem */}
@@ -2331,7 +1701,11 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     </div>
                     <div className="channel-res-row">
                       <span className="res-row-label">Base legal</span>
-                      <span className="res-row-val">Documentada nos registros de origem dos 280 perfis restantes. A IA não escolheu nem criou a base.</span>
+                      <span className="res-row-val">
+                        {excludeSemBase
+                          ? 'Documentada nos registros de origem dos 280 perfis restantes. A IA não escolheu nem criou a base.'
+                          : 'Documentada em 280 dos 300 perfis restantes. 20 registros seguem sem base legal na origem.'}
+                      </span>
                     </div>
                     <div className="channel-res-row">
                       <span className="res-row-label">Opt-out</span>
@@ -2339,7 +1713,11 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     </div>
                     <div className="channel-res-row">
                       <span className="res-row-label">Sem base registrada</span>
-                      <span className="res-row-val">20 registros excluídos do público. Continuam sem regularização automática na origem.</span>
+                      <span className="res-row-val">
+                        {excludeSemBase
+                          ? '20 registros excluídos do público. Continuam sem regularização automática na origem.'
+                          : '0 excluídos. Os 20 registros sem base legal foram mantidos por opção do usuário.'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -2388,11 +1766,11 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                     <span className="stat-card-label">Opt-outs excluídos</span>
                   </div>
                   <div className="modal-stat-card">
-                    <span className="stat-card-num">20</span>
+                    <span className="stat-card-num">{excludeSemBase ? 20 : 0}</span>
                     <span className="stat-card-label">Sem base excluídos</span>
                   </div>
                   <div className="modal-stat-card green-highlight">
-                    <span className="stat-card-num text-green">280</span>
+                    <span className="stat-card-num text-green">{excludeSemBase ? 280 : 300}</span>
                     <span className="stat-card-label">Elegíveis · e-mail</span>
                   </div>
                 </div>
@@ -2529,10 +1907,14 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                 {/* Box de Perfis Únicos */}
                 <div className="modal-count-box blue-theme">
                   <div className="count-box-left">
-                    <span className="count-number">280</span>
+                    <span className="count-number">{excludeSemBase ? 280 : 300}</span>
                     <div className="count-info">
                       <strong>Perfis únicos no público de e-mail</strong>
-                      <p>324 encontrados · 24 opt-outs e 20 sem base legal excluídos.</p>
+                      <p>
+                        {excludeSemBase
+                          ? '324 encontrados · 24 opt-outs e 20 sem base legal excluídos.'
+                          : '324 encontrados · 24 opt-outs excluídos (20 sem base legal mantidos).'}
+                      </p>
                     </div>
                   </div>
                   <span className="count-badge-demo">Demonstração</span>
@@ -2563,7 +1945,7 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                   <div className="card-sec-rows">
                     <div className="card-sec-row">
                       <span className="sec-row-key">Registro</span>
-                      <strong className="sec-row-val">DEMO-SEG-014 · 14/10/2026, às 11:30 · Carlos</strong>
+                      <strong className="sec-row-val">DEMO-SEG-014 · 14/10/2026, às 11:30 · Administrador</strong>
                     </div>
                     <div className="card-sec-row">
                       <span className="sec-row-key">Rastreabilidade</span>
@@ -2597,12 +1979,10 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                   <button className="modal-btn-cancel" onClick={handleFinishAndSaveSegment}>
                     Voltar a segmentos
                   </button>
-
                   <button
                     className="modal-btn-primary"
                     onClick={() => {
                       handleFinishAndSaveSegment();
-
                       if (onShowToast) {
                         onShowToast('Registro de auditoria DEMO-SEG-014 validado com sucesso!');
                       }
@@ -2610,7 +1990,6 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
                   >
                     Ver registro
                   </button>
-
                 </div>
                 <p className="modal-disclaimer">
                   Confirmação exclusivamente ilustrativa. Nenhuma sincronização ou automação real foi executada.
@@ -2621,11 +2000,12 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
         </div>
       )}
 
-      {isEditModalOpen && (
+      {isEditSegModalOpen && (
         <ModalEditarSegmento
           segmento={selectedSegment}
-          fecharModal={() => setIsEditModalOpen(false)}
+          fecharModal={() => !isSavingSeg && setIsEditSegModalOpen(false)}
           salvarAlteracoes={handleSaveEditSegment}
+          salvando={isSavingSeg}
         />
       )}
 
@@ -2640,7 +2020,6 @@ export default function DashboardSegmentos({ onShowToast, onNavigateToContact })
         fecharModal={() => setContatoSelecionado(null)}
         removerContato={removerContatoDoSegmento}
       />
-
     </main>
   );
 }

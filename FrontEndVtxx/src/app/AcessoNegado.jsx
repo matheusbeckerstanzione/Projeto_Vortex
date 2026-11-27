@@ -10,7 +10,6 @@ export default function AcessoNegado() {
 
   // Validação: a tela de acesso negado só funciona se o código MFA foi 000000
   const isAuthorizedDenied =
-    import.meta.env.DEV ||
     location.state?.fromMfaDenied ||
     sessionStorage.getItem('mfa_denied') === 'true';
 

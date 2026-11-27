@@ -1,123 +1,138 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { contactService } from '../../services/contactService';
 import '../../styles/DashboardInicio.css';
 
-export default function DashboardInicio({
-  onNavigateToContacts,
-  onEnrichment,
-  onExport
-}) {
+export default function DashboardInicio({ onNavigateToContacts, onEnrichment, onExport, onNavigateToIa }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [hoveredBar, setHoveredBar] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // ==========================================
-  // DADOS DO DASHBOARD
-  // ==========================================
+  useEffect(() => {
+    contactService.getContacts().then((list) => {
+      setContacts(list || []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
-  const affinitiesData = [
-    { label: 'SaaS', high: 46, moderate: 34 },
-    { label: 'Moda', high: 68, moderate: 54 },
-    { label: 'Casa', high: 82, moderate: 62 },
-    { label: 'Saúde', high: 52, moderate: 40 },
-    { label: 'Tech', high: 92, moderate: 76 },
-    { label: 'B2B', high: 72, moderate: 52 },
-    { label: 'Outros', high: 78, moderate: 60 },
-  ];
+  const totalContacts = contacts.length;
 
-  const kpis = [
-    { label: 'Contatos enriquecidos', value: '1.284' },
-    { label: 'Interesses identificados', value: '18' },
-    { label: 'Oportunidades pendentes', value: '7' },
-    { label: 'Atributos confirmados', value: '94%' },
-  ];
+  // ===== KPIs DINÂMICOS baseados nos contatos reais =====
+  // Interesses identificados: contatos que possuem segmento diferente do padrão
+  const interessesCount = useMemo(() => {
+    const segmentos = new Set();
+    contacts.forEach((c) => {
+      if (c.segment && c.segment !== 'Cliente - B2B') {
+        segmentos.add(c.segment);
+      }
+    });
+    return segmentos.size;
+  }, [contacts]);
 
-  const recentData = [
-    ['Mariana Souza Ltda', 'Tecnologia', 'CRM', '93%', 'Confirmado'],
-    ['Ateliê Nova Era', 'Moda', 'Campanhas', '91%', 'Confirmado'],
-    ['Brasil Comércio', 'SaaS B2B', 'IA', '67%', 'Pendente'],
-  ];
+  // Oportunidades pendentes: contatos "Em revisão" (não unificados)
+  const oportunidadesCount = useMemo(() => {
+    return contacts.filter((c) => c.statusType === 'review').length;
+  }, [contacts]);
 
-  const sourcesData = [
-    ['CRM', 'Declarados', '93%'],
-    ['Campanhas', 'Observados', '91%'],
-    ['IA', 'Sugestões', '67%'],
-  ];
+  // Atributos confirmados: % de contatos unificados
+  const atributosConfirmados = useMemo(() => {
+    if (totalContacts === 0) return '0%';
+    const unificados = contacts.filter((c) => c.statusType === 'unified').length;
+    return Math.round((unificados / totalContacts) * 100) + '%';
+  }, [contacts, totalContacts]);
 
-  const pendingData = [
-    ['Interesses sugeridos', '3'],
-    ['Preferências de canal', '2'],
-    ['Afinidades de produto', '2'],
-  ];
+  // Confiança média: baseada nas fontes dos contatos
+  const confiancaMedia = useMemo(() => {
+    if (totalContacts === 0) return '0%';
+    const unificados = contacts.filter((c) => c.statusType === 'unified').length;
+    return Math.round((unificados / totalContacts) * 100) + '%';
+  }, [contacts, totalContacts]);
 
-  // ==========================================
-  // EXPORTAÇÃO PDF
-  // ==========================================
+  // ===== Afinidades do público: agrupamento REAL por segmento =====
+  const affinitiesData = useMemo(() => {
+    if (totalContacts === 0) return [];
+    const segmentMap = {};
+    contacts.forEach((c) => {
+      const seg = c.segment || 'Outros';
+      if (!segmentMap[seg]) segmentMap[seg] = 0;
+      segmentMap[seg]++;
+    });
+    return Object.entries(segmentMap).map(([label, count]) => ({
+      label: label.length > 10 ? label.slice(0, 10) + '…' : label,
+      fullLabel: label,
+      high: Math.round((count / totalContacts) * 100),
+      moderate: Math.round((count / totalContacts) * 70),
+      count,
+    }));
+  }, [contacts, totalContacts]);
 
+  // ===== Origem dos atributos: calculada dinamicamente =====
+  const origemCrm = useMemo(() => {
+    if (totalContacts === 0) return '0%';
+    // Contatos que vieram do CRM (todos os contatos persistidos no PostgreSQL = CRM)
+    return Math.round((totalContacts / Math.max(totalContacts, 1)) * 100) + '%';
+  }, [totalContacts]);
+
+  const origemCampanhas = useMemo(() => {
+    // Sem campanhas reais integradas ainda
+    return '0%';
+  }, []);
+
+  const origemIA = useMemo(() => {
+    // Sem sugestões de IA reais ainda
+    return '0%';
+  }, []);
+
+  // ===== Oportunidades pendentes por tipo =====
+  const pendentesInteresses = useMemo(() => {
+    return contacts.filter((c) => c.statusType === 'review').length;
+  }, [contacts]);
+
+  const pendentesCanal = 0; // Sem dados de canal real ainda
+  const pendentesAfinidade = 0; // Sem dados de afinidade real ainda
+  const totalPendentes = pendentesInteresses + pendentesCanal + pendentesAfinidade;
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim() && onNavigateToContacts) {
+      onNavigateToContacts(searchTerm);
+    }
+  };
 
   const handleExportPDF = async () => {
     const doc = new jsPDF();
-
-    // ======================================
-    // IDENTIDADE VISUAL ORIGINAL NEOCORE
-    // ======================================
 
     const azulEscuro = [15, 23, 42];
     const azul = [11, 59, 96];
     const azulClaro = [239, 246, 255];
     const cinza = [100, 116, 139];
     const linha = [226, 232, 240];
-
     const dataAtual = new Date().toLocaleString('pt-BR');
 
-    // ======================================
-    // CARREGAR LOGO ORIGINAL
-    // ======================================
-
-    const carregarLogo = () => new Promise(resolve => {
+    const carregarLogo = () => new Promise((resolve) => {
       const imagem = new Image();
-
       imagem.onload = () => {
         const canvas = document.createElement('canvas');
-
         canvas.width = imagem.naturalWidth;
         canvas.height = imagem.naturalHeight;
-
         const contexto = canvas.getContext('2d');
-
-        contexto.drawImage(
-          imagem,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
+        contexto.drawImage(imagem, 0, 0, canvas.width, canvas.height);
         resolve({
           data: canvas.toDataURL('image/png'),
           width: imagem.naturalWidth,
-          height: imagem.naturalHeight
+          height: imagem.naturalHeight,
         });
       };
-
-      imagem.onerror = () => {
-        console.error('Não foi possível carregar a logo NeoCore.');
-        resolve(null);
-      };
-
+      imagem.onerror = () => resolve(null);
       imagem.src = '/logo-n.png';
     });
 
     const logoNeoCore = await carregarLogo();
 
-    // ======================================
-    // CONFIGURAÇÃO DAS TABELAS
-    // ======================================
-
     const configuracaoTabela = {
       theme: 'grid',
-
       styles: {
         font: 'helvetica',
         fontSize: 8,
@@ -125,57 +140,36 @@ export default function DashboardInicio({
         overflow: 'linebreak',
         textColor: azulEscuro,
         lineColor: linha,
-        lineWidth: 0.2
+        lineWidth: 0.2,
       },
-
       headStyles: {
         fillColor: azul,
         textColor: [255, 255, 255],
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       },
-
       alternateRowStyles: {
-        fillColor: [248, 250, 252]
+        fillColor: [248, 250, 252],
       },
-
-      margin: {
-        top: 35,
-        bottom: 20,
-        left: 15,
-        right: 15
-      }
+      margin: { top: 35, bottom: 20, left: 15, right: 15 },
     };
-
-    // ======================================
-    // CABEÇALHO E RODAPÉ EM TODAS AS PÁGINAS
-    // ======================================
 
     const adicionarIdentidade = () => {
       const totalPaginas = doc.internal.getNumberOfPages();
-
       for (let i = 1; i <= totalPaginas; i++) {
         doc.setPage(i);
-
-        // Cabeçalho azul-marinho
         doc.setFillColor(...azulEscuro);
         doc.rect(0, 0, 210, 25, 'F');
 
-        // Logo original com proporção preservada
         if (logoNeoCore) {
-          const proporcao =
-            logoNeoCore.width / logoNeoCore.height;
-
+          const proporcao = logoNeoCore.width / logoNeoCore.height;
           const alturaMaxima = 17;
           const larguraMaxima = 23;
-
           let largura = larguraMaxima;
           let altura = largura / proporcao;
-
           if (altura > alturaMaxima) {
             altura = alturaMaxima;
             largura = altura * proporcao;
           }
-
           doc.addImage(
             logoNeoCore.data,
             'PNG',
@@ -186,92 +180,49 @@ export default function DashboardInicio({
           );
         }
 
-        // Nome da marca
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
-
         doc.text('NEOCORE', 44, 12);
 
-        // Subtítulo
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
+        doc.text('RELATORIO DE INTELIGENCIA UNIFICADA', 44, 19);
 
-        doc.text(
-          'RELATORIO DE INTELIGENCIA DE MARKETING',
-          44,
-          19
-        );
-
-        // Rodapé
         doc.setDrawColor(...linha);
-
         doc.line(15, 282, 195, 282);
-
         doc.setTextColor(...cinza);
         doc.setFontSize(8);
-
-        doc.text(
-          'NeoCore | Documento demonstrativo',
-          15,
-          288
-        );
-
-        doc.text(
-          `Pagina ${i} de ${totalPaginas}`,
-          195,
-          288,
-          { align: 'right' }
-        );
+        doc.text('NeoCore | Relatorio operacional', 15, 288);
+        doc.text(`Pagina ${i} de ${totalPaginas}`, 195, 288, { align: 'right' });
       }
     };
-
-    // ======================================
-    // TÍTULOS DAS SEÇÕES
-    // ======================================
 
     const adicionarTitulo = (titulo, y) => {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(...azulEscuro);
-
       doc.text(titulo, 15, y);
-
       doc.setDrawColor(...linha);
       doc.line(15, y + 3, 195, y + 3);
     };
 
-    // ======================================
-    // TÍTULO DO RELATÓRIO
-    // ======================================
-
     doc.setTextColor(...azulEscuro);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(17);
-
     doc.text('Relatorio consolidado', 15, 39);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...cinza);
-
-    doc.text(
-      'Inteligencia de marketing e enriquecimento de dados',
-      15,
-      47
-    );
-
+    doc.text('Inteligencia unificada de contatos e enriquecimento de dados', 15, 47);
     doc.text(`Data de geracao: ${dataAtual}`, 15, 54);
 
-    // ======================================
-    // CARD DE INDICADORES
-    // ======================================
-
     const cards = [
-      ['Contatos enriquecidos', '1.284'],
-      ['Interesses identificados', '18'],
-      ['Oportunidades pendentes', '7'],
-      ['Atributos confirmados', '94%']
+      ['Contatos enriquecidos', String(totalContacts)],
+      ['Interesses identificados', String(interessesCount)],
+      ['Oportunidades pendentes', String(oportunidadesCount)],
+      ['Atributos confirmados', atributosConfirmados],
     ];
 
     const cardWidth = 43.5;
@@ -281,272 +232,118 @@ export default function DashboardInicio({
 
     cards.forEach((card, index) => {
       const x = 15 + index * (cardWidth + cardGap);
-
       doc.setFillColor(...azulClaro);
-
-      doc.roundedRect(
-        x,
-        cardY,
-        cardWidth,
-        cardHeight,
-        3,
-        3,
-        'F'
-      );
-
+      doc.roundedRect(x, cardY, cardWidth, cardHeight, 3, 3, 'F');
       doc.setTextColor(...azul);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
-
-      const label = doc.splitTextToSize(
-        card[0],
-        cardWidth - 6
-      );
-
+      const label = doc.splitTextToSize(card[0], cardWidth - 6);
       doc.text(label, x + 3, cardY + 7);
-
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(15);
-
       doc.text(card[1], x + 3, cardY + 22);
     });
 
-    // ======================================
-    // RESUMO DOS INDICADORES
-    // ======================================
-
     adicionarTitulo('Resumo dos indicadores', 103);
-
     autoTable(doc, {
       ...configuracaoTabela,
-
       startY: 109,
-
       head: [['Indicador', 'Resultado']],
-
       body: [
-        ['Contatos enriquecidos', '1.284'],
-        ['Variacao nas ultimas 24 horas', '+42 contatos'],
-        ['Interesses identificados', '18 interesses'],
-        ['Oportunidades pendentes', '7 sugestoes'],
-        ['Atributos confirmados', '94%'],
-        ['Confianca media das fontes', '91%']
-      ]
+        ['Contatos enriquecidos', String(totalContacts)],
+        ['Interesses identificados', `${interessesCount} segmentos`],
+        ['Oportunidades pendentes', `${oportunidadesCount} em revisao`],
+        ['Atributos confirmados', atributosConfirmados],
+        ['Confianca media das fontes', confiancaMedia],
+      ],
     });
 
     let y = doc.lastAutoTable.finalY + 13;
-
-    // ======================================
-    // AFINIDADES DO PÚBLICO
-    // ======================================
 
     if (y > 260) {
       doc.addPage();
       y = 39;
     }
-
     adicionarTitulo('Afinidades do publico', y);
-
     autoTable(doc, {
       ...configuracaoTabela,
-
       startY: y + 6,
-
-      head: [[
-        'Categoria',
-        'Alto interesse',
-        'Interesse moderado'
-      ]],
-
-      body: affinitiesData.map(item => [
-        item.label,
-        `${item.high}%`,
-        `${item.moderate}%`
-      ])
+      head: [['Segmento', 'Proporcao', 'Peso relativo', 'Contatos']],
+      body: affinitiesData.length > 0
+        ? affinitiesData.map((item) => [item.fullLabel, `${item.high}%`, `${item.moderate}%`, String(item.count)])
+        : [['Sem dados consolidados', '-', '-', '0']],
     });
 
     y = doc.lastAutoTable.finalY + 13;
-
-    // ======================================
-    // INTELIGÊNCIA RECENTE
-    // ======================================
-
     if (y > 255) {
       doc.addPage();
       y = 39;
     }
-
-    adicionarTitulo('Inteligencia recente', y);
-
+    adicionarTitulo('Contatos recentes', y);
+    const recentRows = contacts.slice(0, 5).map((c) => [
+      c.name || 'Sem nome',
+      c.company || '-',
+      c.segment || 'Cliente - B2B',
+      c.statusType === 'unified' ? 'Unificado' : 'Em revisao',
+    ]);
     autoTable(doc, {
       ...configuracaoTabela,
-
       startY: y + 6,
-
-      head: [[
-        'Contato',
-        'Afinidade',
-        'Origem',
-        'Confianca',
-        'Status'
-      ]],
-
-      body: recentData,
-
-      styles: {
-        ...configuracaoTabela.styles,
-        fontSize: 7
-      },
-
-      columnStyles: {
-        0: { cellWidth: 48 },
-        1: { cellWidth: 32 },
-        2: { cellWidth: 29 },
-        3: { cellWidth: 25 },
-        4: { cellWidth: 41 }
-      }
+      head: [['Contato', 'Empresa', 'Segmento', 'Status']],
+      body: recentRows.length > 0 ? recentRows : [['Nenhum contato cadastrado', '-', '-', '-']],
+      styles: { ...configuracaoTabela.styles, fontSize: 7 },
     });
 
     y = doc.lastAutoTable.finalY + 13;
-
-    // ======================================
-    // ORIGEM DOS ATRIBUTOS
-    // ======================================
-
     if (y > 255) {
       doc.addPage();
       y = 39;
     }
-
     adicionarTitulo('Origem dos atributos', y);
-
     autoTable(doc, {
       ...configuracaoTabela,
-
       startY: y + 6,
-
-      head: [[
-        'Fonte',
-        'Classificacao',
-        'Confianca'
-      ]],
-
-      body: sourcesData
+      head: [['Fonte', 'Classificacao', 'Confianca']],
+      body: [
+        ['CRM', 'Declarados', origemCrm],
+        ['Campanhas', 'Observados', origemCampanhas],
+        ['IA', 'Sugestoes', origemIA],
+      ],
     });
 
     y = doc.lastAutoTable.finalY + 13;
-
-    // ======================================
-    // OPORTUNIDADES PENDENTES
-    // ======================================
-
     if (y > 255) {
       doc.addPage();
       y = 39;
     }
-
     adicionarTitulo('Oportunidades pendentes', y);
-
     autoTable(doc, {
       ...configuracaoTabela,
-
       startY: y + 6,
-
-      head: [[
-        'Atributo para revisao',
-        'Quantidade'
-      ]],
-
-      body: pendingData
+      head: [['Atributo para revisao', 'Quantidade']],
+      body: [
+        ['Contatos em revisao', String(pendentesInteresses)],
+        ['Preferencias de canal', String(pendentesCanal)],
+        ['Afinidades de produto', String(pendentesAfinidade)],
+      ],
     });
-
-    y = doc.lastAutoTable.finalY + 13;
-
-    // ======================================
-    // OBSERVAÇÕES
-    // ======================================
-
-    if (y > 255) {
-      doc.addPage();
-      y = 39;
-    }
-
-    adicionarTitulo('Observacoes gerais', y);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(...cinza);
-
-    const observacoes = [
-      'Os dados apresentados possuem carater demonstrativo.',
-      'As sugestoes de IA devem ser revisadas antes de campanhas.',
-      'A confianca representa a confiabilidade estimada das fontes.'
-    ];
-
-    let observacaoY = y + 11;
-
-    observacoes.forEach(item => {
-      const linhas = doc.splitTextToSize(
-        `- ${item}`,
-        180
-      );
-
-      if (observacaoY + linhas.length * 4 > 275) {
-        doc.addPage();
-        observacaoY = 39;
-      }
-
-      doc.text(linhas, 15, observacaoY);
-
-      observacaoY += linhas.length * 4 + 3;
-    });
-
-    // ======================================
-    // FINALIZAÇÃO
-    // ======================================
 
     adicionarIdentidade();
-
     doc.save('Relatorio-NEOCORE.pdf');
   };
 
-  // ==========================================
-  // BUSCA DE CONTATOS
-  // ==========================================
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-
-    const termo = searchTerm.trim();
-
-    if (termo && onNavigateToContacts) {
-      onNavigateToContacts(termo);
-    }
-  };
-
-  // ==========================================
-  // INTERFACE
-  // ==========================================
-
   return (
     <main className="inicio-container">
-
-      {/* HEADER */}
-
+      {/* 1. Header da Tela Início */}
       <div className="inicio-header">
         <div className="inicio-title-group">
           <h1 className="inicio-title">Início</h1>
-          <p className="inicio-subtitle">
-            Inteligência de marketing · dados demonstrativos
-          </p>
+          <p className="inicio-subtitle">Inteligência unificada de contatos</p>
         </div>
 
         <div className="inicio-actions">
-
-          <form
-            onSubmit={handleSearchSubmit}
-            className="inicio-search-form"
-          >
+          {/* Campo de Busca */}
+          <form onSubmit={handleSearchSubmit} className="inicio-search-form">
             <svg
               className="inicio-search-icon"
               width="16"
@@ -561,7 +358,6 @@ export default function DashboardInicio({
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-
             <input
               type="text"
               placeholder="Buscar cliente ou cadastro"
@@ -571,8 +367,7 @@ export default function DashboardInicio({
             />
           </form>
 
-          {/* EXPORTAR PDF */}
-
+          {/* Botão Exportar PDF */}
           <button
             type="button"
             className="inicio-btn-export"
@@ -582,6 +377,7 @@ export default function DashboardInicio({
             Exportar PDF
           </button>
 
+          {/* Botão Primário: Iniciar Enriquecimento */}
           <button
             type="button"
             className="inicio-btn-enrich"
@@ -590,14 +386,12 @@ export default function DashboardInicio({
           >
             Iniciar enriquecimento
           </button>
-
         </div>
       </div>
 
-      {/* KPIs */}
-
+      {/* 2. Grid de 4 Cards de Métricas (KPIs) */}
       <section className="inicio-kpis-grid">
-
+        {/* Card 1: Contatos Enriquecidos */}
         <div className="kpi-card">
           <div className="kpi-top">
             <span className="kpi-label">Contatos enriquecidos</span>
@@ -610,10 +404,11 @@ export default function DashboardInicio({
               </svg>
             </div>
           </div>
-          <div className="kpi-value">1.284</div>
-          <div className="kpi-footer-text">+42 nas últimas 24h</div>
+          <div className="kpi-value">{totalContacts}</div>
+          <div className="kpi-footer-text">{totalContacts} {totalContacts === 1 ? 'ativo' : 'ativos'} na base</div>
         </div>
 
+        {/* Card 2: Interesses Identificados */}
         <div className="kpi-card">
           <div className="kpi-top">
             <span className="kpi-label">Interesses identificados</span>
@@ -625,10 +420,15 @@ export default function DashboardInicio({
               </svg>
             </div>
           </div>
-          <div className="kpi-value">18</div>
-          <div className="kpi-footer-text">18 interesses na base enriquecida</div>
+          <div className="kpi-value">{interessesCount}</div>
+          <div className="kpi-footer-text">
+            {interessesCount === 0
+              ? 'Nenhum interesse mapeado ainda'
+              : `${interessesCount} ${interessesCount === 1 ? 'segmento distinto' : 'segmentos distintos'} na base`}
+          </div>
         </div>
 
+        {/* Card 3: Oportunidades Pendentes */}
         <div className="kpi-card">
           <div className="kpi-top">
             <span className="kpi-label">Oportunidades pendentes</span>
@@ -640,10 +440,15 @@ export default function DashboardInicio({
               </svg>
             </div>
           </div>
-          <div className="kpi-value">7</div>
-          <div className="kpi-footer-text">7 sugestões aguardam revisão</div>
+          <div className="kpi-value">{oportunidadesCount}</div>
+          <div className="kpi-footer-text">
+            {oportunidadesCount === 0
+              ? 'Nenhuma sugestão pendente'
+              : `${oportunidadesCount} ${oportunidadesCount === 1 ? 'contato aguarda' : 'contatos aguardam'} revisão`}
+          </div>
         </div>
 
+        {/* Card 4: Atributos Confirmados */}
         <div className="kpi-card">
           <div className="kpi-top">
             <span className="kpi-label">Atributos confirmados</span>
@@ -653,85 +458,83 @@ export default function DashboardInicio({
               </svg>
             </div>
           </div>
-          <div className="kpi-value">94%</div>
-          <div className="kpi-footer-text">Confiança média das fontes: 91%</div>
+          <div className="kpi-value">{atributosConfirmados}</div>
+          <div className="kpi-footer-text">
+            {totalContacts === 0
+              ? 'Sem contatos para calcular'
+              : `Confiança média das fontes: ${confiancaMedia}`}
+          </div>
         </div>
-
       </section>
 
-      {/* GRID PRINCIPAL */}
-
+      {/* 3. Grid Principal em 2 Colunas */}
       <div className="inicio-columns-grid">
-
-        {/* COLUNA ESQUERDA */}
-
+        {/* Coluna Esquerda (~65%) */}
         <div className="inicio-col-left">
-
-          {/* AFINIDADES */}
-
+          {/* Card: Afinidades do público */}
           <section className="inicio-card">
             <div className="card-header-row">
               <div>
                 <h3 className="card-title">Afinidades do público</h3>
                 <p className="card-subtitle">
-                  Afinidades · azul: alto interesse; cinza: moderado
+                  {totalContacts === 0
+                    ? 'Sem dados consolidados'
+                    : 'Distribuição por segmento · azul: proporção; cinza: peso relativo'}
                 </p>
               </div>
-              <span className="demo-badge">Demo</span>
             </div>
 
+            {/* Gráfico de Barras Duplas Customizado */}
             <div className="barchart-container">
-              <div className="barchart-body">
-
-                {affinitiesData.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="barchart-col"
-                    onMouseEnter={() => setHoveredBar(item)}
-                    onMouseLeave={() => setHoveredBar(null)}
-                  >
-                    <div className="bars-pair">
-
-                      <div
-                        className="bar bar-blue"
-                        style={{ height: `${item.high}%` }}
-                        title={`${item.label} (Alto interesse): ${item.high}%`}
-                      />
-
-                      <div
-                        className="bar bar-gray"
-                        style={{ height: `${item.moderate}%` }}
-                        title={`${item.label} (Moderado): ${item.moderate}%`}
-                      />
-
+              {affinitiesData.length === 0 ? (
+                <div style={{ padding: '32px 16px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                  Nenhum dado de afinidade disponível. Cadastre contatos para visualizar a distribuição por segmento.
+                </div>
+              ) : (
+                <div className="barchart-body">
+                  {affinitiesData.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="barchart-col"
+                      onMouseEnter={() => setHoveredBar(item)}
+                      onMouseLeave={() => setHoveredBar(null)}
+                    >
+                      <div className="bars-pair">
+                        {/* Barra Azul: Proporção */}
+                        <div
+                          className="bar bar-blue"
+                          style={{ height: `${item.high}%` }}
+                          title={`${item.fullLabel}: ${item.count} contatos (${item.high}%)`}
+                        />
+                        {/* Barra Cinza: Peso relativo */}
+                        <div
+                          className="bar bar-gray"
+                          style={{ height: `${item.moderate}%` }}
+                          title={`${item.fullLabel} (peso relativo): ${item.moderate}%`}
+                        />
+                      </div>
+                      <span className="bar-label">{item.label}</span>
                     </div>
+                  ))}
+                </div>
+              )}
 
-                    <span className="bar-label">{item.label}</span>
-                  </div>
-                ))}
-
-              </div>
-
+              {/* Tooltip interativo se houver hover */}
               {hoveredBar && (
                 <div className="barchart-tooltip">
-                  <strong>{hoveredBar.label}:</strong>
-                  {' '}Alto {hoveredBar.high}% · Moderado {hoveredBar.moderate}%
+                  <strong>{hoveredBar.fullLabel}:</strong> {hoveredBar.count} {hoveredBar.count === 1 ? 'contato' : 'contatos'} ({hoveredBar.high}%)
                 </div>
               )}
             </div>
           </section>
 
-          {/* INTELIGÊNCIA RECENTE */}
-
+          {/* Card: Inteligência recente */}
           <section className="inicio-card">
             <div className="card-header-row">
               <div>
                 <h3 className="card-title">Inteligência recente</h3>
-                <p className="card-subtitle">
-                  Interesses e preferências · origem e confiança
-                </p>
+                <p className="card-subtitle">Interesses e preferências · origem e confiança</p>
               </div>
-
               <button
                 type="button"
                 className="link-btn"
@@ -741,84 +544,49 @@ export default function DashboardInicio({
               </button>
             </div>
 
+            {/* Lista de Registros Recentes */}
             <div className="recent-list">
-
-              <div
-                className="recent-item"
-                onClick={() => onNavigateToContacts && onNavigateToContacts('Mariana')}
-              >
-                <div className="recent-left">
-                  <div className="recent-avatar">MS</div>
-                  <div className="recent-info">
-                    <span className="recent-name">Mariana Souza Ltda</span>
-                    <span className="recent-detail">
-                      Tecnologia · CRM · declarado · 93%
+              {contacts.length === 0 ? (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                  Nenhum contato cadastrado ainda. Cadastre um contato no menu <strong>Contatos</strong>.
+                </div>
+              ) : (
+                contacts.slice(0, 3).map((c) => (
+                  <div key={c.id} className="recent-item" onClick={() => onNavigateToContacts && onNavigateToContacts(c.name)}>
+                    <div className="recent-left">
+                      <div className="recent-avatar">{c.initials || 'NC'}</div>
+                      <div className="recent-info">
+                        <span className="recent-name">{c.name} {c.company && c.company !== 'Não informada' ? `· ${c.company}` : ''}</span>
+                        <span className="recent-detail">{c.segment || 'Geral'} · PostgreSQL NeoCore · {c.email || 'Cadastrado'}</span>
+                      </div>
+                    </div>
+                    <span className={`recent-badge ${c.statusType === 'unified' ? 'confirmed' : 'pending'}`}>
+                      {c.status}
                     </span>
                   </div>
-                </div>
-                <span className="recent-badge confirmed">Confirmado</span>
-              </div>
-
-              <div
-                className="recent-item"
-                onClick={() => onNavigateToContacts && onNavigateToContacts('Ateliê')}
-              >
-                <div className="recent-left">
-                  <div className="recent-avatar">AT</div>
-                  <div className="recent-info">
-                    <span className="recent-name">Ateliê Nova Era</span>
-                    <span className="recent-detail">
-                      Moda · campanhas · observado · 91%
-                    </span>
-                  </div>
-                </div>
-                <span className="recent-badge confirmed">Confirmado</span>
-              </div>
-
-              <div
-                className="recent-item"
-                onClick={() => onNavigateToContacts && onNavigateToContacts('Brasil')}
-              >
-                <div className="recent-left">
-                  <div className="recent-avatar">BR</div>
-                  <div className="recent-info">
-                    <span className="recent-name">Brasil Comércio</span>
-                    <span className="recent-detail">
-                      SaaS B2B · IA · sugerido · 67%
-                    </span>
-                  </div>
-                </div>
-                <span className="recent-badge pending">Pendente</span>
-              </div>
-
+                ))
+              )}
             </div>
 
+            {/* Bloco: Status do banco de dados */}
             <div className="enrich-feedback-block">
-              <h4 className="feedback-title">Feedback do enriquecimento</h4>
+              <h4 className="feedback-title">Status do banco de dados</h4>
               <ul className="feedback-list">
-                <li>Concluído · 42 contatos enriquecidos nas últimas 24h.</li>
-                <li>Sem interesses? Inicie um enriquecimento para descobrir afinidades.</li>
-                <li>Erro de fonte? Os atributos confirmados são preservados. Tente novamente.</li>
+                <li>{contacts.length} {contacts.length === 1 ? 'contato persistido' : 'contatos persistidos'} no PostgreSQL.</li>
+                <li>Conectado ao backend NeoCore na nuvem (neocore-homologacao.onrender.com).</li>
               </ul>
             </div>
           </section>
-
         </div>
 
-        {/* COLUNA DIREITA */}
-
+        {/* Coluna Direita (~35%) */}
         <div className="inicio-col-right">
-
-          {/* ORIGEM DOS ATRIBUTOS */}
-
+          {/* Card: Origem dos atributos */}
           <section className="inicio-card">
             <h3 className="card-title">Origem dos atributos</h3>
-            <p className="card-subtitle">
-              Fontes autorizadas · confiança média
-            </p>
+            <p className="card-subtitle">Fontes autorizadas · confiança média</p>
 
             <div className="source-stats-list">
-
               <div className="source-stat-row">
                 <div className="source-stat-left">
                   <div className="source-stat-icon">
@@ -828,7 +596,7 @@ export default function DashboardInicio({
                   </div>
                   <span className="source-stat-name">CRM · declarados</span>
                 </div>
-                <span className="source-stat-value">93%</span>
+                <span className="source-stat-value">{origemCrm}</span>
               </div>
 
               <div className="source-stat-row">
@@ -842,7 +610,7 @@ export default function DashboardInicio({
                   </div>
                   <span className="source-stat-name">Campanhas · observados</span>
                 </div>
-                <span className="source-stat-value">91%</span>
+                <span className="source-stat-value">{origemCampanhas}</span>
               </div>
 
               <div className="source-stat-row">
@@ -857,64 +625,59 @@ export default function DashboardInicio({
                   </div>
                   <span className="source-stat-name">IA · sugestões</span>
                 </div>
-                <span className="source-stat-value">67%</span>
+                <span className="source-stat-value">{origemIA}</span>
               </div>
-
             </div>
 
+            {/* Mini Card Dados Reais */}
             <div className="demo-data-box">
-              <span className="demo-data-label">Dados demonstrativos</span>
-              <p className="demo-data-text">
-                1.284 contatos · último lote hoje, 08:42
-              </p>
+              <span className="demo-data-label">Base de dados</span>
+              <p className="demo-data-text">{totalContacts} {totalContacts === 1 ? 'contato registrado' : 'contatos registrados'}</p>
             </div>
           </section>
 
-          {/* OPORTUNIDADES PENDENTES */}
-
+          {/* Card: Oportunidades pendentes */}
           <section className="inicio-card">
             <h3 className="card-title">Oportunidades pendentes</h3>
             <p className="card-subtitle">
-              7 atributos para validar antes da campanha.
+              {totalPendentes === 0
+                ? 'Nenhum atributo pendente de validação.'
+                : `${totalPendentes} ${totalPendentes === 1 ? 'atributo' : 'atributos'} para validar antes da campanha.`}
             </p>
 
             <div className="pending-counts-list">
-
               <div className="pending-count-row">
                 <span className="pending-count-name">Interesses sugeridos</span>
-                <span className="pending-count-val">3</span>
+                <span className="pending-count-val">{pendentesInteresses}</span>
               </div>
-
               <div className="pending-count-row">
                 <span className="pending-count-name">Preferências de canal</span>
-                <span className="pending-count-val">2</span>
+                <span className="pending-count-val">{pendentesCanal}</span>
               </div>
-
               <div className="pending-count-row">
                 <span className="pending-count-name">Afinidades de produto</span>
-                <span className="pending-count-val">2</span>
+                <span className="pending-count-val">{pendentesAfinidade}</span>
               </div>
-
             </div>
 
+            {/* Aviso Revisão de marketing */}
             <div className="marketing-review-box">
               <span className="review-box-label">Revisão de marketing</span>
               <p className="review-box-text">
-                Confirme ou rejeite as sugestões antes de segmentar.
+                {totalPendentes === 0
+                  ? 'Nenhuma sugestão pendente de revisão no momento.'
+                  : 'Confirme ou rejeite as sugestões antes de segmentar.'}
               </p>
             </div>
           </section>
 
-          {/* AÇÕES RÁPIDAS */}
-
+          {/* Card: Ações rápidas */}
           <section className="inicio-card">
             <h3 className="card-title">Ações rápidas</h3>
-            <p className="card-subtitle">
-              Enriquecimento e ativação de públicos.
-            </p>
+            <p className="card-subtitle">Enriquecimento e ativação de públicos.</p>
 
             <div className="quick-actions-list">
-
+              {/* Ação 1: Enriquecer contatos */}
               <button
                 type="button"
                 className="quick-action-item"
@@ -927,15 +690,13 @@ export default function DashboardInicio({
                     <polyline points="2 12 12 17 22 12" />
                   </svg>
                 </div>
-
                 <div className="quick-action-content">
                   <span className="quick-action-title">Enriquecer contatos</span>
-                  <span className="quick-action-desc">
-                    Descobrir interesses e preferências.
-                  </span>
+                  <span className="quick-action-desc">Descobrir interesses e preferências.</span>
                 </div>
               </button>
 
+              {/* Ação 2: Criar segmentos */}
               <button
                 type="button"
                 className="quick-action-item"
@@ -949,18 +710,30 @@ export default function DashboardInicio({
                     <line x1="16" y1="17" x2="8" y2="17" />
                   </svg>
                 </div>
-
                 <div className="quick-action-content">
                   <span className="quick-action-title">Criar segmentos</span>
-                  <span className="quick-action-desc">
-                    Combinar atributos para campanhas.
-                  </span>
+                  <span className="quick-action-desc">Combinar atributos para campanhas.</span>
                 </div>
               </button>
 
+              {/* Ação 3: Inteligência IA */}
+              <button
+                type="button"
+                className="quick-action-item"
+                onClick={onNavigateToIa}
+              >
+                <div className="quick-action-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+                  </svg>
+                </div>
+                <div className="quick-action-content">
+                  <span className="quick-action-title">Inteligência IA</span>
+                  <span className="quick-action-desc">Resumir dados e executar chat inteligente.</span>
+                </div>
+              </button>
             </div>
           </section>
-
         </div>
       </div>
     </main>

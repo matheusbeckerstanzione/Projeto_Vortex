@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import AuthLayout from './AuthLayout';
 import LoginNeocore from './LoginNeocore';
 import CadastroNeocore from './CadastroNeocore';
+import AtivarContaNeocore from './AtivarContaNeocore';
 import Dashboard from './Dashboard';
 import AcessoNegado from './AcessoNegado';
 import '../styles/authLayout.css';
@@ -28,6 +29,12 @@ function AppInner() {
    * 6. O branco dissolve gradualmente (fade-out), revelando o painel pronto e nítido.
    */
   const triggerLoginTransition = useCallback((orbSlotEl, orbRef) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    const duration = 450;
     // 1. Ativa estado de transição global (libera overflow e eleva o z-index)
     const authPage = document.querySelector('.auth-page');
     if (authPage) authPage.classList.add('auth-transitioning');
@@ -49,33 +56,33 @@ function AppInner() {
       const dy = cy - orbCenterY;
 
       orbSlotEl.style.transformOrigin = 'center center';
-      orbSlotEl.style.transition = 'transform 1.15s cubic-bezier(0.22, 1, 0.36, 1)';
+      orbSlotEl.style.transition = `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
       orbSlotEl.style.transform = `translate(${dx}px, ${dy}px) scale(3.5)`;
     }
 
     // 3. Mergulho de câmera e rotação no Three.js (sem pegmen gigantes)
     if (orbRef?.current?.diveIn) {
-      orbRef.current.diveIn(1100);
+      orbRef.current.diveIn(duration);
     }
 
-    // 4. Fade-in do branco total (inicia aos ~500ms e completa em ~1050ms)
+    // 4. A tela branca entra junto com a animação.
     setWhiteOverlayActive(true);
     setTimeout(() => {
       setWhiteOverlayOpacity(1);
-    }, 450);
+    }, 120);
 
-    // 5. No ápice da tela branca (~1150ms), muda de página
+    // 5. No fim da animação, muda de página.
     setTimeout(() => {
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
 
       // 6. Fade-out da tela branca revelando o dashboard com suavidade
       setTimeout(() => {
         setWhiteOverlayOpacity(0);
         setTimeout(() => {
           setWhiteOverlayActive(false);
-        }, 550);
-      }, 150);
-    }, 1150);
+        }, 280);
+      }, 50);
+    }, duration);
   }, [navigate]);
 
   return (
@@ -95,6 +102,7 @@ function AppInner() {
           <Route path="/" element={<LoginNeocore />} />
           <Route path="/login" element={<LoginNeocore />} />
           <Route path="/cadastro" element={<CadastroNeocore />} />
+          <Route path="/ativar-conta" element={<AtivarContaNeocore />} />
         </Route>
 
         {/* Rotas Autenticadas (sem o globo) */}
@@ -105,6 +113,7 @@ function AppInner() {
         <Route path="/logs" element={<Dashboard initialMenu="logs" />} />
         <Route path="/logs-auditoria" element={<Dashboard initialMenu="logs" />} />
         <Route path="/segmentos" element={<Dashboard initialMenu="segmentos" />} />
+        <Route path="/usuarios" element={<Dashboard initialMenu="usuarios" />} />
 
         {/* Rota Acesso Negado (liberada somente com código MFA 000000) */}
         <Route path="/acesso-negado" element={<AcessoNegado />} />
