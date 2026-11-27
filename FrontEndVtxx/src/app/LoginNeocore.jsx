@@ -261,6 +261,7 @@ export default function LoginNeocore() {
   };
 
   return (
+    <>
     <form className="card" ref={cardRef} onSubmit={handleSubmit}>
       {/* Header com Logo */}
       <header className="brand">
@@ -424,6 +425,7 @@ export default function LoginNeocore() {
           Cadastre-se
         </button>
       </p>
+    </form>
 
       {/* Modal MFA Setup — QR Code + Chave Secreta */}
       {mfaSetupData && (
@@ -700,6 +702,6 @@ export default function LoginNeocore() {
           </div>
         </div>
       )}
-    </form>
+    </>
   );
 }
