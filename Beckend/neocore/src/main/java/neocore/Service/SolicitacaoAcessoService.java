@@ -9,6 +9,7 @@ import neocore.Model.Enum.*;
 import neocore.Repository.SolicitacaoAcessoRepository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class SolicitacaoAcessoService {
     private final SolicitacaoAcessoRepository repository;
     private final SolicitacaoAcessoMapper mapper;
     private final ServiceSupport suporte;
+    private final PasswordEncoder encoder;
     private final AuditoriaService auditoria;
 
     @Transactional
@@ -34,6 +36,7 @@ public class SolicitacaoAcessoService {
         var solicitacao = mapper.toEntity(request);
 
         solicitacao.setEmail(ServiceSupport.email(request.email()));
+        solicitacao.setSenhaHash(encoder.encode(request.senha()));
         solicitacao.setStatus(StatusSolicitacao.PENDENTE);
         solicitacao.setSolicitadoEm(OffsetDateTime.now());
 

@@ -30,6 +30,9 @@ public class SolicitacaoAcesso {
     @Column(nullable = false, length = 500)
     private String justificativa;
 
+    @Column(name = "senha_hash", columnDefinition = "TEXT")
+    private String senhaHash;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusSolicitacao status;

@@ -147,10 +147,11 @@ export async function fazerLogout() {
  * Solicitação de acesso para novos usuários
  * POST /solicitacoes-acesso
  */
-export async function solicitarAcesso(nome, email, justificativa) {
+export async function solicitarAcesso(nome, email, senha, justificativa) {
   return await api.post('/solicitacoes-acesso', {
     nome,
     email,
+    senha,
     justificativa: justificativa || 'Solicitação de acesso ao sistema NeoCore',
   });
 }

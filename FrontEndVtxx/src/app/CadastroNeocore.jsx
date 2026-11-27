@@ -19,8 +19,9 @@ export default function CadastroNeocore() {
   const [form, setForm] = useState({
     nome: '',
     email: '',
+    senha: '',
     cpf: '',
-    justificativa: 'Solicitação de acesso ao sistema NeoCore para operações e gestão de contatos',
+    justificativa: '',
   });
   const [aceiteTermos, setAceiteTermos] = useState(false);
   const [aceiteNovidades, setAceiteNovidades] = useState(false);
@@ -51,6 +52,11 @@ export default function CadastroNeocore() {
     } else if (!form.email.includes('@')) {
       newErrors.email = 'Informe um e-mail válido';
     }
+    if (!form.senha) {
+      newErrors.senha = 'Informe uma senha';
+    } else if (form.senha.length < 6) {
+      newErrors.senha = 'A senha deve ter pelo menos 6 caracteres';
+    }
     if (!aceiteTermos) newErrors.termos = 'Você deve aceitar os termos de uso';
 
     if (Object.keys(newErrors).length > 0) {
@@ -62,7 +68,7 @@ export default function CadastroNeocore() {
     setSubmitError('');
 
     try {
-      await solicitarAcesso(form.nome, form.email, form.justificativa);
+      await solicitarAcesso(form.nome, form.email, form.senha, form.justificativa);
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err?.message || 'Falha ao enviar solicitação de acesso.');
@@ -131,6 +137,21 @@ export default function CadastroNeocore() {
               aria-invalid={!!errors.email}
             />
             {errors.email && <span className="cad-err">{errors.email}</span>}
+          </div>
+
+          {/* Senha */}
+          <div className={`cad-field ${errors.senha ? 'has-error' : ''}`}>
+            <label htmlFor="cad-senha">Senha</label>
+            <input
+              id="cad-senha"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Mínimo de 6 caracteres"
+              value={form.senha}
+              onChange={(e) => setField('senha', e.target.value)}
+              aria-invalid={!!errors.senha}
+            />
+            {errors.senha && <span className="cad-err">{errors.senha}</span>}
           </div>
 
           {/* CPF */}

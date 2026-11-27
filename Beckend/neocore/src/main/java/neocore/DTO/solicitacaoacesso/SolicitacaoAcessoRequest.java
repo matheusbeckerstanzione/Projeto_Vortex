@@ -14,6 +14,10 @@ public record SolicitacaoAcessoRequest(@NotBlank
                                         String email,
 
                                        @NotBlank
+                                        @Size(min = 6, max = 128)
+                                        String senha,
+
+                                       @NotBlank
                                         @Size(max = 500)
                                         String justificativa) {
 }
